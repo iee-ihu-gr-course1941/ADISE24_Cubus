@@ -5,6 +5,10 @@ import { PageProps as AppPageProps } from './';
 
 declare global {
     interface Window {
+       Echo: Echo,
+    }
+
+    interface Window {
         axios: AxiosInstance;
     }
 
@@ -13,5 +17,7 @@ declare global {
 }
 
 declare module '@inertiajs/core' {
-    interface PageProps extends InertiaPageProps, AppPageProps {}
+    interface PageProps extends InertiaPageProps, AppPageProps {
+        flash: string
+    }
 }

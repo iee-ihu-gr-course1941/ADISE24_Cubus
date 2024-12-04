@@ -2,47 +2,44 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
+use App\Enums\PlayerColor;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
-use Illuminate\Notifications\Notifiable;
 
-class User extends Authenticatable
-{
-    /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable;
+class User extends Authenticatable {
+    use HasFactory;
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array<int, string>
-     */
     protected $fillable = [
+        'name', 'icon', 'auth_identifier', 'auth_type'
+    ];
+
+    protected $public = [
         'name',
-        'email',
-        'password',
+        'icon',
+        'public_id',
     ];
 
-    /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var array<int, string>
-     */
-    protected $hidden = [
-        'password',
-        'remember_token',
-    ];
+    function getPublic() {
+        $public_instance = [];
 
-    /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
-     */
-    protected function casts(): array
-    {
-        return [
-            'email_verified_at' => 'datetime',
-            'password' => 'hashed',
-        ];
+        foreach($this->public as $col) {
+            $public_instance[$col] = $this[$col];
+        }
+
+        return $public_instance;
+    }
+
+    function getCurrentSession(): ?GameSession {
+        $currentUserSessions = GameSession::query();
+        $nextQuery = 'where';
+        foreach(PlayerColor::values() as $color) {
+            $currentUserSessions = $currentUserSessions->$nextQuery('player_'.$color.'_id', '=', $this['id']);
+            $nextQuery = 'orWhere';
+        }
+        $currentUserSessions = $currentUserSessions->get();
+
+        if(count($currentUserSessions) == 0) return null;
+
+        return $currentUserSessions[0];
     }
 }

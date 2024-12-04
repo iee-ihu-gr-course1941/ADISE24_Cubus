@@ -15,9 +15,20 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->web(append: [
             \App\Http\Middleware\HandleInertiaRequests::class,
             \Illuminate\Http\Middleware\AddLinkHeadersForPreloadedAssets::class,
+            \App\Http\Middleware\EnsureUserTokenExistence::class,
+            \App\Http\Middleware\ManageAuthorization::class,
         ]);
 
-        //
+        $middleware->api(append: [
+            Illuminate\Cookie\Middleware\EncryptCookies::class
+        ]);
+
+        $middleware->encryptCookies(except: [ 'user-token' ]);
+
+        $middleware->priority([
+            \App\Http\Middleware\EnsureUserTokenExistence::class,
+            \Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse::class,
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //

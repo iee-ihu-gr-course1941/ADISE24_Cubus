@@ -1,0 +1,10 @@
+name: Deploy
+run-name: Deploy to RPI
+on: [push]
+jobs:
+    Deploy:
+        runs-on: self-hosted
+        steps:
+          - run: ls ~/cubus
+          - run: cd ~/cubus && git pull
+          - run: pwd

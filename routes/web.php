@@ -1,27 +1,40 @@
 <?php
 
-use App\Http\Controllers\ProfileController;
-use Illuminate\Foundation\Application;
+use App\Http\Controllers\AuthService;
+use App\Http\Controllers\GameSessionController;
+use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
-use Inertia\Inertia;
 
-Route::get('/', function () {
-    return Inertia::render('Welcome', [
-        'canLogin' => Route::has('login'),
-        'canRegister' => Route::has('register'),
-        'laravelVersion' => Application::VERSION,
-        'phpVersion' => PHP_VERSION,
-    ]);
+Route::withoutMiddleware(['auth', \App\Http\Middleware\ManageAuthorization::class])->group(function () {
+    Route::get('/', function () {
+        $user = AuthService::getUser();
+        $user = !is_null($user) ? $user->getPublic() : null;
+
+        if(request()->expectsJson()) {
+            $message = 'Welcome, please login to start using the game API';
+            if(!is_null($user)) $message = 'Hello ' . $user['name'] . '!';
+            return [ 'message' => $message ];
+        }
+
+        return inertia('Index', [ 'user' => $user ]);
+    })->name('index');
+
+    Route::get('/apps-login-callback', [UserController::class, 'loginApps'])->name('login.apps');
+    Route::get('/mock-login/{id}', [UserController::class, 'loginMock'])->name('login.mock');
 });
 
-Route::get('/dashboard', function () {
-    return Inertia::render('Dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
+Route::get('/profile/logout', [UserController::class, 'logout'])->name('logout');
+Route::resource('profile', UserController::class)->only(['show', 'create', 'edit', 'store']);
+Route::resource('lobby',   GameSessionController::class)->only(['index', 'create', 'store']);
 
-Route::middleware('auth')->group(function () {
-    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
-});
+Route::get('/lobby/current', [GameSessionController::class, 'show']);
+Route::get('/lobby/match',  [GameSessionController::class, 'search'])->name('lobby.match');
+Route::get('/lobby/{game_session}/join', [GameSessionController::class, 'join'])->name('lobby.join');
 
-require __DIR__.'/auth.php';
+Route::get('/game', function () {
+    return 'kopeles';
+})->name('game');
+
+Route::get('/card-demo', function () {
+    return inertia('CardDemo');
+})->name('card-demo');
