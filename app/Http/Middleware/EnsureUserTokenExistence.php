@@ -14,7 +14,7 @@ class EnsureUserTokenExistence {
      */
     public function handle(Request $request, Closure $next): Response {
         if(is_null($request->cookie('user-token'))) {
-            Cookie::queue(cookie('user-token', Str::uuid(), secure: true, httpOnly: false, minutes: 100000000, path: '/'));
+            Cookie::queue(cookie('user-token', Str::uuid(), httpOnly: false, minutes: 100000000, path: '/'));
         }
 
         return $next($request);
