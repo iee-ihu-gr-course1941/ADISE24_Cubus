@@ -1,6 +1,9 @@
 name: Deploy
 run-name: Deploy to RPI
-on: [push]
+on:
+  push:
+    branches:
+      - main
 jobs:
     Deploy:
         runs-on: self-hosted
