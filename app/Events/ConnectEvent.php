@@ -13,7 +13,7 @@ class ConnectEvent implements ShouldBroadcastNow {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
     public function __construct(
-        protected GameSession $game_session
+        protected GameSession $game_session,
     ) {}
 
     /**
@@ -26,6 +26,8 @@ class ConnectEvent implements ShouldBroadcastNow {
     }
 
     public function broadcastWith(): array {
-        return $this->game_session->getPublic();
+        return [
+            'game_session' => $this->game_session->getPublic(),
+        ];
     }
 }

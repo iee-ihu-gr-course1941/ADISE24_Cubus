@@ -134,17 +134,14 @@ class GameSessionController extends Controller {
         $game_session['player_'.$user_color.'_id'] = $user['id'];
         if(count($valid_colors) == 1) {
             $game_session['session_state'] = GameSessionState::Playing->value;
-            // TODO: Broadcast a game started event
         }
         $game_session->save();
-        // TODO: Broadcast a user connected event
 
         if($request->expectsJson()) {
             return response($game_session)->withHeaders(['Content-Type' => 'application/json']);
         }
 
         broadcast(new ConnectEvent($game_session));
-
         return redirect()->route('lobby.index')->with('flash', 'Joined game!');
     }
 
@@ -178,11 +175,10 @@ class GameSessionController extends Controller {
         $game_session['player_'.$user_color.'_id'] = $user['id'];
         if(count($valid_colors) == 1) {
             $game_session['session_state'] = GameSessionState::Playing->value;
-            // TODO: Broadcast a game started event
         }
         $game_session->save();
-        // TODO: Broadcast a user connected event
 
+        broadcast(new ConnectEvent($game_session));
         return $game_session;
     }
 }

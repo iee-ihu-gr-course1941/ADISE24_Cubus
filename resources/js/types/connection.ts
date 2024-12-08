@@ -20,10 +20,14 @@ export type ChannelSessionsEventsMap = {
 };
 
 export type ChannelGameEventsMap = {
-    'ConnectEvent': Game_session,
+    'ConnectEvent': ConnectEvent,
 };
 
 export type LoginEvent = {
     'success': boolean,
     'redirect_url': string,
+};
+
+export type ConnectEvent = {
+    'game_session': Game_session,
 };

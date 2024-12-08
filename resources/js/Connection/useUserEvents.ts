@@ -27,8 +27,8 @@ export default function useUserEvents() {
 
         if(gameId.length === 0) return;
         console.info('Creating game event ws listener for: ', gameId);
-        listen(`.game.${gameId}`, 'ConnectEvent', gameSession => {
-            setSession(gameSession);
+        listen(`.game.${gameId}`, 'ConnectEvent', event => {
+            setSession(event.game_session);
         });
 
         return () => {

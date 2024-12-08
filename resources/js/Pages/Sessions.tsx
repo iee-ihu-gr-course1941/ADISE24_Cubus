@@ -2,10 +2,20 @@ import useUserEvents from '@/Connection/useUserEvents';
 import { PageProps } from '@/types';
 import { Game_session } from '@/types/models/tables/Session';
 import { User } from '@/types/models/tables/User';
+import { router } from '@inertiajs/react';
 import { useEffect } from 'react';
 
 export default function Sessions({ user, userSession, sessions, flash }: PageProps<{ user: User, userSession?: Game_session, sessions: Game_session[] }>) {
     let { connectionState, joinGame, currentSession } = useUserEvents();
+
+    useEffect(() => {
+        const session = currentSession ?? userSession;
+        if(!session) return;
+
+        if(session.session_state === 'playing' || session.session_state === 'waiting') {
+            router.visit(route('game'));
+        }
+    }, [currentSession]);
 
     useEffect(() => {
         if(!userSession) return;
