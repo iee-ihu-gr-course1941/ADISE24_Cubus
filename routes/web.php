@@ -32,7 +32,7 @@ Route::get('/lobby/match',  [GameSessionController::class, 'search'])->name('lob
 Route::get('/lobby/{game_session}/join', [GameSessionController::class, 'join'])->name('lobby.join');
 
 Route::get('/game', function () {
-    return 'kopeles';
+    return inertia('Game');
 })->name('game');
 
 Route::get('/card-demo', function () {
