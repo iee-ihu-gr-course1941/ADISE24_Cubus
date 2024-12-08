@@ -2,12 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\GameSessionPlayerCount;
 use App\Enums\GameSessionState;
 use App\Enums\PlayerColor;
 use App\Events\ConnectEvent;
 use App\Models\GameSession;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
 class GameSessionController extends Controller {
     public function index(Request $request): \Inertia\ResponseFactory | \Inertia\Response | \Illuminate\Http\Response {
@@ -59,6 +61,10 @@ class GameSessionController extends Controller {
         /** @var \App\Models\User */
         $user = AuthService::getUser();
 
+        $data = $request->validate([
+            'player_count' => ['required', Rule::enum(GameSessionPlayerCount::class)],
+        ]);
+
         $current_session = $user->getCurrentSession();
         if(!is_null($current_session)) {
             return response(['message' => 'You have already started a lobby.'])->withHeaders(['Content-Type' => 'application/json']);
@@ -69,6 +75,7 @@ class GameSessionController extends Controller {
         $valid_colors = $game_session->getValidPlayerColors();
         $host_color = $valid_colors[rand(0,count($valid_colors) - 1)];
         $game_session['player_'.$host_color.'_id'] = $user['id'];
+        $game_session['player_count'] = $data['player_count'];
         $game_session->save();
 
         if($request->expectsJson()) {

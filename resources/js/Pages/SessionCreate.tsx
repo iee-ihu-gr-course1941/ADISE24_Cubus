@@ -5,7 +5,9 @@ import { useForm } from '@inertiajs/react';
 
 export default function Sessions({ user }: PageProps<{ user: User }>) {
     let { connectionState } = useUserEvents();
-    let { post } = useForm({});
+    let { post, data, setData, errors } = useForm({
+        'player_count': 4,
+    });
 
     function onCreateGame() {
         post(route('lobby.store'));
@@ -37,7 +39,12 @@ export default function Sessions({ user }: PageProps<{ user: User }>) {
             </div>
 
             <p className='font-black text-lg'>Create Game</p>
-            <p className='italic'>Some valid options could be the player count (2, 4) maybe a name for the lobby potentially a password for rooms to not be publically available etc...</p>
+
+            <div className='flex gap-2 items-center'>
+                <label htmlFor='player-count'>Player Count</label>
+                <input name='player-count' placeholder='4' value={data.player_count} onChange={(e) => setData('player_count', (parseInt(e.target.value) || 4))} />
+                { errors.player_count && <p className='text-red-400'>{ errors.player_count }</p> }
+            </div>
 
             <button onClick={onCreateGame}>Create Game</button>
         </div>
