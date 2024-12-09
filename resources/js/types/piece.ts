@@ -8,13 +8,15 @@ export type MovePayload = {
     flip: boolean;
 }
 
-export type PieceCenterData = {
+export type PieceData = {
     center_offset: Vector2;
     origin_center_distance: Vector2;
     code: PieceCode;
+    block_positions: Vector2[];
 }
 
 export type Vector2 = {
     x: number;
     y: number;
 }
+
