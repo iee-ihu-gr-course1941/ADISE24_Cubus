@@ -1,5 +1,8 @@
 import { OrbitControls } from "@react-three/drei";
 import { Canvas } from "@react-three/fiber";
+import { Board } from "./Board/Board";
+import { Lights } from "./Ligths";
+import { Perf } from "r3f-perf"
 
 export const Experience = () => {
     return (
@@ -9,14 +12,11 @@ export const Experience = () => {
             far: 200,
             position: [-1.5, 2, 10],
           }}>
-            <OrbitControls/>
-            <ambientLight intensity={0.5} />
-            <directionalLight position={[10, 10, 10]} intensity={0.5} />
-            <color attach={'background'} args={['#171717']} />
-            <mesh>
-                <boxGeometry args={[1, 1, 1]} />
-                <meshStandardMaterial color="hotpink" />
-            </mesh>
+            <OrbitControls makeDefault/>
+            <color attach={'background'} args={['#535353']} />
+            <Lights/>
+            <Board/>
+            <Perf position="top-left"/>
         </Canvas>
     );
 }
