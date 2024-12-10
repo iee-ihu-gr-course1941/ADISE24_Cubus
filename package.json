@@ -18,35 +18,34 @@
         "concurrently": "^9.0.1",
         "laravel-echo": "^1.17.1",
         "laravel-vite-plugin": "^1.0",
+        "leva": "^0.9.35",
         "postcss": "^8.4.31",
+        "prettier": "^3.4.1",
         "pusher-js": "^8.4.0-rc2",
+        "r3f-perf": "7.2",
         "react": "^18.2.0",
         "react-dom": "^18.2.0",
         "tailwindcss": "^3.2.1",
         "typescript": "^5.0.2",
         "vite": "^5.0",
-        "leva": "^0.9.35",
-        "r3f-perf": "7.2",
-        "vite-plugin-restart": "^0.4.2",
         "vite-plugin-glsl": "^1.3.1",
-        "prettier": "^3.4.1"
+        "vite-plugin-restart": "^0.4.2"
     },
     "dependencies": {
-        "framer-motion": "^11.13.1",
-        "zustand": "^5.0.2",
-
-        "three": "^0.171.0",
         "@gsap/react": "^2.1.1",
         "@react-three/drei": "^9.119.0",
         "@react-three/fiber": "^8.17.10",
         "@react-three/postprocessing": "^2.16.3",
         "@react-three/rapier": "^1.5.0",
+        "framer-motion": "^11.13.1",
         "gsap": "^3.12.5",
-        "postprocessing": "^6.0.4"
+        "postprocessing": "^6.0.4",
+        "three": "^0.171.0",
+        "zustand": "^5.0.2"
     },
     "overrides": {
         "leva": {
-          "@radix-ui/react-portal": "1.0.2"
+            "@radix-ui/react-portal": "1.0.2"
         }
-      }
+    }
 }
