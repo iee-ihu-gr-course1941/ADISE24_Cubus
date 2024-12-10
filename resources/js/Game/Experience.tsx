@@ -4,6 +4,7 @@ import { Board } from "./Board/Board";
 import { Lights } from "./Ligths";
 import { Perf } from "r3f-perf"
 import { memo } from "react";
+import GameMap from "./Board/GameMap";
 
 export const Experience = memo(
     () => {
@@ -14,11 +15,10 @@ export const Experience = memo(
                 far: 200,
                 position: [3.5, 5, 10],
               }}>
+                <Perf position="top-left"/>
                 <OrbitControls makeDefault/>
                 <color attach={'background'} args={['#535353']} />
-                <Lights/>
-                <Board/>
-                <Perf position="top-left"/>
+                <GameMap/>
             </Canvas>
         );
     }
