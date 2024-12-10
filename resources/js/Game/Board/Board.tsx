@@ -9,19 +9,11 @@ export const Board = () => {
     const gridSize = useGameDimensions(state => state.getGridSize());
     return (
         <>
-            <Grid args={[gridSize, gridSize, 1]} sectionSize={blockSize} sectionColor={0x00ff00} />
-            {
-                new Array(21).fill(0).map((_, index) => {
-                    const position = new THREE.Vector3((Math.random() - 0.5) * 15, 0, (Math.random() -0.5) * 15);
-                    position.x = Math.round(position.x * blockSize) / blockSize;
-                    position.z = Math.round(position.z * blockSize) / blockSize;
-                    const rotation = Math.floor(Math.random() * 4);
-                    const flip = Math.random() > 0.5;
-                    return (
-                      index > 15 && <Piece key={index} code={index as PieceCode} origin_position={{x: position.x, y: position.z}} rotation={rotation} flip={flip}/>
-                    )
-                })
-            }
+            <Grid args={[gridSize, gridSize, 1]} position-y={0.06} sectionSize={blockSize} sectionColor={0x00ff00} />
+            <mesh scale={[gridSize, 1, gridSize]}>
+                <boxGeometry args={[1, 0.1, 1]} />
+                <meshBasicMaterial color={0xffffff} />
+            </mesh>
         </>
     );
 }
