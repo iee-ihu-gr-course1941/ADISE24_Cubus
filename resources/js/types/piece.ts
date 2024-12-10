@@ -20,3 +20,4 @@ export type Vector2 = {
     y: number;
 }
 
+export type MoveType = 'move' | 'rotate' | 'flip';

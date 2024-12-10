@@ -1,11 +1,12 @@
 import { PiecePositions, Piece as PieceData } from "@/Constants/Piece";
 import { useGameDimensions } from "@/Store/game_dimensions";
-import { MovePayload, PieceCode, PieceRotation } from "@/types/piece";
+import { MovePayload, MoveType, PieceCode, PieceRotation } from "@/types/piece";
 import { DragControls } from "@react-three/drei";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import * as THREE from "three";
 import gsap, { snap } from "gsap";
 import { ThreeEvent } from "@react-three/fiber";
+import {useControls} from 'leva';
 
 const material = new THREE.MeshStandardMaterial({ color: 0xff0000 });
 const originMaterial = new THREE.MeshStandardMaterial({ color: 0xaa0f0f });
@@ -22,6 +23,20 @@ export const Piece = ({code: pieceCode = 0, origin_position: position, rotation,
     const ref = useRef<THREE.Group>(null);
     const [centerCalculated, setCenterCalculated] = useState(false);
     const [lockRotation, setLockRotation] = useState(false);
+    const [prePosition, setPrePosition] = useState<THREE.Vector3 | null>(null);
+    const [preQuaternion, setPreQuaternion] = useState<THREE.Quaternion | null>(null);
+    const onStart = useRef<() => void>();
+    const onComplete = useRef<(moveType: MoveType) => void>();
+
+    const {isPositionValid} = useControls(
+        {
+            isPositionValid: {
+                label: 'Valid Move',
+                value: true,
+            },
+
+        }
+    )
 
     const {block_positions,center_offset,origin_center_distance} = PieceData[pieceCode];
 
@@ -33,20 +48,49 @@ export const Piece = ({code: pieceCode = 0, origin_position: position, rotation,
 
     }, [ref.current, position, pieceCode, rotation, flip])
 
+    useEffect(() => {
+
+        onStart.current = () => {
+            if(ref.current){
+                if(!preQuaternion){
+                    const quaternion = new THREE.Quaternion();
+                    ref.current.getWorldQuaternion(quaternion)
+                    setPreQuaternion(quaternion);
+                }
+                setLockRotation(true)
+            }
+        }
+
+        onComplete.current = (moveType: MoveType) => {
+            if(ref.current){
+                if(!prePosition){
+                    setLockRotation(false)
+                    onMoveFinish(moveType);
+                }
+            }
+        }
+
+    }, [ref.current, preQuaternion, isPositionValid, prePosition])
+
+    const getOriginalQuaternion = () => {
+        const flipAxis = getFlipAxis();
+        return new THREE.Quaternion().setFromEuler(
+            new THREE.Euler(
+                (flipAxis === 'x' && flip) ? Math.PI : 0,
+                rotation * (Math.PI * 0.5),
+                (flipAxis === 'z' && flip) ? Math.PI : 0
+            )
+        );
+    }
+
 
     const positionElement = () => {
         if (ref.current && !centerCalculated) {
             //* Convert Origin's position to Piece's position
-            const flipAxis = getFlipAxis();
             const piecePosition = new THREE.Vector3(position.x, blockSize * 0.5 + 0.01, position.y).sub(getOriginToCenterOffset());
 
-            const rotationQuaternion = new THREE.Quaternion().setFromEuler(
-                new THREE.Euler(
-                    (flipAxis === 'x' && flip) ? Math.PI : 0,
-                    rotation * (Math.PI * 0.5),
-                    (flipAxis === 'z' && flip) ? Math.PI : 0
-                )
-            );
+            const rotationQuaternion = getOriginalQuaternion();
+
             const pMatrix = new THREE.Matrix4().makeTranslation(
                 piecePosition.x,
                 piecePosition.y,
@@ -82,7 +126,6 @@ export const Piece = ({code: pieceCode = 0, origin_position: position, rotation,
             ref.current.children[0].getWorldPosition(prePosition);
 
             ref.current.applyQuaternion(rotationQuaternion);
-
             //Get the position with the quaternion
             const postPosition = new THREE.Vector3();
             ref.current.children[0].getWorldPosition(postPosition);
@@ -98,8 +141,17 @@ export const Piece = ({code: pieceCode = 0, origin_position: position, rotation,
           }
     }
 
-    const onMoveFinish = () => {
+    const onMoveFinish = (moveType: MoveType) => {
 
+        if(isPositionValid){
+            onMoveAccept(moveType);
+        }else{
+            onMoveReject(moveType)
+        }
+
+    }
+
+    const onMoveAccept = (moveType: MoveType) => {
         if(ref.current){
             //* The position of the center of the origin block
             const centerPosition = new THREE.Vector3();
@@ -120,8 +172,9 @@ export const Piece = ({code: pieceCode = 0, origin_position: position, rotation,
                 flip: isFlipped,
             }
             console.log('payload:', payload);
+            setPreQuaternion(null);
+            setPrePosition(null);
         }
-
     }
 
     const getRotationFromQuaternion = () => {
@@ -164,14 +217,59 @@ export const Piece = ({code: pieceCode = 0, origin_position: position, rotation,
             );
 
             ref.current.applyMatrix4(snapMatrix);
-            ref.current.updateMatrixWorld(true);
+            ref.current.updateWorldMatrix(true, true);
         }
     }
 
+    const onMoveReject = (moveType: MoveType) => {
+            if(!ref.current) return;
+            if(moveType === 'move'){
+                const currentPosition = getPiecePosition();
+                const _prePosition = prePosition ?? new THREE.Vector3();
+                const translation = new THREE.Vector3(_prePosition.x - currentPosition.x, 0, _prePosition.z - currentPosition.z);
+                ref.current.applyMatrix4(new THREE.Matrix4().makeTranslation(translation.x, 0, translation.z));
+                ref.current.updateWorldMatrix(true, true);
+                setPrePosition(null);
+
+            }
+            else if(moveType === 'rotate' || moveType === 'flip'){
+                const currentQuaternion = new THREE.Quaternion();
+                ref.current.getWorldQuaternion(currentQuaternion);
+
+                const rotationQuaternion = getOriginalQuaternion();
+
+                //* Subtract the previous rotation from the current rotation
+                ref.current.applyQuaternion(
+                    ((preQuaternion ?? new THREE.Quaternion()).clone()
+                    .multiply(currentQuaternion.clone().invert())
+                    .multiply(rotationQuaternion).normalize()).normalize()
+                );
+
+                //* Fix any snapping issues
+                const euler = new THREE.Euler().setFromQuaternion(ref.current.quaternion);
+                const snappedEuler = new THREE.Euler(
+                    Math.round(euler.x / (Math.PI * 0.5)) * (Math.PI * 0.5),
+                    Math.round(euler.y / (Math.PI * 0.5)) * (Math.PI * 0.5),
+                    Math.round(euler.z / (Math.PI * 0.5)) * (Math.PI * 0.5)
+                );
+                ref.current.quaternion.setFromEuler(snappedEuler);
+
+
+                ref.current.updateWorldMatrix(true, true);
+                setPreQuaternion(null);
+            }
+        }
+
     const onDragEnd = () => {
         //* Snap the piece to the grid
-        snapPieceToGrid()
-        onMoveFinish();
+        if(prePosition){
+            snapPieceToGrid()
+            onMoveFinish('move');
+        }
+    }
+
+    const onDragStart = () => {
+        setPrePosition(getPiecePosition());
     }
 
     const getFlipAxis = () => {
@@ -191,11 +289,8 @@ export const Piece = ({code: pieceCode = 0, origin_position: position, rotation,
                 {
                     y: ref.current.rotation.y + (Math.PI * 0.5) * (sign),
                     duration: 1,
-                    onStart: () => setLockRotation(true),
-                    onComplete: () => {
-                        setLockRotation(false)
-                        onMoveFinish();
-                    }
+                    onStart: onStart.current,
+                    onComplete: () => onComplete.current?.('rotate'),
                 },
             );
         }
@@ -218,18 +313,15 @@ export const Piece = ({code: pieceCode = 0, origin_position: position, rotation,
             {
                 [axis]: (isPieceFlipped(axis) ? ref.current.rotation[axis] - (Math.PI * sign) : ref.current.rotation[axis] + (Math.PI * sign)),
                 duration: 1,
-                onStart: () => setLockRotation(true),
-                onComplete: () => {
-                    setLockRotation(false)
-                    onMoveFinish();
-                }
+                onStart: onStart.current,
+                onComplete: () => onComplete.current?.('flip'),
             }
             ,);
         }
     }
 
     return (
-        <DragControls axisLock="y" onDragEnd={onDragEnd} dragConfig={{enabled: !lockRotation}}>
+        <DragControls axisLock="y" onDragEnd={onDragEnd} onDragStart={onDragStart} dragConfig={{enabled: !lockRotation}}>
             <group onDoubleClick={onFlip} onContextMenu={onRotate} ref={ref}>
             {
                 block_positions.map((position, index) => {
