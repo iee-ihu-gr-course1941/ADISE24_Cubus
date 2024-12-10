@@ -4,9 +4,10 @@ import { MovePayload, MoveType, PieceCode, PieceRotation } from "@/types/piece";
 import { DragControls } from "@react-three/drei";
 import { useCallback, useEffect, useRef, useState } from "react";
 import * as THREE from "three";
-import gsap, { snap } from "gsap";
+import gsap from "gsap";
 import { ThreeEvent } from "@react-three/fiber";
 import {useControls} from 'leva';
+import { useBoardState } from "@/Store/board_state";
 
 const material = new THREE.MeshStandardMaterial({ color: 0xff0000 });
 const originMaterial = new THREE.MeshStandardMaterial({ color: 0xaa0f0f });
@@ -21,6 +22,7 @@ const rotationToIndex = (rotation: number) => {
 export const Piece = ({code: pieceCode = 0, origin_position: position, rotation, flip}: Props) => {
     const blockSize = useGameDimensions(state => state.blockSize);
     const ref = useRef<THREE.Group>(null);
+
     const [centerCalculated, setCenterCalculated] = useState(false);
     const [lockRotation, setLockRotation] = useState(false);
     const [prePosition, setPrePosition] = useState<THREE.Vector3 | null>(null);
@@ -142,8 +144,8 @@ export const Piece = ({code: pieceCode = 0, origin_position: position, rotation,
     }
 
     const onMoveFinish = (moveType: MoveType) => {
-
-        if(isPositionValid){
+        const isMoveValid = isPositionValid || isPieceOnBoard();
+        if(isMoveValid){
             onMoveAccept(moveType);
         }else{
             onMoveReject(moveType)
@@ -319,6 +321,25 @@ export const Piece = ({code: pieceCode = 0, origin_position: position, rotation,
             ,);
         }
     }
+    const isPieceOnBoard = () => {
+        const board = useBoardState.getState().boardRef;
+        if(ref.current && board){
+            for(const child of ref.current.children){
+                const raycaster = new THREE.Raycaster();
+                const position = new THREE.Vector3();
+                child.getWorldPosition(position);
+
+                raycaster.set(position, new THREE.Vector3(0, -1, 0).normalize());
+                const intersects = raycaster.intersectObject(board);
+                if(intersects.length === 0){
+                    return false;
+                }
+            }
+            return true;
+        }
+        return false;
+    }
+
 
     return (
         <DragControls axisLock="y" onDragEnd={onDragEnd} onDragStart={onDragStart} dragConfig={{enabled: !lockRotation}}>
