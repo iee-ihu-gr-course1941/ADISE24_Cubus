@@ -27,9 +27,23 @@ export const Piece = ({code: pieceCode = 0, origin_position: position, rotation,
     const [lockRotation, setLockRotation] = useState(false);
     const [prePosition, setPrePosition] = useState<THREE.Vector3 | null>(null);
     const [preQuaternion, setPreQuaternion] = useState<THREE.Quaternion | null>(null);
+    const [preMovePosition, setPreMovePosition] = useState<THREE.Vector3 | null>(null);
+    const [preMoveQuaternion, setPreMoveQuaternion] = useState<THREE.Quaternion | null>(null);
+    const [hasMoved, setHasMoved] = useState(false);
     const onStart = useRef<() => void>();
     const onComplete = useRef<(moveType: MoveType) => void>();
     const [boardState, setBoardState] = useState<BoardState>()
+
+    const {isPositionValid} = useControls(
+        {
+            isPositionValid: {
+                label: 'Valid Move',
+                value: false,
+            },
+        }
+    )
+
+    const {block_positions,center_offset,origin_center_distance} = PieceData[pieceCode];
 
     useEffect(() => {
 
@@ -42,17 +56,27 @@ export const Piece = ({code: pieceCode = 0, origin_position: position, rotation,
 
     }, [])
 
-    const {isPositionValid} = useControls(
-        {
-            isPositionValid: {
-                label: 'Valid Move',
-                value: false,
-            },
-
+    useEffect(() => {
+        if(boardState?.gameState.state === 'OwnTurnPlaying'){
+            setHasMoved(false);
+            onMoveStart();
+        }else if (boardState?.gameState.state === 'OwnTurnLocked'){
+            if(boardState?.move?.code !== pieceCode){
+                if(hasMoved){
+                    onMoveReject();
+                }
+            }else{
+                //todo validate move from remote server.
+                const isValid = isPositionValid;
+                if(isValid){
+                    boardState.endTurn();
+                }else{
+                    onMoveReject();
+                    boardState.continueTurn();
+                }
+            }
         }
-    )
-
-    const {block_positions,center_offset,origin_center_distance} = PieceData[pieceCode];
+    }, [boardState?.gameState.state])
 
     useEffect(() => {
 
@@ -77,9 +101,10 @@ export const Piece = ({code: pieceCode = 0, origin_position: position, rotation,
 
         onComplete.current = (moveType: MoveType) => {
             if(ref.current){
+                setLockRotation(false)
+                setHasMoved(true);
                 if(!prePosition){
-                    setLockRotation(false)
-                    onMoveFinish(moveType);
+                    onPositionChange(moveType);
                 }
             }
         }
@@ -96,7 +121,6 @@ export const Piece = ({code: pieceCode = 0, origin_position: position, rotation,
             )
         );
     }
-
 
     const positionElement = () => {
         if (ref.current && !centerCalculated) {
@@ -155,17 +179,7 @@ export const Piece = ({code: pieceCode = 0, origin_position: position, rotation,
           }
     }
 
-    const onMoveFinish = (moveType: MoveType) => {
-        const isMoveValid = isPositionValid || (isPieceOnBoard() && !isPieceInteractingWithOtherPieces());
-        if(isMoveValid){
-            onMoveAccept(moveType);
-        }else{
-            onMoveReject(moveType)
-        }
-
-    }
-
-    const onMoveAccept = (moveType: MoveType) => {
+    const saveMove = () => {
         if(ref.current){
             //* The position of the center of the origin block
             const centerPosition = new THREE.Vector3();
@@ -186,9 +200,28 @@ export const Piece = ({code: pieceCode = 0, origin_position: position, rotation,
                 flip: isFlipped,
             }
             // console.log('payload:', payload);
-            setPreQuaternion(null);
-            setPrePosition(null);
+            boardState?.setMove(payload);
+        }
+    }
+
+    const onMoveStart = () => {
+        if(ref.current){
+            const quaternion = new THREE.Quaternion();
+            ref.current.getWorldQuaternion(quaternion);
+
+            setPreMovePosition(getPiecePosition());
+            setPreMoveQuaternion(quaternion);
+        }
+    }
+
+    const onPositionChange = (moveType: MoveType) => {
+        //* Local Movement
+        const isMoveValid = (isPieceOnBoard() && !isPieceInteractingWithOtherPieces());
+        if(!isMoveValid){
+            onPositionChangeReject(moveType)
+        }else if(ref.current){
             boardState?.addBoardPiece(ref.current)
+            saveMove();
         }
     }
 
@@ -236,55 +269,79 @@ export const Piece = ({code: pieceCode = 0, origin_position: position, rotation,
         }
     }
 
-    const onMoveReject = (moveType: MoveType) => {
+    const rejectPosition = (type: 'lock' | 'change') => {
+        if(ref.current){
+            const currentPosition = getPiecePosition();
+            const _prePosition = (type==='lock' ? preMovePosition : prePosition) ?? new THREE.Vector3();
+            const translation = new THREE.Vector3(_prePosition.x - currentPosition.x, 0, _prePosition.z - currentPosition.z);
+            if(translation.length() === 0) return;
+
+            ref.current.applyMatrix4(new THREE.Matrix4().makeTranslation(translation.x, 0, translation.z));
+            ref.current.updateWorldMatrix(true, true);
+        }
+    }
+
+    const rejectRotation = (type: 'lock' | 'change') => {
+        if(ref.current){
+            const currentQuaternion = new THREE.Quaternion();
+            ref.current.getWorldQuaternion(currentQuaternion);
+            const rotationQuaternion = getOriginalQuaternion();
+
+            //* Subtract the previous rotation from the current rotation
+            ref.current.applyQuaternion(
+                (((type==='lock' ? preMoveQuaternion : preQuaternion) ?? new THREE.Quaternion()).clone()
+                .multiply(currentQuaternion.clone().invert())
+                .multiply(rotationQuaternion).normalize()).normalize()
+            );
+
+            //* Fix any snapping issues
+            const euler = new THREE.Euler().setFromQuaternion(ref.current.quaternion);
+            const snappedEuler = new THREE.Euler(
+                Math.round(euler.x / (Math.PI * 0.5)) * (Math.PI * 0.5),
+                Math.round(euler.y / (Math.PI * 0.5)) * (Math.PI * 0.5),
+                Math.round(euler.z / (Math.PI * 0.5)) * (Math.PI * 0.5)
+            );
+            ref.current.quaternion.setFromEuler(snappedEuler);
+            ref.current.updateWorldMatrix(true, true);
+        }
+    }
+
+    const onMoveReject = () => {
+        if(preMovePosition){
+            rejectPosition('lock');
+            setPreMovePosition(null);
+        }
+        if(preMoveQuaternion){
+            rejectRotation('lock');
+            setPreMoveQuaternion(null);
+        }
+        if(ref.current){
+            boardState?.removeBoardPiece(ref.current);
+        }
+    }
+
+    const onPositionChangeReject = (moveType: MoveType) => {
             if(!ref.current) return;
             if(moveType === 'move'){
-                const currentPosition = getPiecePosition();
-                const _prePosition = prePosition ?? new THREE.Vector3();
-                const translation = new THREE.Vector3(_prePosition.x - currentPosition.x, 0, _prePosition.z - currentPosition.z);
-
-                ref.current.applyMatrix4(new THREE.Matrix4().makeTranslation(translation.x, 0, translation.z));
-                ref.current.updateWorldMatrix(true, true);
-
+                rejectPosition('change');
                 setPrePosition(null);
             }
             else if(moveType === 'rotate' || moveType === 'flip'){
-                const currentQuaternion = new THREE.Quaternion();
-                ref.current.getWorldQuaternion(currentQuaternion);
-
-                const rotationQuaternion = getOriginalQuaternion();
-
-                //* Subtract the previous rotation from the current rotation
-                ref.current.applyQuaternion(
-                    ((preQuaternion ?? new THREE.Quaternion()).clone()
-                    .multiply(currentQuaternion.clone().invert())
-                    .multiply(rotationQuaternion).normalize()).normalize()
-                );
-
-                //* Fix any snapping issues
-                const euler = new THREE.Euler().setFromQuaternion(ref.current.quaternion);
-                const snappedEuler = new THREE.Euler(
-                    Math.round(euler.x / (Math.PI * 0.5)) * (Math.PI * 0.5),
-                    Math.round(euler.y / (Math.PI * 0.5)) * (Math.PI * 0.5),
-                    Math.round(euler.z / (Math.PI * 0.5)) * (Math.PI * 0.5)
-                );
-                ref.current.quaternion.setFromEuler(snappedEuler);
-
-
-                ref.current.updateWorldMatrix(true, true);
+                rejectRotation('change');
                 setPreQuaternion(null);
             }
-        }
+    }
 
     const onDragEnd = () => {
         //* Snap the piece to the grid
         if(prePosition){
             snapPieceToGrid()
-            onMoveFinish('move');
+            onPositionChange('move');
         }
     }
 
     const onDragStart = () => {
+        setHasMoved(true);
         setPrePosition(getPiecePosition());
     }
 
@@ -380,9 +437,8 @@ export const Piece = ({code: pieceCode = 0, origin_position: position, rotation,
         return false;
     }
 
-
     return (
-        <DragControls axisLock="y" onDragEnd={onDragEnd} onDragStart={onDragStart} dragConfig={{enabled: !lockRotation}}>
+        <DragControls axisLock="y" onDragEnd={onDragEnd} onDragStart={onDragStart} dragConfig={{enabled: !lockRotation && boardState?.canPlay()}}>
             <group onDoubleClick={onFlip} onContextMenu={onRotate} ref={ref}>
             {
                 block_positions.map((position, index) => {
