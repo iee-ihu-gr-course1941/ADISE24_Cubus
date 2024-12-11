@@ -7,3 +7,50 @@ canvas{
     height: 100vh;
     overflow: hidden;
 }
+
+.interface{
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    pointer-events: none;
+    overflow: hidden;
+}
+
+.interface .btn-group{
+    position: absolute;
+    bottom: 20px;
+    display: flex;
+    width: 100%;
+    justify-content: space-around;
+}
+.interface .game-state{
+    position: absolute;
+    left: 20px;
+    top: 20%;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+
+.btn-group button{
+    padding: 8px 12px;
+    background-color: white;
+    border-radius: 8px;
+    opacity: 0.7;
+    transition: opacity 0.1s ease-in-out;
+    pointer-events: auto;
+}
+.btn-group button:hover{
+    opacity: 0.9;
+}
+
+.btn-group button[datatype="blocked"]{
+    opacity: 0.3;
+    cursor: not-allowed;
+}
