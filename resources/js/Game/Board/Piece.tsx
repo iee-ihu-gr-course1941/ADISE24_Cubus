@@ -156,7 +156,7 @@ export const Piece = ({code: pieceCode = 0, origin_position: position, rotation,
     }
 
     const onMoveFinish = (moveType: MoveType) => {
-        const isMoveValid = isPositionValid || isPieceOnBoard();
+        const isMoveValid = isPositionValid || (isPieceOnBoard() && !isPieceInteractingWithOtherPieces());
         if(isMoveValid){
             onMoveAccept(moveType);
         }else{
@@ -350,6 +350,32 @@ export const Piece = ({code: pieceCode = 0, origin_position: position, rotation,
                 }
             }
             return true;
+        }
+        return false;
+    }
+
+    const isPieceInteractingWithOtherPieces = () => {
+        const piece = ref.current;
+        if(piece){
+            const pieces = boardState?.boardPieces.filter(item => item.uuid !== piece.uuid) ?? []
+            //* Check if there are no other pieces
+            if(pieces.length === 0) {
+                return false;
+            }else{
+                //* Get all the pieces positions that are on board;
+                const piecesPosition = pieces.map((p) => p.children.map(_ => new THREE.Vector3())).flat();
+                pieces.forEach((p, i) => p.children.forEach((b, j) => b.getWorldPosition(piecesPosition[i * piece.children.length + j])));
+                //* Traverse through all blocks to find if any pieces are on top of each other
+                for(const block of piece.children){
+                    const blockPosition = new THREE.Vector3();
+                    block.getWorldPosition(blockPosition);
+                    const minDistance = Math.min(...piecesPosition.map(p => blockPosition.distanceTo(p)));
+                    const allowedDistance = blockSize * 0.5;
+                    if((allowedDistance >= minDistance) ){
+                        return true;
+                    }
+                }
+            }
         }
         return false;
     }
