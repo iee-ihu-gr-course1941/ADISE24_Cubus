@@ -21,3 +21,11 @@ export type Vector2 = {
 }
 
 export type MoveType = 'move' | 'rotate' | 'flip';
+
+export type GameState = {
+    startTime?: number;
+    endTime?: number | null;
+    round: number;
+    player_turn: number;
+    state: 'Ready' | 'Finished' | 'OwnTurnPlaying' | 'OwnTurnLocked' | 'OpponentTurn';
+}
