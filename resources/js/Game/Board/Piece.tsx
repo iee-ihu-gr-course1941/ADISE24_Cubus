@@ -7,7 +7,7 @@ import * as THREE from "three";
 import gsap from "gsap";
 import { ThreeEvent } from "@react-three/fiber";
 import {useControls} from 'leva';
-import { useBoardState } from "@/Store/board_state";
+import { BoardState, useBoardState } from "@/Store/board_state";
 
 const material = new THREE.MeshStandardMaterial({ color: 0xff0000 });
 const originMaterial = new THREE.MeshStandardMaterial({ color: 0xaa0f0f });
@@ -29,12 +29,24 @@ export const Piece = ({code: pieceCode = 0, origin_position: position, rotation,
     const [preQuaternion, setPreQuaternion] = useState<THREE.Quaternion | null>(null);
     const onStart = useRef<() => void>();
     const onComplete = useRef<(moveType: MoveType) => void>();
+    const [boardState, setBoardState] = useState<BoardState>()
+
+    useEffect(() => {
+
+        setBoardState(useBoardState.getState())
+        //* We subscribe to the state instead of listening to it directly to avoid re-rendering before component's state is correctly updated
+        const unsubscribe = useBoardState.subscribe(state => setBoardState(state))
+        return () => {
+            unsubscribe()
+        }
+
+    }, [])
 
     const {isPositionValid} = useControls(
         {
             isPositionValid: {
                 label: 'Valid Move',
-                value: true,
+                value: false,
             },
 
         }
@@ -170,12 +182,13 @@ export const Piece = ({code: pieceCode = 0, origin_position: position, rotation,
             const payload: MovePayload = {
                 code: pieceCode,
                 origin_position: position,
-                rotation:rotationIndex,
+                rotation: rotationIndex,
                 flip: isFlipped,
             }
-            console.log('payload:', payload);
+            // console.log('payload:', payload);
             setPreQuaternion(null);
             setPrePosition(null);
+            boardState?.addBoardPiece(ref.current)
         }
     }
 
@@ -229,10 +242,11 @@ export const Piece = ({code: pieceCode = 0, origin_position: position, rotation,
                 const currentPosition = getPiecePosition();
                 const _prePosition = prePosition ?? new THREE.Vector3();
                 const translation = new THREE.Vector3(_prePosition.x - currentPosition.x, 0, _prePosition.z - currentPosition.z);
+
                 ref.current.applyMatrix4(new THREE.Matrix4().makeTranslation(translation.x, 0, translation.z));
                 ref.current.updateWorldMatrix(true, true);
-                setPrePosition(null);
 
+                setPrePosition(null);
             }
             else if(moveType === 'rotate' || moveType === 'flip'){
                 const currentQuaternion = new THREE.Quaternion();
@@ -322,7 +336,7 @@ export const Piece = ({code: pieceCode = 0, origin_position: position, rotation,
         }
     }
     const isPieceOnBoard = () => {
-        const board = useBoardState.getState().boardRef;
+        const board = boardState?.boardRef;
         if(ref.current && board){
             for(const child of ref.current.children){
                 const raycaster = new THREE.Raycaster();
