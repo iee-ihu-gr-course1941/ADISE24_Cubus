@@ -14,6 +14,7 @@ type Actions = {
     setBoardRef: (boardRef: THREE.Mesh | null) => void
     addBoardPiece: (piece: THREE.Group) => void;
     setMove: (move: MovePayload | null) => void;
+    rejectMove: () => void;
     startGame: () => void;
     lockTurn: () => void;
     beginTurn: () => void;
@@ -43,7 +44,10 @@ export const useBoardState = create<BoardState>()((set, get, state) => ({
         set({gameState: {round: 1, player_turn: 0, state: 'OwnTurnPlaying', startTime: Date.now()}})
     },
     lockTurn: () => {
-        set({gameState: {...get().gameState, state: 'OwnTurnLocked'}})
+        const state = get();
+        if(state.move){
+            set({gameState: {...state.gameState, state: 'OwnTurnLocked'}})
+        }
     },
     beginTurn: () => {
         set(({gameState}) => (
@@ -53,10 +57,13 @@ export const useBoardState = create<BoardState>()((set, get, state) => ({
         set(({gameState}) => ({gameState: {...gameState, state: 'OwnTurnPlaying'}}))
     },
     endTurn: () => {
-        set(({gameState}) => ({gameState: {player_turn: gameState.player_turn, round: gameState.round + 1, state: 'OpponentTurn', startTime: Date.now()}}))
+        set(({gameState}) => ({gameState: {player_turn: gameState.player_turn, round: gameState.round + 1, state: 'OpponentTurn', startTime: Date.now()}, move: null}))
     },
     setMove: (move) => {
         set({move})
+    },
+    rejectMove: () => {
+        set(({move}) => ({move: null}))
     },
     setBoardRef: (boardRef) => {
         set({boardRef})
