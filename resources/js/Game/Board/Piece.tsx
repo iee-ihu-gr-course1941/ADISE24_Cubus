@@ -38,7 +38,7 @@ export const Piece = ({code: pieceCode = 0, origin_position: position, rotation,
         {
             isPositionValid: {
                 label: 'Valid Move',
-                value: false,
+                value: true,
             },
         }
     )
@@ -57,23 +57,18 @@ export const Piece = ({code: pieceCode = 0, origin_position: position, rotation,
     }, [])
 
     useEffect(() => {
+        //* LISTENERS
         if(boardState?.gameState.state === 'OwnTurnPlaying'){
             setHasMoved(false);
             onMoveStart();
         }else if (boardState?.gameState.state === 'OwnTurnLocked'){
-            if(boardState?.move?.code !== pieceCode){
-                if(hasMoved){
+            if((boardState?.move?.code !== pieceCode || !isPiecePositionValid()) && hasMoved){
                     onMoveReject();
-                }
-            }else{
-                //todo validate move from remote server.
-                const isValid = isPositionValid;
-                if(isValid){
-                    boardState.endTurn();
-                }else{
-                    onMoveReject();
-                    boardState.continueTurn();
-                }
+            }else if(isPositionValid && boardState?.move?.code === pieceCode && ref.current){
+                boardState?.endTurn();
+                boardState?.addBoardPiece(ref.current)
+            }else if(hasMoved){
+                onMoveReject();
             }
         }
     }, [boardState?.gameState.state])
@@ -103,9 +98,9 @@ export const Piece = ({code: pieceCode = 0, origin_position: position, rotation,
             if(ref.current){
                 setLockRotation(false)
                 setHasMoved(true);
-                if(!prePosition){
-                    onPositionChange(moveType);
-                }
+                // if(!prePosition){
+                onPositionChange(moveType, false);
+                // }
             }
         }
 
@@ -214,13 +209,16 @@ export const Piece = ({code: pieceCode = 0, origin_position: position, rotation,
         }
     }
 
-    const onPositionChange = (moveType: MoveType) => {
+    const isPiecePositionValid = () => {
+        return (isPieceOnBoard() && !isPieceInteractingWithOtherPieces());
+    }
+
+    const onPositionChange = (moveType: MoveType, rejectChange = true) => {
         //* Local Movement
-        const isMoveValid = (isPieceOnBoard() && !isPieceInteractingWithOtherPieces());
-        if(!isMoveValid){
-            onPositionChangeReject(moveType)
-        }else if(ref.current){
-            boardState?.addBoardPiece(ref.current)
+        const isPositionValid = isPiecePositionValid();
+        if(!isPositionValid && rejectChange){
+            onPositionChangeReject(moveType);
+        }else if(ref.current && isPositionValid){
             saveMove();
         }
     }
@@ -307,17 +305,20 @@ export const Piece = ({code: pieceCode = 0, origin_position: position, rotation,
     }
 
     const onMoveReject = () => {
-        if(preMovePosition){
-            rejectPosition('lock');
-            setPreMovePosition(null);
-        }
         if(preMoveQuaternion){
             rejectRotation('lock');
             setPreMoveQuaternion(null);
         }
+        if(preMovePosition){
+            rejectPosition('lock');
+            setPreMovePosition(null);
+        }
         if(ref.current){
+            //* Remove piece in case of it not being in the board previously
             boardState?.removeBoardPiece(ref.current);
         }
+        boardState?.rejectMove();
+        boardState?.continueTurn();
     }
 
     const onPositionChangeReject = (moveType: MoveType) => {
@@ -356,7 +357,7 @@ export const Piece = ({code: pieceCode = 0, origin_position: position, rotation,
     }
 
     const onRotate = () => {
-        if(ref.current && !lockRotation){
+        if(ref.current && !lockRotation && boardState?.canPlay()){
             const sign = isPieceFlipped('z') ? -1 : 1;
             gsap.to(ref.current.rotation,
                 {
@@ -379,7 +380,7 @@ export const Piece = ({code: pieceCode = 0, origin_position: position, rotation,
 
     const onFlip = (event: ThreeEvent<MouseEvent>) => {
         event.stopPropagation();
-        if(ref.current && !lockRotation){
+        if(ref.current && !lockRotation && boardState?.canPlay()){
             const axis = getFlipAxis();
             const sign = ref.current.rotation[axis] < 0 ? -1 : 1 //* Fix problem being caused by the snapToGrid matrix which messes with the rotation sign
             gsap.to(ref.current.rotation,
