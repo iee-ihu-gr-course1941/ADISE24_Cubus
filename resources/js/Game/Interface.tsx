@@ -8,6 +8,7 @@ export const Interface = () => {
     const lockTurn = useBoardState(state => state.lockTurn);
     const beginOwnTurn = useBoardState(state => state.beginTurn);
     const {state, round, startTime} = useBoardState(state => state.gameState);
+    const move = useBoardState(state => state.move);
     const boardPieces = useBoardState(state => state.boardPieces);
     const [timer, setTimer] = useState(0);
 
@@ -22,10 +23,11 @@ export const Interface = () => {
                 <p>Board Pieces: {boardPieces.length}</p>
                 {state !== 'Ready' && <p>Round: {round}</p>}
                 {state !== 'Ready' &&<p>Time: {timer}</p>}
+                {state !== 'Ready' &&<p className="playing">{(state === 'OwnTurnPlaying' || state === 'OwnTurnLocked') ? 'You are playing!' : 'Opponent is playing!'}</p>}
             </div>
             <div className="btn-group">
                 <button datatype={state == 'Ready' ? '' : 'blocked'} onClick={startGame}>Start Game</button>
-                <button datatype={state === 'OwnTurnPlaying' ? '' : 'blocked'} onClick={lockTurn}>Lock Turn</button>
+                <button datatype={(state === 'OwnTurnPlaying' && move) ? '' : 'blocked'} onClick={lockTurn}>Lock Turn</button>
                 <button datatype={state === 'OpponentTurn' ? '' : 'blocked'} onClick={beginOwnTurn}>End Opponent Turn</button>
             </div>
         </div>

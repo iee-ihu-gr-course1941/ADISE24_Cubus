@@ -54,3 +54,12 @@ canvas{
     opacity: 0.3;
     cursor: not-allowed;
 }
+
+.playing{
+    margin-top: 12px;
+    width: 150px;
+    padding: 8px 12px;
+    background-color: white;
+    border-radius: 8px;
+    opacity: 0.5;
+}
