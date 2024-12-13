@@ -8,7 +8,7 @@ declare global {
     export default value
   }
   interface ThreeElements {
-    customMaterial: ShaderMaterialProps;
+    blockShadowMaterial: ShaderMaterialProps;
     // * New extend types go here !
   }
   namespace JSX {
