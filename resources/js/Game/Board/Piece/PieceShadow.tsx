@@ -1,11 +1,25 @@
 import { useBoardState } from "@/Store/board_state";
 import { Vector2 } from "@/types/piece";
+import { shaderMaterial } from "@react-three/drei";
 import React, { ForwardedRef, MutableRefObject, Ref, useEffect, useRef } from "react";
 import * as THREE from "three";
+import vertexShader from '../../../../shaders/piece_shadow/vertexShader.glsl'
+import fragmentShader from '../../../../shaders/piece_shadow/fragmentShader.glsl'
+import { extend } from "@react-three/fiber";
 
-const materialSuccess = new THREE.MeshStandardMaterial({ color: 0x00ff00 });
-const materialError = new THREE.MeshStandardMaterial({ color: 0xff0000 });
+const successColor = new THREE.Color(0x00ff00);
+const errorColor = new THREE.Color(0xff0000);
 const geometry = new THREE.BoxGeometry(0.5,0.01,0.5);
+
+const BlockShadowMaterial = shaderMaterial(
+    {
+      uColor: new THREE.Color(0x000000),
+    },
+    vertexShader,
+    fragmentShader,
+  );
+
+extend({BlockShadowMaterial});
 
 type Props = {
     isDragging: boolean;
@@ -15,7 +29,9 @@ type Props = {
 }
 export const PieceShadow = React.forwardRef<THREE.Group, Props>(({isDragging, block_positions, blockSize, shadowPosition}: Props, ref) => {
     const boardObject = useBoardState(state => state.boardRef)
+    const shadowMaterialRef = useRef<THREE.ShaderMaterial[]>([]);
     const shadowObject = (ref as unknown as  MutableRefObject<THREE.Group | undefined>).current;
+
     useEffect(() => {
         //* Update position
         if(shadowObject && shadowPosition){
@@ -25,10 +41,11 @@ export const PieceShadow = React.forwardRef<THREE.Group, Props>(({isDragging, bl
 
     useEffect(() => {
         //* Handle raycasting
-        if(shadowObject && boardObject && shadowPosition){
+        if(shadowObject && boardObject && shadowPosition && shadowMaterialRef.current){
             const blocksInside = [];
             const blocksOutside = [];
-            for (const block of shadowObject.children){
+            for (let i=0;i<shadowObject.children.length;i++){
+                const block = shadowObject.children[i];
                 const raycaster = new THREE.Raycaster();
                 const position = new THREE.Vector3();
                 block.getWorldPosition(position);
@@ -37,21 +54,22 @@ export const PieceShadow = React.forwardRef<THREE.Group, Props>(({isDragging, bl
                 raycaster.set(position, new THREE.Vector3(0, -1, 0).normalize());
                 const intersects = raycaster.intersectObject(boardObject);
                 if(intersects.length > 0){
-                    blocksInside.push(block);
+                    blocksInside.push({index: i,block});
                 }else{
-                    blocksOutside.push(block);
+                    blocksOutside.push({index: i,block});
                 }
             }
-
-            for(const block of blocksInside as THREE.Mesh[]){
-                block.material = materialSuccess;
+            for(let i=0;i<blocksInside.length;i++){
+                const {block, index} = blocksInside[i];
+                const material = shadowMaterialRef.current[index];
+                material.uniforms.uColor.value = successColor;
                 block.visible = true;
             }
-            for (const block of blocksOutside as THREE.Mesh[]){
+            for (let i=0;i<blocksOutside.length;i++){
+                const {block, index} = blocksOutside[i];
+                const material = shadowMaterialRef.current[index];
+                material.uniforms.uColor.value = errorColor;
                 block.visible = blocksInside.length > 0;
-                if(blocksInside.length > 0){
-                    block.material = materialError;
-                }
             }
 
         }
@@ -61,7 +79,9 @@ export const PieceShadow = React.forwardRef<THREE.Group, Props>(({isDragging, bl
             {
                 block_positions.map((position, index) => {
                     return (
-                        <mesh visible={false} key={index} position={[position.x * blockSize, 0, position.y * blockSize]} geometry={geometry} material={materialSuccess} />
+                        <mesh visible={false} key={index} position={[position.x * blockSize, 0, position.y * blockSize]} geometry={geometry}>
+                            <blockShadowMaterial ref={materialRef => !shadowMaterialRef.current.some(m => m === materialRef) && materialRef && shadowMaterialRef.current.push(materialRef)} />
+                        </mesh>
                     )
                 })
             }
