@@ -1,6 +1,5 @@
 import { useGameDimensions } from "@/Store/game_dimensions";
 import { DragControls, Grid } from "@react-three/drei";
-import { Piece } from "./Piece";
 import { PieceCode } from "@/types/piece";
 import * as THREE from "three";
 import { useBoardState } from "@/Store/board_state";

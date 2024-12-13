@@ -1,9 +1,10 @@
 import * as THREE from "three";
-import { Piece } from "./Piece";
+import { Piece } from "./Piece/Piece";
 import { PieceCode } from "@/types/piece";
 import { useGameDimensions } from "@/Store/game_dimensions";
 
 const Hand = () => {
+
     const blockSize = useGameDimensions(state => state.blockSize);
     const handPosition = new THREE.Vector3(10, 0, 0);
     return (

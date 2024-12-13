@@ -15,7 +15,7 @@ export const Experience = memo(
                     fov: 60,
                     near: 0.1,
                     far: 200,
-                    position: [14.5, 5, 15],
+                    position: [14.5, 3, 10],
                 }}>
                     <Perf position="top-left"/>
                     <OrbitControls makeDefault/>

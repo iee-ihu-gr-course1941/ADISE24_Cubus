@@ -2,17 +2,18 @@ import { PiecePositions, Piece as PieceData } from "@/Constants/Piece";
 import { useGameDimensions } from "@/Store/game_dimensions";
 import { MovePayload, MoveType, PieceCode, PieceRotation } from "@/types/piece";
 import { DragControls } from "@react-three/drei";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import * as THREE from "three";
 import gsap from "gsap";
 import { ThreeEvent } from "@react-three/fiber";
 import {useControls} from 'leva';
 import { BoardState, useBoardState } from "@/Store/board_state";
+import { PieceModel } from "./PieceModel";
+import { PieceShadow } from "./PieceShadow";
 
-const material = new THREE.MeshStandardMaterial({ color: 0xff0000 });
-const originMaterial = new THREE.MeshStandardMaterial({ color: 0xaa0f0f });
-const geometry = new THREE.BoxGeometry(0.5,0.5,0.5);
-type Props = MovePayload
+type Props = MovePayload & {
+
+}
 
 const rotationToIndex = (rotation: number) => {
     const normalizedRotation = (rotation + 2 * Math.PI) % (2 * Math.PI);
@@ -30,16 +31,35 @@ export const Piece = ({code: pieceCode = 0, origin_position: position, rotation,
     const [preMovePosition, setPreMovePosition] = useState<THREE.Vector3 | null>(null);
     const [preMoveQuaternion, setPreMoveQuaternion] = useState<THREE.Quaternion | null>(null);
     const [hasMoved, setHasMoved] = useState(false);
+    const [isDragging, setIsDragging] = useState(false);
     const onStart = useRef<() => void>();
     const onComplete = useRef<(moveType: MoveType) => void>();
     const [boardState, setBoardState] = useState<BoardState>()
 
-    const {isPositionValid} = useControls(
+    const canMovePiece = useMemo(() => {
+            return !lockRotation && boardState?.canPlay() && !boardState?.boardPieces.some(p => p.uuid === ref.current?.uuid);
+    }, [lockRotation, boardState?.gameState, boardState?.boardPieces, ref.current]);
+
+    const {isPositionValid, dragHeight, animationDuration} = useControls(
         {
             isPositionValid: {
                 label: 'Valid Move',
                 value: true,
             },
+            dragHeight: {
+                label: 'Drag Height',
+                value: 1,
+                min: 0.0,
+                max: 2,
+                step: 0.25,
+            },
+            animationDuration: {
+                label: 'Animation Duration',
+                value: 0.25,
+                min: 0.0,
+                max: 2,
+                step: 0.1,
+            }
         }
     )
 
@@ -142,7 +162,7 @@ export const Piece = ({code: pieceCode = 0, origin_position: position, rotation,
             center.x -= center_offset.x * blockSize;
             center.z -= center_offset.y * blockSize;
 
-            ref.current.children.forEach((child) => {
+            ref.current.children.forEach((child, i) => {
               if (child instanceof THREE.Mesh) {
                 //* Move child based on position matrix
                 child.applyMatrix4(pMatrix);
@@ -333,17 +353,20 @@ export const Piece = ({code: pieceCode = 0, origin_position: position, rotation,
             }
     }
 
+    const onDragStart = () => {
+        setIsDragging(true);
+        addDragAnimation();
+        setHasMoved(true);
+        setPrePosition(getPiecePosition());
+    }
+
     const onDragEnd = () => {
-        //* Snap the piece to the grid
+        setIsDragging(false);
         if(prePosition){
             snapPieceToGrid()
             onPositionChange('move');
         }
-    }
-
-    const onDragStart = () => {
-        setHasMoved(true);
-        setPrePosition(getPiecePosition());
+        removeDragAnimation();
     }
 
     const getFlipAxis = () => {
@@ -357,7 +380,7 @@ export const Piece = ({code: pieceCode = 0, origin_position: position, rotation,
     }
 
     const onRotate = () => {
-        if(ref.current && !lockRotation && boardState?.canPlay()){
+        if(ref.current && canMovePiece){
             const sign = isPieceFlipped('z') ? -1 : 1;
             gsap.to(ref.current.rotation,
                 {
@@ -380,7 +403,7 @@ export const Piece = ({code: pieceCode = 0, origin_position: position, rotation,
 
     const onFlip = (event: ThreeEvent<MouseEvent>) => {
         event.stopPropagation();
-        if(ref.current && !lockRotation && boardState?.canPlay()){
+        if(ref.current && canMovePiece){
             const axis = getFlipAxis();
             const sign = ref.current.rotation[axis] < 0 ? -1 : 1 //* Fix problem being caused by the snapToGrid matrix which messes with the rotation sign
             gsap.to(ref.current.rotation,
@@ -427,9 +450,10 @@ export const Piece = ({code: pieceCode = 0, origin_position: position, rotation,
                 for(const block of piece.children){
                     const blockPosition = new THREE.Vector3();
                     block.getWorldPosition(blockPosition);
-                    const minDistance = Math.min(...piecesPosition.map(p => blockPosition.distanceTo(p)));
+                    //* Calculate all the distances between the piece's block and all the other pieces blocks but exclude "y" axis to avoid confusion with height/drag animation
+                    const minDistance = Math.min(...piecesPosition.map(p => (new THREE.Vector3(blockPosition.x, 0, blockPosition.z)).distanceTo(new THREE.Vector3(p.x, 0, p.z))));
                     const allowedDistance = blockSize * 0.5;
-                    if((allowedDistance >= minDistance) ){
+                    if((allowedDistance >= (minDistance)) ){
                         return true;
                     }
                 }
@@ -438,17 +462,26 @@ export const Piece = ({code: pieceCode = 0, origin_position: position, rotation,
         return false;
     }
 
+    const addDragAnimation = () => {
+        if(ref.current){
+            gsap.to(ref.current.position, {y: dragHeight * blockSize, duration: animationDuration * 2, ease: 'power1.inOut'});
+        }
+    }
+
+    const removeDragAnimation = () => {
+        if(ref.current){
+            gsap.to(ref.current.position, {y: blockSize*0.5, duration: animationDuration, ease: 'power1.inOut'});
+        }
+    }
+
+
     return (
-        <DragControls axisLock="y" onDragEnd={onDragEnd} onDragStart={onDragStart} dragConfig={{enabled: !lockRotation && boardState?.canPlay()}}>
-            <group onDoubleClick={onFlip} onContextMenu={onRotate} ref={ref}>
-            {
-                block_positions.map((position, index) => {
-                    return (
-                        <mesh key={index} position={[position.x * blockSize, 0, position.y * blockSize]} geometry={geometry} material={index === 0 ? originMaterial : material} />
-                    )
-                })
-            }
-            </group>
-        </DragControls>
+        <>
+            <DragControls axisLock="y"  onDragEnd={onDragEnd} onDragStart={onDragStart} dragConfig={{enabled: canMovePiece}}>
+                <group onDoubleClick={onFlip} onContextMenu={onRotate} ref={ref}>
+                    <PieceModel block_positions={block_positions} blockSize={blockSize}/>
+                </group>
+            </DragControls>
+        </>
     );
 }
