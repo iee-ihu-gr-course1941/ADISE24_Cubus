@@ -23,6 +23,7 @@ const rotationToIndex = (rotation: number) => {
 export const Piece = ({code: pieceCode = 0, origin_position: position, rotation, flip}: Props) => {
     const blockSize = useGameDimensions(state => state.blockSize);
     const ref = useRef<THREE.Group>(null);
+    const shadowRef = useRef<THREE.Group>(null);
 
     const [centerCalculated, setCenterCalculated] = useState(false);
     const [lockRotation, setLockRotation] = useState(false);
@@ -32,6 +33,7 @@ export const Piece = ({code: pieceCode = 0, origin_position: position, rotation,
     const [preMoveQuaternion, setPreMoveQuaternion] = useState<THREE.Quaternion | null>(null);
     const [hasMoved, setHasMoved] = useState(false);
     const [isDragging, setIsDragging] = useState(false);
+    const [shadowPosition, setShadowPosition] = useState<THREE.Vector3>();
     const onStart = useRef<() => void>();
     const onComplete = useRef<(moveType: MoveType) => void>();
     const [boardState, setBoardState] = useState<BoardState>()
@@ -151,6 +153,8 @@ export const Piece = ({code: pieceCode = 0, origin_position: position, rotation,
             )
 
             ref.current.applyMatrix4(pMatrix);
+            shadowRef.current?.applyMatrix4(pMatrix);
+            shadowRef.current?.updateWorldMatrix(true, true);
             ref.current.updateWorldMatrix(true, true);
 
             //* Calculate Bounding Box (Center of piece)
@@ -166,10 +170,13 @@ export const Piece = ({code: pieceCode = 0, origin_position: position, rotation,
               if (child instanceof THREE.Mesh) {
                 //* Move child based on position matrix
                 child.applyMatrix4(pMatrix);
+                shadowRef.current?.children[i].applyMatrix4(pMatrix);
 
                 //* Move child to center
                 child.position.sub(center);
+                shadowRef.current?.children[i].position.sub(center);
                 child.updateWorldMatrix(true, true);
+                shadowRef.current?.children[i].updateWorldMatrix(true, true);
               }
             });
 
@@ -474,14 +481,36 @@ export const Piece = ({code: pieceCode = 0, origin_position: position, rotation,
         }
     }
 
+    const onDrag = () => {
+        //* Snap the shadow to the grid
+
+        //Handle rotation
+        const rotation = getRotationFromQuaternion();
+        shadowRef.current?.rotation.set(rotation.x, rotation.y, rotation.z);
+
+        //Handle position
+        // Get center position
+        const position = new THREE.Vector3();
+        ref.current?.getWorldPosition(position);
+        // Get a corner position
+        const offset = new THREE.Vector3(blockSize * 0.5, 0, blockSize * 0.5)
+        position.sub(offset);
+
+        const snapX = Math.round(position.x / blockSize) * blockSize;
+        const snapZ = Math.round(position.z / blockSize) * blockSize;
+
+        const snapPosition = new THREE.Vector3(snapX, 0.05, snapZ).add(offset);
+        setShadowPosition(snapPosition)
+    }
 
     return (
         <>
-            <DragControls axisLock="y"  onDragEnd={onDragEnd} onDragStart={onDragStart} dragConfig={{enabled: canMovePiece}}>
+            <DragControls axisLock="y" onDrag={onDrag} onDragEnd={onDragEnd} onDragStart={onDragStart} dragConfig={{enabled: canMovePiece}}>
                 <group onDoubleClick={onFlip} onContextMenu={onRotate} ref={ref}>
                     <PieceModel block_positions={block_positions} blockSize={blockSize}/>
                 </group>
             </DragControls>
+            <PieceShadow isDragging={isDragging} shadowPosition={shadowPosition} ref={shadowRef} block_positions={block_positions} blockSize={blockSize}/>
         </>
     );
 }
