@@ -9,7 +9,6 @@ import { ThreeEvent } from "@react-three/fiber";
 import {useControls} from 'leva';
 import { BoardState, useBoardState } from "@/Store/board_state";
 import { PieceModel } from "./PieceModel";
-import { PieceShadow } from "./PieceShadow";
 
 type Props = MovePayload & {
 
