@@ -2,9 +2,9 @@ import * as THREE from "three";
 import { Piece } from "./Piece/Piece";
 import { PieceCode } from "@/types/piece";
 import { useGameDimensions } from "@/Store/game_dimensions";
+import { memo } from "react";
 
-const Hand = () => {
-
+const Hand = memo(() => {
     const blockSize = useGameDimensions(state => state.blockSize);
     const handPosition = new THREE.Vector3(10, 0, 0);
     return (
@@ -24,6 +24,6 @@ const Hand = () => {
             }
         </>
     )
-}
+})
 
 export default Hand

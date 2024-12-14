@@ -1,11 +1,9 @@
 import { useGameDimensions } from "@/Store/game_dimensions";
-import { DragControls, Grid } from "@react-three/drei";
-import { PieceCode } from "@/types/piece";
 import * as THREE from "three";
 import { useBoardState } from "@/Store/board_state";
+import { memo } from "react";
 
-export const Board = () => {
-    const blockSize = useGameDimensions(state => state.blockSize);
+export const Board = memo(() => {
     const gridSize = useGameDimensions(state => state.getGridSize());
     const setBoardRef = useBoardState(state => state.setBoardRef);
     return (
@@ -17,4 +15,4 @@ export const Board = () => {
             </mesh>
         </>
     );
-}
+});
