@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthService;
+use App\Http\Controllers\GameController;
 use App\Http\Controllers\GameSessionController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
@@ -32,9 +33,9 @@ Route::get('/lobby/match',  [GameSessionController::class, 'search'])->name('lob
 Route::get('/lobby/{game_session}/join', [GameSessionController::class, 'join'])->name('lobby.join');
 Route::get('/lobby/disconnect', [GameSessionController::class, 'disconnect'])->name('lobby.disconnect');
 
-Route::get('/game', function () {
-    return inertia('Game');
-})->name('game');
+Route::middleware(\App\Http\Middleware\ManageInGameVerification::class)->group(function () {
+    Route::resource('/game', GameController::class)->only(['index']);
+});
 
 Route::get('/card-demo', function () {
     return inertia('CardDemo');
