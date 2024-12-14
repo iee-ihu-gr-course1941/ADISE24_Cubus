@@ -27,5 +27,6 @@ export type GameState = {
     endTime?: number | null;
     round: number;
     player_turn: number;
+    player_count: number;
     state: 'Ready' | 'Finished' | 'OwnTurnPlaying' | 'OwnTurnLocked' | 'OpponentTurn';
 }

@@ -26,7 +26,8 @@ export const Interface = () => {
                 {state !== 'Ready' &&<p className="playing">{(state === 'OwnTurnPlaying' || state === 'OwnTurnLocked') ? 'You are playing!' : 'Opponent is playing!'}</p>}
             </div>
             <div className="btn-group">
-                <button datatype={state == 'Ready' ? '' : 'blocked'} onClick={startGame}>Start Game</button>
+                {state==='Ready' && <button datatype={state == 'Ready' ? '' : 'blocked'} onClick={() => startGame(2)}>Start Game 2</button>}
+                {state==='Ready' && <button datatype={state == 'Ready' ? '' : 'blocked'} onClick={() => startGame(4)}>Start Game 4</button>}
                 <button datatype={(state === 'OwnTurnPlaying' && move) ? '' : 'blocked'} onClick={lockTurn}>Lock Turn</button>
                 <button datatype={state === 'OpponentTurn' ? '' : 'blocked'} onClick={beginOwnTurn}>End Opponent Turn</button>
             </div>

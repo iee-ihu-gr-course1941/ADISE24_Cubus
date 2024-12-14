@@ -15,7 +15,7 @@ type Actions = {
     addBoardPiece: (piece: THREE.Group) => void;
     setMove: (move: MovePayload | null) => void;
     rejectMove: () => void;
-    startGame: () => void;
+    startGame: (player_count: number) => void;
     lockTurn: () => void;
     beginTurn: () => void;
     endTurn: () => void;
@@ -36,12 +36,13 @@ export const useBoardState = create<BoardState>()((set, get, state) => ({
         round: 0,
         player_turn: 0,
         state: 'Ready',
+        player_count: 0,
     },
     canPlay: () => {
         return get().gameState.state === 'OwnTurnPlaying'
     },
-    startGame: () => {
-        set({gameState: {round: 1, player_turn: 0, state: 'OwnTurnPlaying', startTime: Date.now()}})
+    startGame: (player_count: number) => {
+        set({gameState: {round: 1, player_turn: 0, state: 'OwnTurnPlaying', startTime: Date.now(), player_count: player_count}})
     },
     lockTurn: () => {
         const state = get();
@@ -51,13 +52,17 @@ export const useBoardState = create<BoardState>()((set, get, state) => ({
     },
     beginTurn: () => {
         set(({gameState}) => (
-            {gameState: {round: gameState.round + 1, player_turn: gameState.player_turn, state: 'OwnTurnPlaying', startTime: Date.now()}}))
+            {gameState: {
+                ...gameState,round: gameState.round + 1, state: 'OwnTurnPlaying',startTime: Date.now()
+            }}))
     },
     continueTurn: () => {
         set(({gameState}) => ({gameState: {...gameState, state: 'OwnTurnPlaying'}}))
     },
     endTurn: () => {
-        set(({gameState}) => ({gameState: {player_turn: gameState.player_turn, round: gameState.round + 1, state: 'OpponentTurn', startTime: Date.now()}, move: null}))
+        set(({gameState}) => ({gameState: {
+            ...gameState, state: 'OpponentTurn', startTime: Date.now()
+        }, move: null}))
     },
     setMove: (move) => {
         set({move})
