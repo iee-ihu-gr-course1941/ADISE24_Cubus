@@ -7,13 +7,13 @@ import vertexShader from '../../../../shaders/piece_shadow/vertexShader.glsl'
 import fragmentShader from '../../../../shaders/piece_shadow/fragmentShader.glsl'
 import { extend } from "@react-three/fiber";
 
-const successColor = new THREE.Color(0x00ff00);
-const errorColor = new THREE.Color(0xff0000);
+const successColor = new THREE.Color(0x86efac);
+const errorColor = new THREE.Color(0xfca5a5);
 const geometry = new THREE.BoxGeometry(0.5,0.01,0.5);
 
 const BlockShadowMaterial = shaderMaterial(
     {
-      uColor: new THREE.Color(0x000000),
+      uColor: new THREE.Color(0xff0000),
     },
     vertexShader,
     fragmentShader,
@@ -80,7 +80,7 @@ export const PieceShadow = React.forwardRef<THREE.Group, Props>(({isDragging, bl
                 block_positions.map((position, index) => {
                     return (
                         <mesh visible={false} key={index} position={[position.x * blockSize, 0, position.y * blockSize]} geometry={geometry}>
-                            <blockShadowMaterial ref={materialRef => !shadowMaterialRef.current.some(m => m === materialRef) && materialRef && shadowMaterialRef.current.push(materialRef)} />
+                            <blockShadowMaterial transparent depthWrite={false} ref={materialRef => !shadowMaterialRef.current.some(m => m === materialRef) && materialRef && shadowMaterialRef.current.push(materialRef)} />
                         </mesh>
                     )
                 })

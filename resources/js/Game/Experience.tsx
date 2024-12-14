@@ -18,7 +18,7 @@ export const Experience = memo(
                     position: [14.5, 3, 10],
                 }}>
                     <Perf position="top-left"/>
-                    <OrbitControls makeDefault/>
+                    <OrbitControls makeDefault enableDamping/>
                     <color attach={'background'} args={['#535353']} />
                     <GameMap/>
                 </Canvas>
