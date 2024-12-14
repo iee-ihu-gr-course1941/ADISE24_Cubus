@@ -40,7 +40,7 @@
         "framer-motion": "^11.13.1",
         "gsap": "^3.12.5",
         "postprocessing": "^6.0.4",
-        "three": "^0.171.0",
+        "three": "^0.159.0",
         "zustand": "^5.0.2"
     },
     "overrides": {
