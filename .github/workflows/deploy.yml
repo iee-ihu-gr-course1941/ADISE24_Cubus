@@ -1,5 +1,5 @@
 name: Deploy
-run-name: Deploy to RPI
+run-name: Deploy project
 on:
   push:
     branches:
@@ -7,7 +7,13 @@ on:
 jobs:
     Deploy:
         runs-on: self-hosted
+        defaults:
+          run:
+            working-directory: ../../../../cubus
         steps:
-          - run: ls ~/cubus
-          - run: cd ~/cubus && git pull && npm run build
-          - run: pwd
+          - name: Clone Codebase
+            run: git pull
+          - name: Install Dependencies
+            run: npm i && composer i
+          - name: Compile
+            run: npm run build
