@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 
+const RELATIVE_MATRIX_SIZE = 5;
+
 class GameController extends Controller {
     function index(Request $request): \Inertia\Response | \Inertia\ResponseFactory | \Illuminate\Http\Response {
         $player = AuthService::getUser();
@@ -24,5 +26,50 @@ class GameController extends Controller {
         }
 
         return inertia('Game');
+    }
+
+    function move(Request $request): \Inertia\Response | \Inertia\ResponseFactory | \Illuminate\Http\Response {
+        $data = $request->validate([
+            'code' => 'required|string',
+            'origin' => 'required|string',
+            'rotation' => 'required|int',
+            'flip' => 'required|boolean',
+        ]);
+
+        $piece = $this->getPieceMatrix($data['code']);
+
+        if($request->expectsJson()) {
+            return response($piece);
+        }
+
+        return inertia('Game');
+    }
+
+    private function getPieceMatrix(string $code): array {
+        // WARN: Very Inefficient code... does it matter though?
+        $pieces_json = file_get_contents('pieces.json');
+        $pieces_object = json_decode($pieces_json);
+        $piece = $pieces_object->$code;
+
+        $piece_pos = 0;
+        $piece_matrix = [];
+
+        for($y = 0; $y < RELATIVE_MATRIX_SIZE; $y++) {
+            for($x = 0; $x < RELATIVE_MATRIX_SIZE; $x++) {
+                $pieice_to_insert = 0;
+                if(
+                    $piece_pos < count($piece) &&
+                    $piece[$piece_pos]->x === $x &&
+                    $piece[$piece_pos]->y === $y
+                ) {
+                    $pieice_to_insert = $piece_pos > 0 ? 1 : 2;
+                    $piece_pos++;
+                }
+
+                $piece_matrix[$y][$x] = $pieice_to_insert;
+            }
+        }
+
+        return $piece_matrix;
     }
 }

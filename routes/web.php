@@ -4,6 +4,7 @@ use App\Http\Controllers\AuthService;
 use App\Http\Controllers\GameController;
 use App\Http\Controllers\GameSessionController;
 use App\Http\Controllers\UserController;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 Route::withoutMiddleware(['auth', \App\Http\Middleware\ManageAuthorization::class])->group(function () {
@@ -35,6 +36,7 @@ Route::get('/lobby/disconnect', [GameSessionController::class, 'disconnect'])->n
 
 Route::middleware(\App\Http\Middleware\ManageInGameVerification::class)->group(function () {
     Route::resource('/game', GameController::class)->only(['index']);
+    Route::post('/game/move', [GameController::class, 'move'])->name('game.move');
 });
 
 Route::get('/card-demo', function () {
