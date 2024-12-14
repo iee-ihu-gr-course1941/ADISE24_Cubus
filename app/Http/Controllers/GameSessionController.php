@@ -133,6 +133,7 @@ class GameSessionController extends Controller {
 
         $user_color = $valid_colors[rand(0,count($valid_colors) - 1)];
         $game_session['player_'.$user_color.'_id'] = $user['id'];
+        error_log('valid colors:' . count($valid_colors));
         if(count($valid_colors) == 1) {
             $game_session['session_state'] = GameSessionState::Playing->value;
         }

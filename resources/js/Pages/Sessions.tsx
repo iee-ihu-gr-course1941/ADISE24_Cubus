@@ -13,7 +13,7 @@ export default function Sessions({ user, userSession, sessions, flash }: PagePro
         if(!session) return;
 
         if(session.session_state === 'playing' || session.session_state === 'paused') {
-            router.visit(route('game'));
+            router.visit(route('game.index'));
         }
     }, [currentSession]);
 
