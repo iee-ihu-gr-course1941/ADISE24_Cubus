@@ -18,7 +18,7 @@ return new class extends Migration {
             $table->enum('current_playing', PlayerColor::values())->default(PlayerColor::Blue);
             $table->enum('session_state', GameSessionState::values())->default(GameSessionState::Waiting);
             $table->enum('player_count', GameSessionPlayerCount::values())->default(GameSessionPlayerCount::Four);
-            $table->json('board_state')->nullable(); // TODO: Update as not nullable after testing
+            $table->json('board_state');
 
             // Player Specific Info
             foreach(PlayerColor::values() as $player_color) {

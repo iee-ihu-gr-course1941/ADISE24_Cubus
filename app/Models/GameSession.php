@@ -10,7 +10,7 @@ class GameSession extends Model {
     use HasFactory;
 
     protected $public = [
-        'id', 'current_round', 'session_state', 'current_playing',
+        'id', 'current_round', 'session_state', 'current_playing', 'board_state',
         'player_blue', 'player_red', 'player_green', 'player_yellow',
     ];
 
@@ -71,5 +71,33 @@ class GameSession extends Model {
         }
 
         return $remaining_empty_colors;
+    }
+
+    /**
+     * @return array<int, array<int, int>>
+     * */
+    static function generateBoard(int $player_count): array {
+        $board = [];
+
+        $grid_size = 0;
+        switch($player_count) {
+            case 2:
+                $grid_size = 14;
+                break;
+            case 4:
+                $grid_size = 21;
+                break;
+        }
+
+        for($y = 0; $y < $grid_size; $y++) {
+            $row = [];
+            for($x = 0; $x < $grid_size; $x++) {
+                $row[$x] = 0;
+            }
+
+            $board[$y] = $row;
+        }
+
+        return $board;
     }
 }
