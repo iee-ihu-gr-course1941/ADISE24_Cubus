@@ -36,6 +36,7 @@ export const Piece = ({code: pieceCode = 0, origin_position: position, rotation,
     const [shadowPosition, setShadowPosition] = useState<THREE.Vector3>();
     const onStart = useRef<() => void>();
     const onComplete = useRef<(moveType: MoveType) => void>();
+    const onDragAnimationEnd = useRef<() => void>();
     const [boardState, setBoardState] = useState<BoardState>()
 
     const canMovePiece = useMemo(() => {
@@ -89,16 +90,13 @@ export const Piece = ({code: pieceCode = 0, origin_position: position, rotation,
     }, [boardState?.gameState.state])
 
     const onLockIn = () => {
-        if((boardState?.move?.code !== pieceCode || !isPiecePositionValid()) && hasMoved){
-            onMoveReject();
-        }else if(isPositionValid && boardState?.move?.code === pieceCode && ref.current){
-            boardState?.endTurn();
-            boardState?.addBoardPiece(ref.current)
-        }else if(hasMoved){
-            onMoveReject();
+        if(ref.current){
+            gsap.to(ref.current.position, {
+                y: blockSize*0.5,
+                duration: animationDuration,
+                onComplete: onDragAnimationEnd.current
+            });
         }
-        setIsDragging(false);
-        removeDragAnimation();
     }
 
     useEffect(() => {
@@ -133,6 +131,22 @@ export const Piece = ({code: pieceCode = 0, origin_position: position, rotation,
         }
 
     }, [ref.current, preQuaternion, isPositionValid, prePosition])
+
+    useEffect(() => {
+
+        onDragAnimationEnd.current = () => {
+            if((boardState?.move?.code !== pieceCode || !isPiecePositionValid()) && hasMoved){
+                onMoveReject();
+            }else if(isPositionValid && boardState?.move?.code === pieceCode && ref.current){
+                boardState?.endTurn();
+                boardState?.addBoardPiece(ref.current)
+            }else if(hasMoved){
+                onMoveReject();
+            }
+            setIsDragging(false);
+        }
+
+    }, [boardState?.move, pieceCode, hasMoved, ref.current, isPositionValid])
 
     const getOriginalQuaternion = () => {
         const flipAxis = getFlipAxis();
@@ -486,12 +500,6 @@ export const Piece = ({code: pieceCode = 0, origin_position: position, rotation,
     const addDragAnimation = () => {
         if(ref.current){
             gsap.to(ref.current.position, {y: dragHeight * blockSize, duration: animationDuration * 2, ease: 'power1.inOut'});
-        }
-    }
-
-    const removeDragAnimation = () => {
-        if(ref.current){
-            gsap.to(ref.current.position, {y: blockSize*0.5, duration: animationDuration, ease: 'power1.inOut'});
         }
     }
 
