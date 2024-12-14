@@ -492,7 +492,14 @@ export const Piece = ({code: pieceCode = 0, origin_position: position, rotation,
             }else{
                 //* Get all the pieces positions that are on board;
                 const piecesPosition = pieces.map((p) => p.children.map(_ => new THREE.Vector3())).flat();
-                pieces.forEach((p, i) => p.children.forEach((b, j) => b && b.getWorldPosition(piecesPosition[i * piece.children.length + j] ?? new THREE.Vector3())));
+                let totalBlocks = 0;
+                for (let i=0;i<pieces.length;i++){
+                    const refPiece = pieces[i]
+                    for(let j=0;j<refPiece.children.length;j++){
+                        refPiece.children[j].getWorldPosition(piecesPosition[totalBlocks] ?? new THREE.Vector3())
+                        totalBlocks++;
+                    }
+                }
                 //* Traverse through all blocks to find if any pieces are on top of each other
                 for(const block of piece.children){
                     const blockPosition = new THREE.Vector3();
