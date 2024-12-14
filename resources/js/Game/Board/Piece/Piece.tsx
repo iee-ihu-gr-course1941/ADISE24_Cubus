@@ -89,12 +89,12 @@ export const Piece = ({code: pieceCode = 0, origin_position: position, rotation,
         }
     }, [boardState?.gameState.state])
 
-    const onLockIn = () => {
+    const onLockIn = (onComplete = true) => {
         if(ref.current){
             gsap.to(ref.current.position, {
                 y: blockSize*0.5,
                 duration: animationDuration,
-                onComplete: onDragAnimationEnd.current
+                onComplete: onComplete ? onDragAnimationEnd.current : undefined,
             });
         }
     }
@@ -135,11 +135,11 @@ export const Piece = ({code: pieceCode = 0, origin_position: position, rotation,
     useEffect(() => {
 
         onDragAnimationEnd.current = () => {
-            if((boardState?.move?.code !== pieceCode || !isPiecePositionValid()) && hasMoved){
+            if((!isPiecePositionValid() || boardState?.move?.code !== pieceCode) && hasMoved){
                 onMoveReject();
             }else if(isPositionValid && boardState?.move?.code === pieceCode && ref.current){
-                boardState?.endTurn();
                 boardState?.addBoardPiece(ref.current)
+                boardState?.endTurn();
             }else if(hasMoved){
                 onMoveReject();
             }
@@ -263,13 +263,23 @@ export const Piece = ({code: pieceCode = 0, origin_position: position, rotation,
 
     const onPositionChange = (moveType: MoveType, rejectChange = true) => {
         //* Local Movement
-        const isPositionValid = isPiecePositionValid();
+        const isPieceInteracting = isPieceInteractingWithOtherPieces();
+        const pieceOnBoard = isPieceOnBoard();
         if(moveType==='flip' || moveType==='rotate'){
             const rotation = getRotationFromQuaternion();
             shadowRef.current?.rotation.set(rotation.x, rotation.y, rotation.z);
         }
-        if(!isPositionValid && rejectChange){
-            onPositionChangeReject(moveType);
+        if((isPieceInteracting || !pieceOnBoard) && rejectChange){
+            if(!isPieceInteracting && !pieceOnBoard && moveType==='move'){
+                // //* Reject the move if the piece is not on the board
+                rejectPosition('lock', dragHeight);
+                if(pieceCode === boardState?.move?.code){
+                    boardState?.rejectMove();
+                    boardState?.lockTurn();
+                }
+            }else{
+                onPositionChangeReject(moveType);
+            }
         }else if(ref.current && isPositionValid){
             saveMove();
         }
@@ -319,14 +329,14 @@ export const Piece = ({code: pieceCode = 0, origin_position: position, rotation,
         }
     }
 
-    const rejectPosition = (type: 'lock' | 'change') => {
+    const rejectPosition = (type: 'lock' | 'change', y = 0) => {
         if(ref.current){
             const currentPosition = getPiecePosition();
             const _prePosition = (type==='lock' ? preMovePosition : prePosition) ?? new THREE.Vector3();
             const translation = new THREE.Vector3(_prePosition.x - currentPosition.x, 0, _prePosition.z - currentPosition.z);
             if(translation.length() === 0) return;
 
-            ref.current.applyMatrix4(new THREE.Matrix4().makeTranslation(translation.x, 0, translation.z));
+            ref.current.applyMatrix4(new THREE.Matrix4().makeTranslation(translation.x, -0.5, translation.z));
             ref.current.updateWorldMatrix(true, true);
 
             const newPosition = new THREE.Vector3();
@@ -374,7 +384,9 @@ export const Piece = ({code: pieceCode = 0, origin_position: position, rotation,
             boardState?.removeBoardPiece(ref.current);
         }
         boardState?.rejectMove();
-        boardState?.continueTurn();
+        if(boardState?.move?.code === pieceCode){
+            boardState?.continueTurn();
+        }
     }
 
     const onPositionChangeReject = (moveType: MoveType) => {
@@ -398,7 +410,7 @@ export const Piece = ({code: pieceCode = 0, origin_position: position, rotation,
 
     const onDragEnd = () => {
 
-        if(prePosition){
+        if(prePosition && hasMoved){
             snapPieceToGrid()
             onPositionChange('move');
         }
@@ -480,7 +492,7 @@ export const Piece = ({code: pieceCode = 0, origin_position: position, rotation,
             }else{
                 //* Get all the pieces positions that are on board;
                 const piecesPosition = pieces.map((p) => p.children.map(_ => new THREE.Vector3())).flat();
-                pieces.forEach((p, i) => p.children.forEach((b, j) => b.getWorldPosition(piecesPosition[i * piece.children.length + j])));
+                pieces.forEach((p, i) => p.children.forEach((b, j) => b && b.getWorldPosition(piecesPosition[i * piece.children.length + j] ?? new THREE.Vector3())));
                 //* Traverse through all blocks to find if any pieces are on top of each other
                 for(const block of piece.children){
                     const blockPosition = new THREE.Vector3();
@@ -527,7 +539,7 @@ export const Piece = ({code: pieceCode = 0, origin_position: position, rotation,
 
     return (
         <>
-            <DragControls axisLock="y" onDrag={onDrag} onDragEnd={onDragEnd} onDragStart={onDragStart} dragConfig={{enabled: canMovePiece}}>
+            <DragControls axisLock="y" onDrag={onDrag} onDragEnd={onDragEnd} onDragStart={onDragStart} dragConfig={{enabled: canMovePiece, filterTaps: true}}>
                 <group onDoubleClick={onFlip} onContextMenu={onRotate} ref={ref}>
                     <PieceModel isDragging={isDragging} pieceCode={pieceCode} block_positions={block_positions} blockSize={blockSize}/>
                 </group>

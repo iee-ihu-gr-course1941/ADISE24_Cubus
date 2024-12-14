@@ -45,10 +45,7 @@ export const useBoardState = create<BoardState>()((set, get, state) => ({
         set({gameState: {round: 1, player_turn: 0, state: 'OwnTurnPlaying', startTime: Date.now(), player_count: player_count}})
     },
     lockTurn: () => {
-        const state = get();
-        if(state.move){
-            set({gameState: {...state.gameState, state: 'OwnTurnLocked'}})
-        }
+        set({gameState: {...get().gameState, state: 'OwnTurnLocked'}})
     },
     beginTurn: () => {
         set(({gameState}) => (
