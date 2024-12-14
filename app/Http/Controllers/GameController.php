@@ -37,6 +37,7 @@ class GameController extends Controller {
         ]);
 
         $piece = $this->getPieceMatrix($data['code']);
+        if($data['flip']) $this->flipPiece($piece);
 
         if($request->expectsJson()) {
             return response($piece);
@@ -71,5 +72,15 @@ class GameController extends Controller {
         }
 
         return $piece_matrix;
+    }
+
+    private function flipPiece(array &$piece): void {
+        for($y = 0; $y < RELATIVE_MATRIX_SIZE; $y++) {
+            for($x = 0; $x < intdiv(RELATIVE_MATRIX_SIZE, 2); $x++) {
+                $temp = $piece[$y][$x];
+                $piece[$y][$x] = $piece[$y][RELATIVE_MATRIX_SIZE - $x - 1];
+                $piece[$y][RELATIVE_MATRIX_SIZE - $x - 1] = $temp;
+            }
+        }
     }
 }
