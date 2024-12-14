@@ -8,7 +8,7 @@ export const BoardControls = () => {
                 target={new THREE.Vector3(0, 0, 2.5)}
 
                 minPolarAngle={Math.PI * 0.1} maxPolarAngle={Math.PI * 0.35}
-                maxAzimuthAngle={Math.PI * 0.2} minAzimuthAngle={Math.PI * -0.2}
+                maxAzimuthAngle={Math.PI * 0.05} minAzimuthAngle={Math.PI * -0.05}
 
                 makeDefault enableDamping
             />
