@@ -544,7 +544,7 @@ export const Piece = ({code: pieceCode = 0, origin_position: position, rotation,
                     <PieceModel isDragging={isDragging} pieceCode={pieceCode} block_positions={block_positions} blockSize={blockSize}/>
                 </group>
             </DragControls>
-            <PieceShadow isDragging={isDragging} shadowPosition={shadowPosition} ref={shadowRef} block_positions={block_positions} blockSize={blockSize}/>
+            <PieceShadow isDragging={isDragging} pieceCode={pieceCode} shadowPosition={shadowPosition} ref={shadowRef} block_positions={block_positions} blockSize={blockSize}/>
         </>
     );
 }

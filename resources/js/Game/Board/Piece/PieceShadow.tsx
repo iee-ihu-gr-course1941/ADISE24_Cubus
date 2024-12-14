@@ -1,5 +1,5 @@
 import { useBoardState } from "@/Store/board_state";
-import { Vector2 } from "@/types/piece";
+import { PieceCode, Vector2 } from "@/types/piece";
 import { shaderMaterial } from "@react-three/drei";
 import React, { ForwardedRef, MutableRefObject, Ref, useEffect, useRef } from "react";
 import * as THREE from "three";
@@ -8,6 +8,7 @@ import fragmentShader from '../../../../shaders/piece_shadow/fragmentShader.glsl
 import { extend } from "@react-three/fiber";
 
 const successColor = new THREE.Color(0x86efac);
+const successColorLight = new THREE.Color(0xbbf7d0);
 const errorColor = new THREE.Color(0xfca5a5);
 const geometry = new THREE.BoxGeometry(0.5,0.01,0.5);
 
@@ -26,11 +27,13 @@ type Props = {
     block_positions: Vector2[];
     blockSize: number;
     shadowPosition?: THREE.Vector3;
+    pieceCode: PieceCode;
 }
-export const PieceShadow = React.forwardRef<THREE.Group, Props>(({isDragging, block_positions, blockSize, shadowPosition}: Props, ref) => {
+export const PieceShadow = React.forwardRef<THREE.Group, Props>(({isDragging, block_positions, blockSize, shadowPosition,pieceCode}: Props, ref) => {
     const boardObject = useBoardState(state => state.boardRef)
     const shadowMaterialRef = useRef<THREE.ShaderMaterial[]>([]);
     const shadowObject = (ref as unknown as  MutableRefObject<THREE.Group | undefined>).current;
+    const latestMove = useBoardState(state => state.move);
 
     useEffect(() => {
         //* Update position
@@ -62,7 +65,7 @@ export const PieceShadow = React.forwardRef<THREE.Group, Props>(({isDragging, bl
             for(let i=0;i<blocksInside.length;i++){
                 const {block, index} = blocksInside[i];
                 const material = shadowMaterialRef.current[index];
-                material.uniforms.uColor.value = successColor;
+                material.uniforms.uColor.value = latestMove?.code === pieceCode ? successColor : successColorLight;
                 block.visible = true;
             }
             for (let i=0;i<blocksOutside.length;i++){
@@ -73,7 +76,7 @@ export const PieceShadow = React.forwardRef<THREE.Group, Props>(({isDragging, bl
             }
 
         }
-    }, [ref, boardObject, shadowPosition])
+    }, [ref, boardObject, shadowPosition, latestMove])
     return (
         <group visible={isDragging} ref={ref as Ref<THREE.Group<THREE.Object3DEventMap>> | undefined}>
             {
