@@ -50,9 +50,9 @@ export const Piece = ({code: pieceCode = 0, origin_position: position, rotation,
             },
             dragHeight: {
                 label: 'Drag Height',
-                value: 1,
+                value: 1.5,
                 min: 0.0,
-                max: 2,
+                max: 3,
                 step: 0.25,
             },
             animationDuration: {
@@ -84,16 +84,22 @@ export const Piece = ({code: pieceCode = 0, origin_position: position, rotation,
             setHasMoved(false);
             onMoveStart();
         }else if (boardState?.gameState.state === 'OwnTurnLocked'){
-            if((boardState?.move?.code !== pieceCode || !isPiecePositionValid()) && hasMoved){
-                    onMoveReject();
-            }else if(isPositionValid && boardState?.move?.code === pieceCode && ref.current){
-                boardState?.endTurn();
-                boardState?.addBoardPiece(ref.current)
-            }else if(hasMoved){
-                onMoveReject();
-            }
+            onLockIn()
         }
     }, [boardState?.gameState.state])
+
+    const onLockIn = () => {
+        if((boardState?.move?.code !== pieceCode || !isPiecePositionValid()) && hasMoved){
+            onMoveReject();
+        }else if(isPositionValid && boardState?.move?.code === pieceCode && ref.current){
+            boardState?.endTurn();
+            boardState?.addBoardPiece(ref.current)
+        }else if(hasMoved){
+            onMoveReject();
+        }
+        setIsDragging(false);
+        removeDragAnimation();
+    }
 
     useEffect(() => {
 
@@ -107,6 +113,7 @@ export const Piece = ({code: pieceCode = 0, origin_position: position, rotation,
 
         onStart.current = () => {
             if(ref.current){
+                setIsDragging(false);
                 if(!preQuaternion){
                     const quaternion = new THREE.Quaternion();
                     ref.current.getWorldQuaternion(quaternion)
@@ -118,11 +125,10 @@ export const Piece = ({code: pieceCode = 0, origin_position: position, rotation,
 
         onComplete.current = (moveType: MoveType) => {
             if(ref.current){
+                setIsDragging(true);
                 setLockRotation(false)
                 setHasMoved(true);
-                // if(!prePosition){
                 onPositionChange(moveType, false);
-                // }
             }
         }
 
@@ -213,7 +219,8 @@ export const Piece = ({code: pieceCode = 0, origin_position: position, rotation,
             position.y = Math.round(position.y * 100) / 100;
 
             const isFlipped = isPieceFlipped('z') || isPieceFlipped('x');
-            const rotationIndex = rotationToIndex(getRotationFromQuaternion().y);
+            const rotation = getRotationFromQuaternion();
+            const rotationIndex = rotationToIndex(rotation.y);
 
             const payload: MovePayload = {
                 code: pieceCode,
@@ -243,6 +250,10 @@ export const Piece = ({code: pieceCode = 0, origin_position: position, rotation,
     const onPositionChange = (moveType: MoveType, rejectChange = true) => {
         //* Local Movement
         const isPositionValid = isPiecePositionValid();
+        if(moveType==='flip' || moveType==='rotate'){
+            const rotation = getRotationFromQuaternion();
+            shadowRef.current?.rotation.set(rotation.x, rotation.y, rotation.z);
+        }
         if(!isPositionValid && rejectChange){
             onPositionChangeReject(moveType);
         }else if(ref.current && isPositionValid){
@@ -303,6 +314,10 @@ export const Piece = ({code: pieceCode = 0, origin_position: position, rotation,
 
             ref.current.applyMatrix4(new THREE.Matrix4().makeTranslation(translation.x, 0, translation.z));
             ref.current.updateWorldMatrix(true, true);
+
+            const newPosition = new THREE.Vector3();
+            ref.current.getWorldPosition(newPosition);
+            setShadowPosition(newPosition);
         }
     }
 
@@ -368,12 +383,11 @@ export const Piece = ({code: pieceCode = 0, origin_position: position, rotation,
     }
 
     const onDragEnd = () => {
-        setIsDragging(false);
+
         if(prePosition){
             snapPieceToGrid()
             onPositionChange('move');
         }
-        removeDragAnimation();
     }
 
     const getFlipAxis = () => {
@@ -507,7 +521,7 @@ export const Piece = ({code: pieceCode = 0, origin_position: position, rotation,
         <>
             <DragControls axisLock="y" onDrag={onDrag} onDragEnd={onDragEnd} onDragStart={onDragStart} dragConfig={{enabled: canMovePiece}}>
                 <group onDoubleClick={onFlip} onContextMenu={onRotate} ref={ref}>
-                    <PieceModel block_positions={block_positions} blockSize={blockSize}/>
+                    <PieceModel isDragging={isDragging} pieceCode={pieceCode} block_positions={block_positions} blockSize={blockSize}/>
                 </group>
             </DragControls>
             <PieceShadow isDragging={isDragging} shadowPosition={shadowPosition} ref={shadowRef} block_positions={block_positions} blockSize={blockSize}/>
