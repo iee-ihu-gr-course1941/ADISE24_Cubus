@@ -11,4 +11,8 @@ enum PlayerColor: string {
     static function values(): array {
         return array_column(PlayerColor::cases(), 'value');
     }
+
+    static function colorFromInt(int $color) {
+        return PlayerColor::values()[$color];
+    }
 }

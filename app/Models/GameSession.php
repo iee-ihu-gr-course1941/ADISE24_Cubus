@@ -92,12 +92,71 @@ class GameSession extends Model {
         for($y = 0; $y < $grid_size; $y++) {
             $row = [];
             for($x = 0; $x < $grid_size; $x++) {
-                $row[$x] = 0;
+                $row[$x] = -1;
             }
 
             $board[$y] = $row;
         }
 
         return $board;
+    }
+
+
+    function visualizeBoard(): string {
+        $board_array = json_decode($this['board_state']);
+        $board_string = '';
+
+        $grid_size = count($board_array);
+
+        for($y = 0; $y < $grid_size; $y++) {
+            for($x = 0; $x < $grid_size; $x++) {
+                $board_string .= $this->cellStateToAscii($board_array[$y][$x]);
+                if($x !== $grid_size - 1) $board_string .= ' ';
+            }
+
+            $board_string .= "\n";
+        }
+
+        return $board_string;
+    }
+
+    function cellStateToAscii(int $cell): string {
+        if($cell === -1) {
+            return '_';
+        }
+
+        return PlayerColor::colorFromInt($cell);
+    }
+
+    function visualizeGameHeader(): string {
+        $header_string = '';
+        $data_string   = '';
+
+        $header_string .= '| ';
+        $data_string .= '| ';
+
+        $this->addtoAsciiHeader('Currently Playing', $this['curent_playing'] ?? 'no one', $header_string, $data_string);
+        $this->addtoAsciiHeader('Round', (string)$this['current_round'], $header_string, $data_string);
+        $this->addtoAsciiHeader('Status', $this['session_state'], $header_string, $data_string);
+
+        $border = str_repeat('-', strlen($header_string) - 2);
+
+        return
+            $border . "\n" .
+            $header_string . "\n" .
+            $data_string . "\n" .
+            $border;
+    }
+
+    function addtoAsciiHeader(string $key, string $value, string &$header_string, string &$data_string): void {
+        $key_length  = strlen($key);
+        $data_length = strlen($value);
+        $max_length  = max($key_length, $data_length);
+
+        $remaining_key_space = $max_length - $key_length;
+        $remaining_data_space = $max_length - $data_length;
+
+        $header_string .= $key . str_repeat(' ', $remaining_key_space) . ' | ';
+        $data_string   .= $value . str_repeat(' ' , $remaining_data_space) . ' | ';
     }
 }
