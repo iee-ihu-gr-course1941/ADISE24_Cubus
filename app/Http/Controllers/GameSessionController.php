@@ -9,6 +9,7 @@ use App\Events\ConnectEvent;
 use App\Models\GameSession;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
 
 class GameSessionController extends Controller {
@@ -75,7 +76,7 @@ class GameSessionController extends Controller {
         $valid_colors = $game_session->getValidPlayerColors();
         $host_color = $valid_colors[rand(0,count($valid_colors) - 1)];
         $game_session['player_'.$host_color.'_id'] = $user['id'];
-        $game_session['player_count'] = $data['player_count'];
+        $game_session['player_count'] = (string)$data['player_count'];
         $game_session->save();
 
         if($request->expectsJson()) {
@@ -180,5 +181,35 @@ class GameSessionController extends Controller {
 
         broadcast(new ConnectEvent($game_session));
         return $game_session;
+    }
+
+    public function disconnect(): \Illuminate\Http\RedirectResponse | \Illuminate\Http\Response {
+        /** @var \App\Models\User */
+        $user = AuthService::getUser();
+        $game_session = $user->getCurrentSession();
+
+        if(is_null($game_session)) return redirect()->route('lobby.index')->with('flash', 'You aren\'t connected in any game.');
+
+
+        $player_color = $user->getCurrentSessionColor();
+        if(is_null($player_color)) return redirect()->route('lobby.index')->with('flash', 'You aren\'t connected in any game');
+
+        $game_session['player_' . $player_color->value . '_id'] = null;
+        $game_session->save();
+
+
+        $empty = true;
+        foreach(PlayerColor::values() as $color) {
+            if(!is_null($game_session['player_' . $color . '_id'])) $empty = false;
+        }
+
+        if($empty) {
+            $game_session->delete();
+        } else {
+            broadcast(new ConnectEvent($game_session));
+        }
+
+
+        return redirect()->route('lobby.index')->with('flash', 'Disconnect successfully');
     }
 }

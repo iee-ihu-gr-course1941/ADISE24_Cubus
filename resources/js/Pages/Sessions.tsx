@@ -90,6 +90,8 @@ function CurrentSessionVisualizer({ user, session }: { user?: User, session: Gam
                 { session.player_green && <li className='text-green-400'>{ session.player_green!.name }</li> }
                 { session.player_yellow && <li className='text-yellow-400'>{ session.player_yellow!.name }</li> }
             </ul>
+
+            <a href={route('lobby.disconnect')}>Disconnect</a>
         </div>
     );
 }

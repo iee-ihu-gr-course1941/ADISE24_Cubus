@@ -42,4 +42,15 @@ class User extends Authenticatable {
 
         return $currentUserSessions[0];
     }
+
+    function getCurrentSessionColor(): ?PlayerColor {
+        $current_session = $this->getCurrentSession();
+        if(is_null($current_session)) return null;
+
+        foreach(PlayerColor::values() as $color) {
+            if($current_session['player_'.$color.'_id'] == $this['id']) return PlayerColor::from($color);
+        }
+
+        return null;
+    }
 }

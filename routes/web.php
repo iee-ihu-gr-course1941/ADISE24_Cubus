@@ -30,6 +30,7 @@ Route::resource('lobby',   GameSessionController::class)->only(['index', 'create
 Route::get('/lobby/current', [GameSessionController::class, 'show']);
 Route::get('/lobby/match',  [GameSessionController::class, 'search'])->name('lobby.match');
 Route::get('/lobby/{game_session}/join', [GameSessionController::class, 'join'])->name('lobby.join');
+Route::get('/lobby/disconnect', [GameSessionController::class, 'disconnect'])->name('lobby.disconnect');
 
 Route::get('/game', function () {
     return inertia('Game');
