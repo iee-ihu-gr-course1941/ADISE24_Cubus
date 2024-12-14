@@ -3,6 +3,7 @@ import * as THREE from "three";
 import { useBoardState } from "@/Store/board_state";
 import { memo } from "react";
 import { Grid } from "@react-three/drei";
+import { OpponentsHand } from "./OpponentsPiece/OpponentsHand";
 
 export const Board = memo(() => {
     const blockSize = useGameDimensions(state => state.blockSize);
@@ -16,6 +17,7 @@ export const Board = memo(() => {
                 <boxGeometry args={[1, 0.1, 1]} />
                 <meshBasicMaterial color={0xffffff} />
             </mesh>
+            <OpponentsHand/>
         </>
     );
 });
