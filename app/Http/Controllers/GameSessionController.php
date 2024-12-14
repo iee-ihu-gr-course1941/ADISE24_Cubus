@@ -77,6 +77,7 @@ class GameSessionController extends Controller {
         $host_color = $valid_colors[rand(0,count($valid_colors) - 1)];
         $game_session['player_'.$host_color.'_id'] = $user['id'];
         $game_session['player_count'] = (string)$data['player_count'];
+        $game_session['board_state'] = json_encode(GameSession::generateBoard($data['player_count']));
         $game_session->save();
 
         if($request->expectsJson()) {
