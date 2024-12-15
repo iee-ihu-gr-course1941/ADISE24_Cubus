@@ -10,7 +10,7 @@ type GameDimensionProps = {
 export const useGameDimensions = create<GameDimensionProps>()((set, get, _) => ({
     blockSize: 0.5,
     getGridSize: (playerCount: number) => {
-        if(playerCount === 0) return 0;
+        if(playerCount === 0) return 10;
         const blockSize = get().blockSize;
         return playerCount > 2 ? (20*blockSize) : (14*blockSize);
     }
