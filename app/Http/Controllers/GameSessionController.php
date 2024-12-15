@@ -9,7 +9,6 @@ use App\Events\ConnectEvent;
 use App\Models\GameSession;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
 
 class GameSessionController extends Controller {
