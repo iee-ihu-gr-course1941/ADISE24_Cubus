@@ -1,3 +1,4 @@
+import { PIECE_GEOMETRY } from "@/Constants/geometries";
 import { BOARD_PLACED_MATERIALS, BOARD_SELECTED_MATERIALS } from "@/Constants/materials";
 import { useBoardState } from "@/Store/board_state";
 import { PieceCode, Vector2 } from "@/types/piece";
@@ -11,7 +12,6 @@ type Props = {
     isDragging: boolean;
 }
 
-const geometry = new THREE.BoxGeometry(0.5,0.5,0.5);
 export const PieceModel = ({blockSize,block_positions, pieceCode,isDragging}: Props) => {
     const blockRef = useRef<THREE.Mesh[]>([]);
     const playerIdentifier = useBoardState(state => state.gameState.player_identifier);
@@ -46,7 +46,7 @@ export const PieceModel = ({blockSize,block_positions, pieceCode,isDragging}: Pr
             block_positions.map((position, index) => {
                 return (
                     <mesh ref={ref => addRef(ref, index)} key={index} position={[position.x * blockSize, 0, position.y * blockSize]}
-                    geometry={geometry} material={BOARD_PLACED_MATERIALS[playerIdentifier]} />
+                    geometry={PIECE_GEOMETRY['block']} material={BOARD_PLACED_MATERIALS[playerIdentifier]} />
                 )
             })
             }

@@ -1,3 +1,4 @@
+import { PIECE_GEOMETRY } from "@/Constants/geometries";
 import { BOARD_PLACED_MATERIALS } from "@/Constants/materials";
 import { useBoardState } from "@/Store/board_state";
 import { useGameDimensions } from "@/Store/game_dimensions";
@@ -7,8 +8,6 @@ import { memo, useEffect, useRef, useState } from "react";
 import * as THREE from "three";
 
 type Props = OpponentMovePayload
-
-const geometry = new THREE.BoxGeometry(0.5,0.5,0.5);
 
 export const OpponentPiece = memo(
     ({block_positions,destination,opponent}: Props) => {
@@ -74,7 +73,7 @@ export const OpponentPiece = memo(
                             <mesh
                                 key={index}
                                 position={[position.x * blockSize, 0, position.y * blockSize]}
-                                geometry={geometry} material={BOARD_PLACED_MATERIALS[opponent]}
+                                geometry={PIECE_GEOMETRY['block']} material={BOARD_PLACED_MATERIALS[opponent]}
                             />
                         )
                     })
