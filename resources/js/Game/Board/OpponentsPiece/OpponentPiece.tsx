@@ -1,13 +1,13 @@
+import { BOARD_PLACED_MATERIALS } from "@/Constants/materials";
 import { useBoardState } from "@/Store/board_state";
 import { useGameDimensions } from "@/Store/game_dimensions";
-import { OpponentMovePayload } from "@/types/piece"
+import { OpponentMovePayload, PlayerIdentifier } from "@/types/piece"
 import gsap from "gsap";
 import { memo, useEffect, useRef, useState } from "react";
 import * as THREE from "three";
 
 type Props = OpponentMovePayload
 
-const material = new THREE.MeshStandardMaterial({ color: 0x00ff00 });
 const geometry = new THREE.BoxGeometry(0.5,0.5,0.5);
 
 export const OpponentPiece = memo(
@@ -17,7 +17,7 @@ export const OpponentPiece = memo(
 
     const blockSize = useGameDimensions(state => state.blockSize);
     const addBoardPiece = useBoardState(state => state.addBoardPiece);
-    const beginOwnTurn = useBoardState(state => state.beginTurn);
+    const changeTurn = useBoardState(state => state.changeTurn);
     const [hasPlaced, setHasPlaced] = useState(false);
 
     const ref = useRef<THREE.Group>(null);
@@ -39,7 +39,7 @@ export const OpponentPiece = memo(
         onCompleteEnd.current = () => {
             if(ref.current){
                 addBoardPiece(ref.current);
-                beginOwnTurn();
+                changeTurn();
             }
         }
 
@@ -74,7 +74,7 @@ export const OpponentPiece = memo(
                             <mesh
                                 key={index}
                                 position={[position.x * blockSize, 0, position.y * blockSize]}
-                                geometry={geometry} material={material}
+                                geometry={geometry} material={BOARD_PLACED_MATERIALS[opponent]}
                             />
                         )
                     })

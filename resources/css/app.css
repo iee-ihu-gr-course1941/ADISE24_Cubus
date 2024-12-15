@@ -46,6 +46,13 @@ canvas{
     transition: opacity 0.1s ease-in-out;
     pointer-events: auto;
 }
+.start-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    justify-content: center;
+}
+
 .btn-group button:hover{
     opacity: 0.9;
 }
@@ -62,4 +69,8 @@ canvas{
     background-color: white;
     border-radius: 8px;
     opacity: 0.5;
+}
+
+.starting-text{
+    font-size: 36px;
 }

@@ -4,6 +4,7 @@ import { Board } from "./Board";
 import Hand from "./Hand";
 import { useEffect } from "react";
 import { useControls } from "leva";
+import { useBoardState } from "@/Store/board_state";
 
 const GameMap = () => {
 
@@ -33,11 +34,13 @@ const GameMap = () => {
 
     }, [y,z])
 
+    const playerIdentifier = useBoardState(state => state.gameState.player_identifier);
+
     return (
         <>
             <Lights/>
             <Board/>
-            <Hand/>
+            {playerIdentifier && <Hand/>}
         </>
     )
 

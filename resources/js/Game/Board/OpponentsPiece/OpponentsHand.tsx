@@ -10,23 +10,29 @@ import { PiecePositions } from "@/Constants/Piece";
 export const OpponentsHand = () => {
     const [occupations, setOccupations] = useState<OpponentMovePayload[]>([]);
     const state = useBoardState(state => state.gameState.state);
+    const playerTurn = useBoardState(state => state.gameState.player_turn);
+    const playerCount = useBoardState(state => state.gameState.player_count);
     const blockSize = useGameDimensions(state => state.blockSize);
+    const getGridSize = useGameDimensions(state => state.getGridSize);
 
     useEffect(() => {
 
         if(state === 'OpponentTurn'){
             //* Generate a random opponent move for demo
-            const randomX = Math.round((((Math.random() - 0.5) * 10)) / blockSize) * blockSize;
-            const randomY = Math.round((((Math.random() - 0.5) * 10)) / blockSize) * blockSize;
+            const gridSize = getGridSize(playerCount);
+            const randomX = Math.round((((Math.random() - 0.5) * gridSize)) / blockSize) * blockSize;
+            const randomY = Math.round((((Math.random() - 0.5) * gridSize)) / blockSize) * blockSize;
             const opponentMovePayload: OpponentMovePayload = {
                 block_positions: PiecePositions[occupations.length as PieceCode],
                 destination: {x: randomX, y: randomY},
-                opponent: 'green',
+                opponent: playerTurn,
             }
-            setOccupations([...occupations, opponentMovePayload])
+            setTimeout(() => {
+                setOccupations([...occupations, opponentMovePayload])
+            }, Math.random() * 500 + 250)
         }
 
-    }, [state])
+    }, [state, playerTurn])
 
     return (
         <>
