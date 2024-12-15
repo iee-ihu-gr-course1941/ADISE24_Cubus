@@ -77,6 +77,7 @@ class GameSessionController extends Controller {
         $game_session['player_'.$host_color.'_id'] = $user['id'];
         $game_session['player_count'] = (string)$data['player_count'];
         $game_session['board_state'] = json_encode(GameSession::generateBoard($data['player_count']));
+        $game_session['current_playing'] = $host_color;
         $game_session->save();
 
         if($request->expectsJson()) {
@@ -181,7 +182,7 @@ class GameSessionController extends Controller {
         $game_session->save();
 
         broadcast(new ConnectEvent($game_session));
-        return $game_session;
+        return response($game_session)->withHeaders(['Content-Type' => 'application/json']);
     }
 
     public function disconnect(): \Illuminate\Http\RedirectResponse | \Illuminate\Http\Response {

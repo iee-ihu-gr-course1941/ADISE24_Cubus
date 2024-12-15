@@ -42,3 +42,7 @@ Route::middleware(\App\Http\Middleware\ManageInGameVerification::class)->group(f
 Route::get('/card-demo', function () {
     return inertia('CardDemo');
 })->name('card-demo');
+
+Route::get('/test/csrf', function (Request $request) {
+    return $request->cookies->get('XSRF-TOKEN');
+});
