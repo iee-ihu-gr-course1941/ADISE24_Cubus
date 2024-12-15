@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\GameSessionState;
 use App\Models\GameSession;
 use Illuminate\Http\Request;
 use function GuzzleHttp\json_encode;
@@ -36,6 +37,30 @@ class GameController extends Controller {
         $current_session = $player->getCurrentSession();
         $board = json_decode($current_session['board_state']);
 
+        if($current_session['session_state'] !== GameSessionState::Playing->value) {
+            if($request->expectsJson()) {
+                return response([
+                    'valid' => false,
+                    'board' => $board,
+                    'message' => 'The game hasn\'t started yet']
+                )->setStatusCode(400);
+            } else {
+                return inertia('Game')->with('flash', 'The game hasn\'t started yet');
+            }
+        }
+
+        if($current_session['current_playing'] !== $player_color) {
+            if($request->expectsJson()) {
+                return response([
+                    'valid' => false,
+                    'board' => $board,
+                    'message' => 'It isn\'t your turn.']
+                )->setStatusCode(400);
+            } else {
+                return inertia('Game')->with('flash', 'It isn\'t your turn.');
+            }
+        }
+
         $board_size = count($board);
         $data = $request->validate([
             'code' => 'required|int|between:0,20',
@@ -44,6 +69,8 @@ class GameController extends Controller {
             'rotation' => 'required|int|between:0,3',
             'flip' => 'required|boolean',
         ]);
+
+        // TODO: Validate that the piece is available
 
         $piece = $this->getPieceMatrix((string)$data['code']);
         if($data['flip']) $this->flipPiece($piece);
@@ -55,10 +82,16 @@ class GameController extends Controller {
         $origin_offset['y'] = $data['origin_y'] - $origin_offset['y'];
         $origin_offset['x'] = $data['origin_x'] - $origin_offset['x'];
 
-        $is_valid = $this->is_valid($board, $piece, $origin_offset, $current_session['current_round'], $player_color[0]);
+        $is_valid = $this->is_valid(
+            $board, $piece,
+            $origin_offset, $current_session['current_round'],
+            $player_color[0], $current_session['player_count']
+        );
         if($is_valid) {
             $this->update_board($board, $piece, $origin_offset, $player_color[0]);
             $current_session['board_state'] = json_encode($board);
+            $current_session['current_round'] = $current_session['current_round'] + 1;
+            $current_session['current_playing'] = $current_session->getNextPlayerColor();
             $current_session->save();
         }
 
@@ -147,7 +180,7 @@ class GameController extends Controller {
         return [ 'y' => $y_offset, 'x' => $x_offset];
     }
 
-    private function is_valid(array $board, array $piece, array $piece_origin, int $move_count, string $player_color): bool {
+    private function is_valid(array $board, array $piece, array $piece_origin, int $move_count, string $player_color, int $player_count): bool {
         // TODO: Please clean this up soon... the code below is sad
         $is_valid = true;
         $is_touching_adjacent = false;
@@ -288,7 +321,7 @@ class GameController extends Controller {
 
         error_log('Is touching piece: ' . $is_touching_adjacent . "\n Is touching corner: " . $is_touching_board_corner);
 
-        return $is_valid && ($move_count === 0 && $is_touching_board_corner || $move_count !== 0 && $is_touching_adjacent);
+        return $is_valid && ($move_count < $player_count && $is_touching_board_corner || $move_count >= $player_count && $is_touching_adjacent);
     }
 
     private function update_board(array &$board, array $piece, array $piece_origin, string $player_char) {

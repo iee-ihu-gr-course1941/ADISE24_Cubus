@@ -75,6 +75,14 @@ class GameSession extends Model {
         return $remaining_empty_colors;
     }
 
+    function getNextPlayerColor(): string {
+        $colors = $this->getValidPlayerColors();
+        $current_color_index = (int)array_search($this['current_playing'], $colors);
+
+        $next_color_index = ($current_color_index + 1) % count($colors);
+        return $colors[$next_color_index];
+    }
+
     /**
      * @return array<int, array<int, int>>
      * */
@@ -137,7 +145,7 @@ class GameSession extends Model {
         $header_string .= '| ';
         $data_string .= '| ';
 
-        $this->addtoAsciiHeader('Currently Playing', $this['curent_playing'] ?? 'no one', $header_string, $data_string);
+        $this->addtoAsciiHeader('Currently Playing', $this['current_playing'] ?? 'no one', $header_string, $data_string);
         $this->addtoAsciiHeader('Round', (string)$this['current_round'], $header_string, $data_string);
         $this->addtoAsciiHeader('Status', $this['session_state'], $header_string, $data_string);
 
