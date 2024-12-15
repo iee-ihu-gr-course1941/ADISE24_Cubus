@@ -31,7 +31,7 @@ export type GameState = {
     player_turn: PlayerIdentifier;
     player_identifier: PlayerIdentifier | null;
     player_count: number;
-    state: 'Ready' | 'Finished' | 'OwnTurnPlaying' | 'OwnTurnLocked' | 'OpponentTurn';
+    state: 'Ready' | 'Starting' | 'Finished' | 'OwnTurnPlaying' | 'OwnTurnLocked' | 'OpponentTurn';
 }
 
 export type OpponentMovePayload = {

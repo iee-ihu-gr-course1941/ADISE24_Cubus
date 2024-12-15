@@ -2,7 +2,7 @@ import { useInterval } from "@/Hooks/useInterval";
 import { useBoardState } from "@/Store/board_state";
 import { useTimerStore } from "@/Store/timer";
 import { PlayerIdentifier } from "@/types/piece";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useState } from "react";
 
 
 export const Interface = () => {
@@ -13,20 +13,14 @@ export const Interface = () => {
     const move = useBoardState(state => state.move);
     const boardPieces = useBoardState(state => state.boardPieces);
     const [timer, setTimer] = useState(0);
-    const {time,start} = useTimerStore();
-    const [isStarting, setIsStarting] = useState(false);
+    const {time} = useTimerStore();
 
     useInterval(() => {
         setTimer(Math.round(((Date.now() - (startTime ?? 0))/1000)*10)/10);
     }, 100)
 
     const onStartGame = (playerCount: number, playerIdentifier: PlayerIdentifier, playerTurn: PlayerIdentifier) => {
-        setIsStarting(true);
-        start(1000);
-        setTimeout(() => {
-            setIsStarting(false);
-            startGame(playerCount, playerIdentifier, playerTurn);
-        }, 3250)
+        startGame(playerCount, playerIdentifier, playerTurn);
     }
     return (
         <div className='interface'>
@@ -43,8 +37,8 @@ export const Interface = () => {
                 </>
                 }
             </div>
-            {isStarting && <p className="starting-text">Starting in {3 - time}...</p>}
-            {!isStarting && <div className="btn-group">
+            {state === 'Starting' && <p className="starting-text">Starting in {Math.round(3 - (time/10))}...</p>}
+            {state !== 'Starting' && <div className="btn-group">
                 {
                     state === 'Ready' &&
                     <>

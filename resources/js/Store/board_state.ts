@@ -3,6 +3,7 @@ import {subscribeWithSelector} from 'zustand/middleware'
 import * as THREE from "three";
 import { GameState, MovePayload, PlayerIdentifier } from "@/types/piece";
 import { useTimerStore } from "./timer";
+import { CAMERA_ANIMATION_DURATION } from "@/Constants/camera";
 
 type State = {
     boardRef: THREE.Mesh | null;
@@ -42,18 +43,25 @@ export const useBoardState = create<BoardState>()((set, get, state) => ({
         player_count: 0,
         player_identifier: null,
     },
+
     canPlay: () => {
         return get().gameState.state === 'OwnTurnPlaying'
     },
     startGame: (player_count, player_identifier, player_turn) => {
-        set({gameState: {
-            round: 1,
-            player_identifier: player_identifier,
-            player_turn: player_turn,
-            state: player_identifier === player_turn ? 'OwnTurnPlaying' : 'OpponentTurn',
-            startTime: Date.now(),
-            player_count: player_count,
-        }})
+        const timer = useTimerStore.getState();
+        timer.start(100);
+        set({gameState: {...get().gameState, state: 'Starting'}})
+        setTimeout(() => {
+            timer.stop();
+            set({gameState: {
+                round: 1,
+                player_identifier: player_identifier,
+                player_turn: player_turn,
+                state: player_identifier === player_turn ? 'OwnTurnPlaying' : 'OpponentTurn',
+                startTime: Date.now(),
+                player_count: player_count,
+            }})
+        }, CAMERA_ANIMATION_DURATION + 250)
     },
     lockTurn: () => {
         set({gameState: {...get().gameState, state: 'OwnTurnLocked'}})
