@@ -12,7 +12,10 @@ enum PlayerColor: string {
         return array_column(PlayerColor::cases(), 'value');
     }
 
-    static function colorFromInt(int $color) {
-        return PlayerColor::values()[$color];
+    static function colorFromChar(string $char) {
+        return array_filter(
+            PlayerColor::values(),
+            fn($color) => str_starts_with($color, $char)
+        );
     }
 }

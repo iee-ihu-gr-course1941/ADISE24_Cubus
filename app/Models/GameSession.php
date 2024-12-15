@@ -9,6 +9,8 @@ use Illuminate\Database\Eloquent\Model;
 class GameSession extends Model {
     use HasFactory;
 
+    const EMPTY_BOARD_CELL = '';
+
     protected $public = [
         'id', 'current_round', 'session_state', 'current_playing', 'board_state',
         'player_blue', 'player_red', 'player_green', 'player_yellow',
@@ -85,14 +87,14 @@ class GameSession extends Model {
                 $grid_size = 14;
                 break;
             case 4:
-                $grid_size = 21;
+                $grid_size = 20;
                 break;
         }
 
         for($y = 0; $y < $grid_size; $y++) {
             $row = [];
             for($x = 0; $x < $grid_size; $x++) {
-                $row[$x] = -1;
+                $row[$x] = GameSession::EMPTY_BOARD_CELL;
             }
 
             $board[$y] = $row;
@@ -120,12 +122,12 @@ class GameSession extends Model {
         return $board_string;
     }
 
-    function cellStateToAscii(int $cell): string {
-        if($cell === -1) {
+    function cellStateToAscii(string $cell): string {
+        if($cell === GameSession::EMPTY_BOARD_CELL) {
             return '_';
         }
 
-        return PlayerColor::colorFromInt($cell);
+        return $cell;
     }
 
     function visualizeGameHeader(): string {
