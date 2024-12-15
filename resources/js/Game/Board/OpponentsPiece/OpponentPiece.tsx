@@ -13,7 +13,7 @@ const geometry = new THREE.BoxGeometry(0.5,0.5,0.5);
 export const OpponentPiece = memo(
     ({block_positions,destination,opponent}: Props) => {
 
-    const INITIAL_POSITION = new THREE.Vector3(0, 2, -5);
+    const ORIGIN_POSITION = new THREE.Vector3(0, 2, -5);
 
     const blockSize = useGameDimensions(state => state.blockSize);
     const addBoardPiece = useBoardState(state => state.addBoardPiece);
@@ -58,7 +58,7 @@ export const OpponentPiece = memo(
             gsap.to(ref.current.position, {
                 z: destinationPosition.z,
                 x: destinationPosition.x,
-                duration: calculateDuration(INITIAL_POSITION),
+                duration: calculateDuration(ORIGIN_POSITION),
                 onComplete: onComplete.current,
             });
         }
@@ -67,7 +67,7 @@ export const OpponentPiece = memo(
 
     return (
         <>
-            <group ref={ref} position={INITIAL_POSITION}>
+            <group ref={ref} position={ORIGIN_POSITION}>
                 {
                     block_positions.map((position, index) => {
                         return (

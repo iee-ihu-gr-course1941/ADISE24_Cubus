@@ -19,7 +19,7 @@ export const OpponentsHand = () => {
             const randomX = Math.round((((Math.random() - 0.5) * 10)) / blockSize) * blockSize;
             const randomY = Math.round((((Math.random() - 0.5) * 10)) / blockSize) * blockSize;
             const opponentMovePayload: OpponentMovePayload = {
-                block_positions: PiecePositions[Math.floor(Math.random() * 20) as PieceCode],
+                block_positions: PiecePositions[occupations.length as PieceCode],
                 destination: {x: randomX, y: randomY},
                 opponent: 'green',
             }

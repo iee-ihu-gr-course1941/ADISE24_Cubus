@@ -34,7 +34,7 @@ export type GameState = {
 }
 
 export type OpponentMovePayload = {
-    block_positions: Vector2[];
+    block_positions: Vector2[]
     destination: Vector2;
     opponent: PlayerIdentifier;
 }
