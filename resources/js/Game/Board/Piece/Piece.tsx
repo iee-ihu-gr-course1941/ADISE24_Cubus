@@ -10,6 +10,7 @@ import {useControls} from 'leva';
 import { BoardState, useBoardState } from "@/Store/board_state";
 import { PieceModel } from "./PieceModel";
 import { PieceShadow } from "./PieceShadow";
+import { useInterfaceState } from "@/Store/interface_state";
 
 type Props = MovePayload & {
 
@@ -38,6 +39,7 @@ export const Piece = ({code: pieceCode = 0, origin_position: position, rotation,
     const onComplete = useRef<(moveType: MoveType) => void>();
     const onDragAnimationEnd = useRef<() => void>();
     const [boardState, setBoardState] = useState<BoardState>()
+    const {action, setAction} = useInterfaceState()
 
     const canMovePiece = useMemo(() => {
             return !lockRotation && boardState?.canPlay() && !boardState?.boardPieces.some(p => p.uuid === ref.current?.uuid);
@@ -67,6 +69,25 @@ export const Piece = ({code: pieceCode = 0, origin_position: position, rotation,
     )
 
     const {block_positions,center_offset,origin_center_distance} = PieceData[pieceCode];
+
+
+    useEffect(() => {
+
+        //* Listen to Action events
+
+        if(boardState?.move?.code !== pieceCode){
+            return ;
+        }
+
+        if(action === 'rotate_pos'){
+            onRotate('pos');
+        }else if(action === 'rotate_neg'){
+            onRotate('neg');
+        }else if(action === 'flip'){
+            onFlip();
+        }
+
+    }, [action])
 
     useEffect(() => {
 
@@ -128,9 +149,14 @@ export const Piece = ({code: pieceCode = 0, origin_position: position, rotation,
                 setHasMoved(true);
                 onPositionChange(moveType, false);
             }
+
+            //* Reset action
+            if(action!=='none'){
+                setAction('none');
+            }
         }
 
-    }, [ref.current, preQuaternion, isPositionValid, prePosition])
+    }, [ref.current, preQuaternion, isPositionValid, prePosition, action])
 
     useEffect(() => {
 
@@ -426,13 +452,13 @@ export const Piece = ({code: pieceCode = 0, origin_position: position, rotation,
         return 'x';
     }
 
-    const onRotate = () => {
+    const onRotate = (direction: 'pos' | 'neg' = 'pos') => {
         if(ref.current && canMovePiece){
-            const sign = isPieceFlipped('z') ? -1 : 1;
+            const sign = (isPieceFlipped('z') ? -1 : 1) * (direction == 'pos' ? 1 : -1);
             gsap.to(ref.current.rotation,
                 {
-                    y: ref.current.rotation.y + (Math.PI * 0.5) * (sign),
-                    duration: 1,
+                    y: ref.current.rotation.y  + (Math.PI * 0.5) * (sign),
+                    duration: animationDuration * 2.5,
                     onStart: onStart.current,
                     onComplete: () => onComplete.current?.('rotate'),
                 },
@@ -448,15 +474,15 @@ export const Piece = ({code: pieceCode = 0, origin_position: position, rotation,
         }
     }
 
-    const onFlip = (event: ThreeEvent<MouseEvent>) => {
-        event.stopPropagation();
+    const onFlip = (event?: ThreeEvent<MouseEvent>) => {
+        event?.stopPropagation();
         if(ref.current && canMovePiece){
             const axis = getFlipAxis();
             const sign = ref.current.rotation[axis] < 0 ? -1 : 1 //* Fix problem being caused by the snapToGrid matrix which messes with the rotation sign
             gsap.to(ref.current.rotation,
             {
                 [axis]: (isPieceFlipped(axis) ? ref.current.rotation[axis] - (Math.PI * sign) : ref.current.rotation[axis] + (Math.PI * sign)),
-                duration: 1,
+                duration: animationDuration * 2.5,
                 onStart: onStart.current,
                 onComplete: () => onComplete.current?.('flip'),
             }
@@ -547,7 +573,7 @@ export const Piece = ({code: pieceCode = 0, origin_position: position, rotation,
     return (
         <>
             <DragControls axisLock="y" onDrag={onDrag} onDragEnd={onDragEnd} onDragStart={onDragStart} dragConfig={{enabled: canMovePiece, filterTaps: true}}>
-                <group onDoubleClick={onFlip} onContextMenu={onRotate} ref={ref}>
+                <group onDoubleClick={() => setAction('flip')} onContextMenu={() => setAction('rotate_pos')} ref={ref}>
                     <PieceModel isDragging={isDragging} pieceCode={pieceCode} block_positions={block_positions} blockSize={blockSize}/>
                 </group>
             </DragControls>
