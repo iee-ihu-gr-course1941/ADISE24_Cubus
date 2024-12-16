@@ -1,5 +1,7 @@
 import { useInterval } from "@/Hooks/useInterval";
+import { FlipIcon, RotateIcon } from "@/Icons/InterfaceIcons";
 import { useBoardState } from "@/Store/board_state";
+import { useInterfaceState } from "@/Store/interface_state";
 import { useTimerStore } from "@/Store/timer";
 import { PlayerIdentifier } from "@/types/piece";
 import { useState } from "react";
@@ -14,6 +16,7 @@ export const Interface = () => {
     const boardPieces = useBoardState(state => state.boardPieces);
     const [timer, setTimer] = useState(0);
     const {time} = useTimerStore();
+    const {setAction, action} = useInterfaceState();
 
     useInterval(() => {
         setTimer(Math.round(((Date.now() - (startTime ?? 0))/1000)*10)/10);
@@ -38,7 +41,9 @@ export const Interface = () => {
                 }
             </div>
             {state === 'Starting' && <p className="starting-text">Starting in {Math.round(3 - (time/10))}...</p>}
-            {state !== 'Starting' && <div className="btn-group">
+            {state !== 'Starting' &&
+            <div className="btn-group">
+                {move && <div></div>}
                 {
                     state === 'Ready' &&
                     <>
@@ -54,8 +59,15 @@ export const Interface = () => {
                     </div>
                     </>
                 }
-                {state !== 'Ready' && state !== 'Finished' && <button datatype={(state === 'OwnTurnPlaying' && move) ? '' : 'blocked'} onClick={lockTurn}>Lock Turn</button>}
+                {state !== 'Ready' && state !== 'Finished' && <button datatype={(state === 'OwnTurnPlaying' && move) ? '' : 'blocked'} onClick={(state === 'OwnTurnPlaying' && move) ? lockTurn : undefined}>Lock Turn</button>}
                 {/* <button datatype={state === 'OpponentTurn' ? '' : 'blocked'} onClick={() => changeTurn('red')}>End Opponent Turn</button> */}
+                {move &&
+                <div className="flex gap-x-2">
+                    <RotateIcon enabled={action === 'none'} onClick={() => setAction('rotate_neg')} color="#f87171"/>
+                    <FlipIcon enabled={action === 'none'} onClick={() => setAction('flip')}/>
+                    <RotateIcon enabled={action === 'none'} onClick={() => setAction('rotate_pos')} color="#22c55e"/>
+                </div>
+                }
             </div>}
         </div>
     );
