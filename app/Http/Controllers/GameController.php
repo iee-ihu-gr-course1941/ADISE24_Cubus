@@ -43,8 +43,8 @@ class GameController extends Controller {
                 return response([
                     'valid' => false,
                     'board' => $board,
-                    'message' => 'The game hasn\'t started yet']
-                )->setStatusCode(400);
+                    'message' => 'The game hasn\'t started yet'
+                ])->setStatusCode(400);
             } else {
                 return inertia('Game')->with('flash', 'The game hasn\'t started yet');
             }
@@ -55,8 +55,8 @@ class GameController extends Controller {
                 return response([
                     'valid' => false,
                     'board' => $board,
-                    'message' => 'It isn\'t your turn.']
-                )->setStatusCode(400);
+                    'message' => 'It isn\'t your turn.'
+                ])->setStatusCode(400);
             } else {
                 return inertia('Game')->with('flash', 'It isn\'t your turn.');
             }
