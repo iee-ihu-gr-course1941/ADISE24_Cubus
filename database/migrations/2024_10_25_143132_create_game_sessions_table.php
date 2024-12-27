@@ -23,6 +23,7 @@ return new class extends Migration {
             // Player Specific Info
             foreach(PlayerColor::values() as $player_color) {
                 $table->foreignId('player_'.$player_color.'_id')->nullable()->constrained('users');
+                $table->json('player_'.$player_color.'_inventory')->nullable();
             }
         });
     }

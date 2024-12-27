@@ -10,6 +10,7 @@ use App\Models\GameSession;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
+use function GuzzleHttp\json_encode;
 
 class GameSessionController extends Controller {
     public function index(Request $request): \Inertia\ResponseFactory | \Inertia\Response | \Illuminate\Http\Response {
@@ -72,12 +73,17 @@ class GameSessionController extends Controller {
 
         $game_session = new GameSession();
 
+        $game_session['player_count'] = (string)$data['player_count'];
+        $game_session['board_state'] = json_encode(GameSession::generateBoard($data['player_count']));
+        $game_session->save();
+
         $valid_colors = $game_session->getValidPlayerColors();
         $host_color = $valid_colors[rand(0,count($valid_colors) - 1)];
         $game_session['player_'.$host_color.'_id'] = $user['id'];
-        $game_session['player_count'] = (string)$data['player_count'];
-        $game_session['board_state'] = json_encode(GameSession::generateBoard($data['player_count']));
         $game_session['current_playing'] = $host_color;
+        for($i = 0; $i < count($valid_colors); $i++) {
+            $game_session['player_'.$valid_colors[$i].'_inventory'] = json_encode([true,true,true,true,true,true,true,true,true,true,true,true,true,true,true,true,true,true,true,true,true]);
+        }
         $game_session->save();
 
         if($request->expectsJson()) {
