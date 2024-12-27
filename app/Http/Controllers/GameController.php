@@ -36,6 +36,7 @@ class GameController extends Controller {
         $player_color = $player->getCurrentSessionColor()->value;
         $current_session = $player->getCurrentSession();
         $board = json_decode($current_session['board_state']);
+        $player_available_pieces = json_decode($current_session['player_'.$player_color.'_inventory']);
 
         if($current_session['session_state'] !== GameSessionState::Playing->value) {
             if($request->expectsJson()) {
@@ -70,7 +71,17 @@ class GameController extends Controller {
             'flip' => 'required|boolean',
         ]);
 
-        // TODO: Validate that the piece is available
+        if(!$player_available_pieces[(int)$data['code']]) {
+            if($request->expectsJson()) {
+                return response([
+                    'valid' => false,
+                    'board' => $board,
+                    'message' => 'The piece is not available to you'
+                ])->setStatusCode(400);
+            } else {
+                return inertia('Game')->with('flash', 'The piece is not available to you');
+            }
+        }
 
         $piece = $this->getPieceMatrix((string)$data['code']);
         if($data['flip']) $this->flipPiece($piece);
@@ -89,6 +100,8 @@ class GameController extends Controller {
         );
         if($is_valid) {
             $this->update_board($board, $piece, $origin_offset, $player_color[0]);
+            $player_available_pieces[(int)$data['code']] = false;
+            $current_session['player_'.$player_color.'_inventory'] = $player_available_pieces;
             $current_session['board_state'] = json_encode($board);
             $current_session['current_round'] = $current_session['current_round'] + 1;
             $current_session['current_playing'] = $current_session->getNextPlayerColor();
