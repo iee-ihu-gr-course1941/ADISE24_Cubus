@@ -3,11 +3,15 @@
 namespace App\Http\Controllers;
 
 use App\Enums\GameSessionState;
+use App\Enums\PlayerColor;
 use App\Models\GameSession;
+use App\Models\User;
 use Illuminate\Http\Request;
 use function GuzzleHttp\json_encode;
 
 const RELATIVE_MATRIX_SIZE = 5;
+const MATRIX_BORDER_SIZE = 1;
+const RELATIVE_MATRIX_SIZE_WITH_BORDER = RELATIVE_MATRIX_SIZE + MATRIX_BORDER_SIZE * 2;
 
 class GameController extends Controller {
     function index(Request $request): \Inertia\Response | \Inertia\ResponseFactory | \Illuminate\Http\Response {
@@ -93,11 +97,16 @@ class GameController extends Controller {
         $origin_offset['y'] = $data['origin_y'] - $origin_offset['y'];
         $origin_offset['x'] = $data['origin_x'] - $origin_offset['x'];
 
-        $is_valid = $this->is_valid(
+        $move_validations = $this->validateMove(
             $board, $piece,
             $origin_offset, $current_session['current_round'],
             $player_color[0], $current_session['player_count']
         );
+
+        $is_valid = $move_validations['is_valid'] && (
+            $current_session['current_round'] < $current_session['player_count'] && $move_validations['is_touching_board_corner'] ||
+            $current_session['current_round'] >= $current_session['player_count'] && $move_validations['is_touching_adjacent']);
+
         if($is_valid) {
             $this->update_board($board, $piece, $origin_offset, $player_color[0]);
             $player_available_pieces[(int)$data['code']] = false;
@@ -193,18 +202,22 @@ class GameController extends Controller {
         return [ 'y' => $y_offset, 'x' => $x_offset];
     }
 
-    private function is_valid(array $board, array $piece, array $piece_origin, int $move_count, string $player_color, int $player_count): bool {
+    private function validateMove(array $board, array $piece, array $piece_origin, int $move_count, string $player_color, int $player_count): array {
         // TODO: Please clean this up soon... the code below is sad
         $is_valid = true;
         $is_touching_adjacent = false;
         $is_touching_board_corner = false;
         $board_size = count($board);
+        $piece_size = count($piece);
+
+        error_log('Piece matrix size: ' . $piece_size);
+        error_log($this->displayFull($piece, []));
 
         $y = 0;
         $x = 0;
-        while($y < RELATIVE_MATRIX_SIZE && $is_valid) {
+        while($y < $piece_size && $is_valid) {
             $x = 0;
-            while($x < RELATIVE_MATRIX_SIZE && $is_valid) {
+            while($x < $piece_size && $is_valid) {
                 if($piece[$y][$x] === 0) {
                     $x++;
                     continue;
@@ -212,7 +225,9 @@ class GameController extends Controller {
 
                 $current_y = $piece_origin['y'] + $y;
                 $current_x = $piece_origin['x'] + $x;
+                error_log('Current (' . $current_x . ',' . $current_y . ') Piece Origin (' . $piece_origin['y'] . ',' . $piece_origin['x'] . ') Offset (' . $y . ',' . $x . ')'  );
 
+                error_log('Outside of board? (' . $current_x . ',' . $current_y . ') ' . (($current_y < 0 || $current_x < 0 || $current_y >= $board_size || $current_x >= $board_size) ? 'true' : 'false'));
                 if($current_y < 0 || $current_x < 0) {
                     $is_valid = false;
                     continue;
@@ -223,89 +238,18 @@ class GameController extends Controller {
                     continue;
                 }
 
-                /*error_log(*/
-                /*    '(Verifying x) (x:'.$current_x.';y:'.$current_y.')'."\n".*/
-                /*    $board[$current_y - 1][$current_x - 1].$board[$current_y - 1][$current_x].$board[$current_y - 1][$current_x + 1]."\n".*/
-                /*    $board[$current_y][$current_x - 1].$board[$current_y][$current_x].$board[$current_y][$current_x + 1]."\n".*/
-                /*    $board[$current_y + 1][$current_x - 1].$board[$current_y + 1][$current_x].$board[$current_y + 1][$current_x + 1]*/
-                /*);*/
-
+                error_log('Is ' . $board[$current_y][$current_x] . ' Empty? (' . $current_x . ',' . $current_y . ') ' . ($board[$current_y][$current_x] !== GameSession::EMPTY_BOARD_CELL));
                 if($board[$current_y][$current_x] !== GameSession::EMPTY_BOARD_CELL) {
                     $is_valid = false;
                     continue;
                 }
 
-                error_log('Not on top of another block');
-
-                // Empty Cross Check
-                if(
-                    $current_y - 1 > 0 &&
-                    $board[$current_y - 1][$current_x] !== GameSession::EMPTY_BOARD_CELL &&
-                    $board[$current_y - 1][$current_x] === $player_color
-                ) {
+                if(!$this->isCrossEmpty($board, $player_color, GameSession::EMPTY_BOARD_CELL, $current_x, $current_y)) {
                     $is_valid = false;
                     continue;
                 }
 
-                if(
-                    $current_y + 1 < $board_size &&
-                    $board[$current_y + 1][$current_x] !== GameSession::EMPTY_BOARD_CELL &&
-                    $board[$current_y + 1][$current_x] === $player_color
-                ) {
-                    $is_valid = false;
-                    continue;
-                }
-
-                if(
-                    $current_x - 1 > 0 &&
-                    $board[$current_y][$current_x - 1] !== GameSession::EMPTY_BOARD_CELL &&
-                    $board[$current_y][$current_x - 1] === $player_color
-                ) {
-                    $is_valid = false;
-                    continue;
-                }
-
-                if(
-                    $current_x + 1 < $board_size &&
-                    $board[$current_y][$current_x + 1] !== GameSession::EMPTY_BOARD_CELL &&
-                    $board[$current_y][$current_x + 1] === $player_color
-                ) {
-                    $is_valid = false;
-                    continue;
-                }
-
-                error_log('No blocks in cross section');
-
-                // Filled X Check
-                if(
-                    $current_x - 1 > 0 && $current_y - 1 > 0 &&
-                    $board[$current_y - 1][$current_x - 1] !== GameSession::EMPTY_BOARD_CELL &&
-                    $board[$current_y - 1][$current_x - 1] === $player_color
-                ) {
-                    $is_touching_adjacent = true;
-                }
-
-                if(
-                    $current_x + 1 < $board_size && $current_y - 1 > 0 &&
-                    $board[$current_y - 1][$current_x + 1] !== GameSession::EMPTY_BOARD_CELL &&
-                    $board[$current_y - 1][$current_x + 1] === $player_color
-                ) {
-                    $is_touching_adjacent = true;
-                }
-
-                if(
-                    $current_x - 1 > 0 && $current_y + 1 < $board_size &&
-                    $board[$current_y + 1][$current_x - 1] !== GameSession::EMPTY_BOARD_CELL &&
-                    $board[$current_y + 1][$current_x - 1] === $player_color
-                ) {
-                    $is_touching_adjacent = true;
-                }
-
-                if(
-                    $current_x + 1 < $board_size && $current_y + 1 < $board_size &&
-                    $board[$current_y + 1][$current_x + 1] !== GameSession::EMPTY_BOARD_CELL &&
-                    $board[$current_y + 1][$current_x + 1] === $player_color
-                ) {
+                if($this->isTouchingCorner($board, $player_color, GameSession::EMPTY_BOARD_CELL, $current_x, $current_y)) {
                     $is_touching_adjacent = true;
                 }
 
@@ -332,9 +276,9 @@ class GameController extends Controller {
             $y++;
         }
 
-        error_log('Is touching piece: ' . $is_touching_adjacent . "\n Is touching corner: " . $is_touching_board_corner);
+        error_log('Is valid: ' . ($is_valid ? 'true' : 'false') . ' Is touching piece: ' . ($is_touching_adjacent ? 'true' : 'false') . " Is touching corner: " . ($is_touching_board_corner ? 'true' : 'false'));
 
-        return $is_valid && ($move_count < $player_count && $is_touching_board_corner || $move_count >= $player_count && $is_touching_adjacent);
+        return ['is_valid' => $is_valid, 'is_touching_board_corner' => $is_touching_board_corner, 'is_touching_adjacent' => $is_touching_adjacent];
     }
 
     private function update_board(array &$board, array $piece, array $piece_origin, string $player_char) {
@@ -347,5 +291,261 @@ class GameController extends Controller {
                 $board[$current_y][$current_x] = $player_char;
             }
         }
+    }
+
+    private function addBordersToPieceMatrix(array $piece): array {
+        $bordered_piece_matrix = [];
+        for($y = 0; $y < RELATIVE_MATRIX_SIZE_WITH_BORDER; $y++) {
+            $bordered_piece_matrix_row = [];
+            for($x = 0; $x < RELATIVE_MATRIX_SIZE_WITH_BORDER; $x++) {
+                $bordered_piece_matrix_row[$x] = 0;
+
+                $piece_y = $y - MATRIX_BORDER_SIZE;
+                $piece_x = $x - MATRIX_BORDER_SIZE;
+                if($piece_y >= 0 && $piece_x >= 0 && $piece_y < RELATIVE_MATRIX_SIZE && $piece_x < RELATIVE_MATRIX_SIZE) {
+                    $bordered_piece_matrix_row[$x] = $piece[$piece_y][$piece_x] === 0 ? 0 : 1;
+                }
+            }
+
+            $bordered_piece_matrix[$y] = $bordered_piece_matrix_row;
+        }
+
+        return $bordered_piece_matrix;
+    }
+
+    /**
+     * Returns array containing positions [x, y] for every valid corner connection for a matrix.
+     * */
+    private function getValidCornerConnectionPositions(array $matrix, string|int $colored_cell, string|int $empty_cell): array {
+        $positions = [];
+        $matrix_size = count($matrix);
+
+        for($y = 0; $y < $matrix_size; $y++) {
+            for($x = 0; $x < $matrix_size; $x++) {
+                if(
+                    $matrix[$y][$x] === $empty_cell &&
+                    $this->isCrossEmpty($matrix, $colored_cell, $empty_cell, $x, $y) &&
+                    $this->isTouchingCorner($matrix, $colored_cell, $empty_cell, $x, $y)
+                ) {
+                    array_push($positions, [$x, $y]);
+                }
+            }
+        }
+
+        return $positions;
+    }
+
+    /**
+     * Returns array containing positions [x, y] for every edge for a piece
+     * */
+    private function getPieceEdges(array $matrix, string|int $colored_cell, string|int $empty_cell): array {
+        $positions = [];
+        $matrix_size = count($matrix);
+
+        for($y = 0; $y < $matrix_size; $y++) {
+            for($x = 0; $x < $matrix_size; $x++) {
+                $is_edge = false;
+
+                // Top Left
+                if(
+                    $matrix[$y][$x] === $colored_cell &&
+                    $matrix[$y][$x - 1] === $empty_cell &&
+                    $matrix[$y - 1][$x] === $empty_cell &&
+                    $matrix[$y - 1][$x - 1] === $empty_cell
+                ) $is_edge = true;
+
+
+                // Top Right
+                if(
+                    !$is_edge &&
+                    $matrix[$y][$x] === $colored_cell &&
+                    $matrix[$y][$x + 1] === $empty_cell &&
+                    $matrix[$y - 1][$x] === $empty_cell &&
+                    $matrix[$y - 1][$x + 1] === $empty_cell
+                ) $is_edge = true;
+
+                // Bottom Left
+                if(
+                    !$is_edge &&
+                    $matrix[$y][$x] === $colored_cell &&
+                    $matrix[$y][$x - 1] === $empty_cell &&
+                    $matrix[$y + 1][$x] === $empty_cell &&
+                    $matrix[$y + 1][$x - 1] === $empty_cell
+                ) $is_edge = true;
+
+                // Bottom Right
+                if(
+                    !$is_edge &&
+                    $matrix[$y][$x] === $colored_cell &&
+                    $matrix[$y][$x + 1] === $empty_cell &&
+                    $matrix[$y + 1][$x] === $empty_cell &&
+                    $matrix[$y + 1][$x + 1] === $empty_cell
+                ) $is_edge = true;
+
+                if($is_edge) {
+                    array_push($positions, [$x, $y]);
+                }
+            }
+        }
+
+        return $positions;
+    }
+
+    private function isCrossEmpty(array $matrix, string|int $colored_cell, string|int $empty_cell, int $x, int $y): bool {
+        $is_empty = true;
+        $matrix_size = count($matrix);
+
+        if(
+            $y - 1 >= 0 &&
+            $matrix[$y - 1][$x] !== $empty_cell &&
+            $matrix[$y - 1][$x] === $colored_cell
+        ) $is_empty = false;
+
+        if(
+            $is_empty &&
+            $y + 1 < $matrix_size &&
+            $matrix[$y + 1][$x] !== $empty_cell &&
+            $matrix[$y + 1][$x] === $colored_cell
+        ) $is_empty = false;
+
+        if(
+            $is_empty &&
+            $x - 1 >= 0 &&
+            $matrix[$y][$x - 1] !== $empty_cell &&
+            $matrix[$y][$x - 1] === $colored_cell
+        ) $is_empty = false;
+
+        if(
+            $is_empty &&
+            $x + 1 < $matrix_size &&
+            $matrix[$y][$x + 1] !== $empty_cell &&
+            $matrix[$y][$x + 1] === $colored_cell
+        ) $is_empty = false;
+
+        return $is_empty;
+    }
+
+    private function isTouchingCorner(array $matrix, string|int $colored_cell, string|int $empty_cell, int $x, int $y): bool {
+        $is_touching = false;
+        $matrix_size = count($matrix);
+
+        if(
+            !$is_touching &&
+            $x - 1 >= 0 && $y - 1 >= 0 &&
+            $matrix[$y - 1][$x - 1] !== $empty_cell &&
+            $matrix[$y - 1][$x - 1] === $colored_cell
+        ) $is_touching = true;
+
+        if(
+            !$is_touching &&
+            $x + 1 < $matrix_size && $y - 1 >= 0 &&
+            $matrix[$y - 1][$x + 1] !== $empty_cell &&
+            $matrix[$y - 1][$x + 1] === $colored_cell
+        ) $is_touching = true;
+
+        if(
+            !$is_touching &&
+            $x - 1 >= 0 && $y + 1 < $matrix_size &&
+            $matrix[$y + 1][$x - 1] !== $empty_cell &&
+            $matrix[$y + 1][$x - 1] === $colored_cell
+        ) $is_touching = true;
+
+
+        if(
+            !$is_touching &&
+            $x + 1 < $matrix_size && $y + 1 < $matrix_size &&
+            $matrix[$y + 1][$x + 1] !== $empty_cell &&
+            $matrix[$y + 1][$x + 1] === $colored_cell
+        ) $is_touching = true;
+
+        return $is_touching;
+    }
+
+    /**
+     * EXTREMELY INEFFICIENT CODE THAT CALCULATES THE NEXT VALID MOVES FOR EACH POSITION.
+     * For this reason once it identifies a valid move it escapes
+     * */
+    function hasValidMoves(GameSession $current_session, User $player): bool {
+        $player_valid_colors = $current_session->getValidPlayerColors();
+        $player_available_pieces = json_decode($current_session['player_'.$player_valid_colors[0].'_inventory']);
+
+        $board = json_decode($current_session['board_state']);
+        $board_valid_connections = $this->getValidCornerConnectionPositions($board, 'b', '');
+
+        foreach($player_available_pieces as $piece_code => $available) {
+            if(!$available) continue;
+
+            $piece = $this->getPieceMatrix((string)$piece_code);
+            for($flip = 0; $flip < 1; $flip++) {
+                if($flip === 1) $this->flipPiece($piece);
+
+                for($i = 0; $i < 4; $i++) {
+                    $this->rotatePiece($piece, $flip === 1);
+
+                    $bordered_piece = $this->addBordersToPieceMatrix($piece);
+                    $piece_valid_connections = $this->getPieceEdges($bordered_piece, 1, 0);
+
+                    foreach($board_valid_connections as $board_origin) {
+                        foreach($piece_valid_connections as $piece_origin) {
+                            $origin_offset = [
+                                'y' => $board_origin[1] - $piece_origin[1],
+                                'x' => $board_origin[0] - $piece_origin[0],
+                            ];
+
+                            error_log('Board (' . $board_origin[0] . ', ' . $board_origin[1] . ') Piece (' . $piece_origin[0] . ', ' . $piece_origin[1] . ')');
+                            $move_validations = $this->validateMove(
+                                $board, $bordered_piece,
+                                $origin_offset, $current_session['current_round'],
+                                'b', $current_session['player_count']
+                            );
+
+                            if($move_validations['is_touching_adjacent'] && $move_validations['is_valid']) {
+                                return true;
+                            }
+                        }
+                    }
+
+                }
+            }
+        }
+
+        return false;
+    }
+
+    private function display3x3(array $matrix, array $ascii_mapping, string $header_details, int $x, int $y) {
+        $matrix_size = count($matrix);
+        $display_string = $x.','.$y.' ('.$matrix[$y][$x].') '.$header_details."\n";
+
+        for($block_y = -1; $block_y < 2; $block_y++) {
+            $curr_y = $y + $block_y;
+            for($block_x = -1; $block_x < 2; $block_x++) {
+                $curr_x = $x + $block_x;
+                $ascii = '.';
+
+                if($curr_y >= 0 && $curr_y < $matrix_size && $curr_x >= 0 && $curr_x < $matrix_size) {
+                    $ascii = $ascii_mapping[$matrix[$curr_y][$curr_x]] ?? $matrix[$curr_y][$curr_x];
+                }
+
+                $display_string .= $ascii . ' ';
+            }
+
+            $display_string .= "\n";
+        }
+
+        return $display_string;
+    }
+
+    private function displayFull(array $matrix, array $ascii_mapping) {
+        $board_string = '';
+        $grid_size = count($matrix);
+        for($y = 0; $y < $grid_size; $y++) {
+            for($x = 0; $x < $grid_size; $x++) {
+                $piece_ascii = $ascii_mapping[$matrix[$y][$x]] ?? $matrix[$y][$x];
+                $board_string .= $piece_ascii . ' ';
+            }
+            $board_string .= "\n";
+        }
+
+        return $board_string;
     }
 }
