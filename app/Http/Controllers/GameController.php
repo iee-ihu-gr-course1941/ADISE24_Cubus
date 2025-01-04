@@ -11,6 +11,9 @@ const RELATIVE_MATRIX_SIZE = 5;
 const MATRIX_BORDER_SIZE = 1;
 const RELATIVE_MATRIX_SIZE_WITH_BORDER = RELATIVE_MATRIX_SIZE + MATRIX_BORDER_SIZE * 2;
 
+const SCORE_LAST_PIECE_MONONIMINO = 20;
+const SCORE_PLACE_ALL_PIECES = 15;
+
 class GameController extends Controller {
     function index(Request $request): \Inertia\Response | \Inertia\ResponseFactory | \Illuminate\Http\Response {
         $player = AuthService::getUser();
@@ -121,6 +124,14 @@ class GameController extends Controller {
         if($is_valid) {
             $this->update_board($board, $piece, $origin_offset, $player_color[0]);
             $current_session['player_'.$player_color.'_inventory'] = $player_available_pieces;
+            $addedScore = $this->calculateAddedScore(
+                $piece_code,
+                $piece_parts,
+                $current_session['player_'.$player_color.'_has_finished'],
+                $player_available_pieces
+            );
+
+            $current_session['player_'.$player_color.'_points'] += $addedScore;
             $current_session['board_state'] = json_encode($board);
             $current_session['current_playing'] = $current_session->getNextPlayingColor();
             $current_session->save();
@@ -511,6 +522,27 @@ class GameController extends Controller {
         return false;
     }
 
+    private function calculateAddedScore(string $piece_code, array $piece_parts, bool $has_finished, array $available_pieces): int {
+        $score = 0;
+
+        $score += count($piece_parts);
+
+        if($has_finished) {
+            $count_available_pieces = array_reduce($available_pieces, function($acc, $available) {
+                $acc += $available ? 1 : 0;
+                return $acc;
+            }, 0);
+
+            $score += $count_available_pieces === 0 ? SCORE_PLACE_ALL_PIECES : 0;
+        }
+
+        if($has_finished && $piece_code === '0') {
+            $score += SCORE_LAST_PIECE_MONONIMINO;
+        }
+
+        return $score;
+    }
+
     private function getAllPieceParts(): object {
         // WARN: Very Inefficient code... does it matter though?
         $pieces_json = file_get_contents('pieces.json');
@@ -553,4 +585,5 @@ class GameController extends Controller {
 
         return $board_string;
     }
+
 }
