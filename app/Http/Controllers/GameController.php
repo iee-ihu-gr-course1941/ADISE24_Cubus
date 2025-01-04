@@ -85,7 +85,12 @@ class GameController extends Controller {
             }
         }
 
-        $piece = $this->getPieceMatrix((string)$data['code']);
+
+        $pieces_object = $this->getAllPieceParts();
+
+        $piece_code = (string)$data['code'];
+        $piece_parts = $pieces_object->$piece_code;
+        $piece = $this->getPieceMatrix($piece_parts);
         if($data['flip']) $this->flipPiece($piece);
         for($i = 0; $i < $data['rotation']; $i++) {
             $this->rotatePiece($piece, $data['flip']);
@@ -128,12 +133,7 @@ class GameController extends Controller {
         return inertia('Game');
     }
 
-    private function getPieceMatrix(string $code): array {
-        // WARN: Very Inefficient code... does it matter though?
-        $pieces_json = file_get_contents('pieces.json');
-        $pieces_object = json_decode($pieces_json);
-        $piece = $pieces_object->$code;
-
+    private function getPieceMatrix(array $piece): array {
         $piece_pos = 0;
         $piece_matrix = [];
 
@@ -470,13 +470,15 @@ class GameController extends Controller {
      * For this reason once it identifies a valid move it escapes
      * */
     function hasValidMoves(array $board, string $player_color, array $player_available_pieces): bool {
+        $pieces_object = $this->getAllPieceParts();
 
         $board_valid_connections = $this->getValidCornerConnectionPositions($board, 'b', '');
 
         foreach($player_available_pieces as $piece_code => $available) {
             if(!$available) continue;
 
-            $piece = $this->getPieceMatrix((string)$piece_code);
+            $piece_parts = $pieces_object->$piece_code;
+            $piece = $this->getPieceMatrix($piece_parts);
             for($flip = 0; $flip < 1; $flip++) {
                 if($flip === 1) $this->flipPiece($piece);
 
@@ -507,6 +509,12 @@ class GameController extends Controller {
         }
 
         return false;
+    }
+
+    private function getAllPieceParts(): object {
+        // WARN: Very Inefficient code... does it matter though?
+        $pieces_json = file_get_contents('pieces.json');
+        return json_decode($pieces_json);
     }
 
     private function display3x3(array $matrix, array $ascii_mapping, string $header_details, int $x, int $y) {
