@@ -169,9 +169,9 @@ class GameSession extends Model {
         $header_string .= '| ';
         $data_string .= '| ';
 
-        $this->addtoAsciiHeader('Currently Playing', $this['current_playing'] ?? 'no one', $header_string, $data_string);
-        $this->addtoAsciiHeader('Round', (string)$this['current_round'], $header_string, $data_string);
-        $this->addtoAsciiHeader('Status', $this['session_state'], $header_string, $data_string);
+        $this->addToAsciiBanner('Currently Playing', $this['current_playing'] ?? 'no one', $header_string, $data_string);
+        $this->addToAsciiBanner('Round', (string)$this['current_round'], $header_string, $data_string);
+        $this->addToAsciiBanner('Status', $this['session_state'], $header_string, $data_string);
 
         $border = str_repeat('-', strlen($header_string) - 2);
 
@@ -182,7 +182,28 @@ class GameSession extends Model {
             $border;
     }
 
-    function addtoAsciiHeader(string $key, string $value, string &$header_string, string &$data_string): void {
+    function visualizeGameFooter(User $player): string {
+        $footer_string = '';
+        $data_string   = '';
+
+        $footer_string .= '| ';
+        $data_string .= '| ';
+
+        $player_color = $player->getCurrentSessionColor();
+
+        $this->addToAsciiBanner('Your Color', $player_color->name, $footer_string, $data_string);
+        $this->addToAsciiBanner('Score', $this['player_'.$player_color->value.'_points'], $footer_string, $data_string);
+
+        $border = str_repeat('-', strlen($footer_string) - 2);
+
+        return
+            $border . "\n" .
+            $footer_string . "\n" .
+            $data_string . "\n" .
+            $border;
+    }
+
+    function addToAsciiBanner(string $key, string $value, string &$header_string, string &$data_string): void {
         $key_length  = strlen($key);
         $data_length = strlen($value);
         $max_length  = max($key_length, $data_length);

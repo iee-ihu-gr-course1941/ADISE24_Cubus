@@ -25,7 +25,9 @@ class GameController extends Controller {
             return response(
                 $current_session->visualizeGameHeader() .
                 "\n" .
-                $current_session->visualizeBoard()
+                $current_session->visualizeBoard() .
+                "\n" .
+                $current_session->visualizeGameFooter($player)
             );
         }
 
