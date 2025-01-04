@@ -3,9 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Enums\GameSessionState;
-use App\Enums\PlayerColor;
 use App\Models\GameSession;
-use App\Models\User;
 use Illuminate\Http\Request;
 use function GuzzleHttp\json_encode;
 
@@ -97,23 +95,29 @@ class GameController extends Controller {
         $origin_offset['y'] = $data['origin_y'] - $origin_offset['y'];
         $origin_offset['x'] = $data['origin_x'] - $origin_offset['x'];
 
-        $move_validations = $this->validateMove(
-            $board, $piece,
-            $origin_offset, $current_session['current_round'],
-            $player_color[0], $current_session['player_count']
-        );
+        $move_validations = $this->validateMove($board, $piece, $origin_offset, $player_color[0]);
 
         $is_valid = $move_validations['is_valid'] && (
             $current_session['current_round'] < $current_session['player_count'] && $move_validations['is_touching_board_corner'] ||
             $current_session['current_round'] >= $current_session['player_count'] && $move_validations['is_touching_adjacent']);
 
+
+        $player_available_pieces[(int)$data['code']] = false;
+        if($is_valid && !$this->hasValidMoves($board, $player_color, $player_available_pieces)) {
+            $current_session['player_'.$player_color.'_has_finished'] = true;
+        }
+
+        if(count($current_session->getPlayingPlayerColors()) === 0) {
+            $current_session['session_state'] = GameSessionState::Complete;
+        } else {
+            $current_session['current_round'] = $current_session['current_round'] + 1;
+        }
+
         if($is_valid) {
             $this->update_board($board, $piece, $origin_offset, $player_color[0]);
-            $player_available_pieces[(int)$data['code']] = false;
             $current_session['player_'.$player_color.'_inventory'] = $player_available_pieces;
             $current_session['board_state'] = json_encode($board);
-            $current_session['current_round'] = $current_session['current_round'] + 1;
-            $current_session['current_playing'] = $current_session->getNextPlayerColor();
+            $current_session['current_playing'] = $current_session->getNextPlayingColor();
             $current_session->save();
         }
 
@@ -202,7 +206,7 @@ class GameController extends Controller {
         return [ 'y' => $y_offset, 'x' => $x_offset];
     }
 
-    private function validateMove(array $board, array $piece, array $piece_origin, int $move_count, string $player_color, int $player_count): array {
+    private function validateMove(array $board, array $piece, array $piece_origin, string $player_color): array {
         // TODO: Please clean this up soon... the code below is sad
         $is_valid = true;
         $is_touching_adjacent = false;
@@ -465,11 +469,8 @@ class GameController extends Controller {
      * EXTREMELY INEFFICIENT CODE THAT CALCULATES THE NEXT VALID MOVES FOR EACH POSITION.
      * For this reason once it identifies a valid move it escapes
      * */
-    function hasValidMoves(GameSession $current_session, User $player): bool {
-        $player_valid_colors = $current_session->getValidPlayerColors();
-        $player_available_pieces = json_decode($current_session['player_'.$player_valid_colors[0].'_inventory']);
+    function hasValidMoves(array $board, string $player_color, array $player_available_pieces): bool {
 
-        $board = json_decode($current_session['board_state']);
         $board_valid_connections = $this->getValidCornerConnectionPositions($board, 'b', '');
 
         foreach($player_available_pieces as $piece_code => $available) {
@@ -493,11 +494,7 @@ class GameController extends Controller {
                             ];
 
                             error_log('Board (' . $board_origin[0] . ', ' . $board_origin[1] . ') Piece (' . $piece_origin[0] . ', ' . $piece_origin[1] . ')');
-                            $move_validations = $this->validateMove(
-                                $board, $bordered_piece,
-                                $origin_offset, $current_session['current_round'],
-                                'b', $current_session['player_count']
-                            );
+                            $move_validations = $this->validateMove($board, $bordered_piece, $origin_offset, $player_color[0]);
 
                             if($move_validations['is_touching_adjacent'] && $move_validations['is_valid']) {
                                 return true;

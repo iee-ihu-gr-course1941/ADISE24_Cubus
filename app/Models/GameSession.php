@@ -52,6 +52,17 @@ class GameSession extends Model {
         return $this->hasOne(User::class, 'id', 'player_yellow_id');
     }
 
+    function getPlayingPlayerColors(): array {
+        $playing_colors = [];
+        $valid_colors = $this->getValidPlayerColors();
+        for($i = 0; $i < count($valid_colors); $i++) {
+            if($this['player_'.$valid_colors[$i].'_has_finished']) continue;
+            array_push($playing_colors, $valid_colors[$i]);
+        }
+
+        return $playing_colors;
+    }
+
     function getValidPlayerColors(): array {
         $all_colors = PlayerColor::values();
         $valid_colors = [];
@@ -80,7 +91,20 @@ class GameSession extends Model {
         $current_color_index = (int)array_search($this['current_playing'], $colors);
 
         $next_color_index = ($current_color_index + 1) % count($colors);
+
         return $colors[$next_color_index];
+    }
+
+    function getNextPlayingColor(): string {
+        $colors = $this->getPlayingPlayerColors();
+        if(count($colors) === 0) return 'blue';
+
+        $current_color_index = (int)array_search($this['current_playing'], $colors);
+
+        $next_color_index = ($current_color_index + 1) % count($colors);
+
+        return $colors[$next_color_index];
+
     }
 
     /**

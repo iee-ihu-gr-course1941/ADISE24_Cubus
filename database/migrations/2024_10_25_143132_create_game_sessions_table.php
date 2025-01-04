@@ -24,6 +24,7 @@ return new class extends Migration {
             foreach(PlayerColor::values() as $player_color) {
                 $table->foreignId('player_'.$player_color.'_id')->nullable()->constrained('users');
                 $table->json('player_'.$player_color.'_inventory')->nullable();
+                $table->boolean('player_'.$player_color.'_has_finished')->default(false);
             }
         });
     }
