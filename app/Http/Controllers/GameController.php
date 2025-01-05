@@ -151,11 +151,7 @@ class GameController extends Controller {
                'y' => $part->y + $origin_offset['y'],
         ], $piece_parts);
 
-        if($request->expectsJson()) {
-            return response(['valid' => $is_valid, 'origin_x' => $data['origin_x'], 'origin_y' => $data['origin_y'], 'pieces' => $piece_parts_offset]);
-        }
-
-        return inertia('Game');
+        return response(['valid' => $is_valid, 'origin_x' => $data['origin_x'], 'origin_y' => $data['origin_y'], 'pieces' => $piece_parts_offset]);
     }
 
     function validate(Request $request): \Inertia\Response | \Inertia\ResponseFactory | \Illuminate\Http\Response {
