@@ -43,7 +43,13 @@ class GameController extends Controller {
             ]);
         }
 
-        return inertia('Game', ['user' => $player->getPublic(), 'userSession' => $current_session->getPublic()]);
+        return inertia('Game', [
+            'user' => $player->getPublic(),
+            'userSession' => [
+                'session' => $current_session->getPublic(),
+                'player' => $public_player_data,
+            ]
+        ]);
     }
 
     function move(Request $request): \Inertia\Response | \Inertia\ResponseFactory | \Illuminate\Http\Response {
