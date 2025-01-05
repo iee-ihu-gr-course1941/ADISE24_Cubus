@@ -158,6 +158,87 @@ class GameController extends Controller {
         return inertia('Game');
     }
 
+    function validate(Request $request): \Inertia\Response | \Inertia\ResponseFactory | \Illuminate\Http\Response {
+        $player = AuthService::getUser();
+        $player_color = $player->getCurrentSessionColor()->value;
+        $current_session = $player->getCurrentSession();
+        $board = json_decode($current_session['board_state']);
+        $player_available_pieces = json_decode($current_session['player_'.$player_color.'_inventory']);
+
+        if($current_session['session_state'] !== GameSessionState::Playing->value) {
+            if($request->expectsJson()) {
+                return response([
+                    'valid' => false,
+                    'board' => $board,
+                    'message' => 'The game hasn\'t started yet'
+                ])->setStatusCode(400);
+            } else {
+                return inertia('Game')->with('flash', 'The game hasn\'t started yet');
+            }
+        }
+
+        if($current_session['current_playing'] !== $player_color) {
+            if($request->expectsJson()) {
+                return response([
+                    'valid' => false,
+                    'board' => $board,
+                    'message' => 'It isn\'t your turn.'
+                ])->setStatusCode(400);
+            } else {
+                return inertia('Game')->with('flash', 'It isn\'t your turn.');
+            }
+        }
+
+        $board_size = count($board);
+        $data = $request->validate([
+            'code' => 'required|int|between:0,20',
+            'origin_x' => 'required|int|between:0,'.$board_size - 1,
+            'origin_y' => 'required|int|between:0,'.$board_size - 1,
+            'rotation' => 'required|int|between:0,3',
+            'flip' => 'required|boolean',
+        ]);
+
+        if(!$player_available_pieces[(int)$data['code']]) {
+            if($request->expectsJson()) {
+                return response([
+                    'valid' => false,
+                    'board' => $board,
+                    'message' => 'The piece is not available to you'
+                ])->setStatusCode(400);
+            } else {
+                return inertia('Game')->with('flash', 'The piece is not available to you');
+            }
+        }
+
+
+        $pieces_object = $this->getAllPieceParts();
+
+        $piece_code = (string)$data['code'];
+        $piece_parts = $pieces_object->$piece_code;
+        $piece = $this->getPieceMatrix($piece_parts);
+        if($data['flip']) $this->flipPiece($piece);
+        for($i = 0; $i < $data['rotation']; $i++) {
+            $this->rotatePiece($piece, $data['flip']);
+        }
+
+        $origin_offset = $this->identifyOriginOffset($piece);
+        $origin_offset['y'] = $data['origin_y'] - $origin_offset['y'];
+        $origin_offset['x'] = $data['origin_x'] - $origin_offset['x'];
+
+        $move_validations = $this->validateMove($board, $piece, $origin_offset, $player_color[0]);
+
+        $is_valid = $move_validations['is_valid'] && (
+            $current_session['current_round'] < $current_session['player_count'] && $move_validations['is_touching_board_corner'] ||
+            $current_session['current_round'] >= $current_session['player_count'] && $move_validations['is_touching_adjacent']);
+
+        $piece_parts_offset = array_map(fn($part) => [
+               'x' => $part->x + $origin_offset['x'],
+               'y' => $part->y + $origin_offset['y'],
+        ], $piece_parts);
+
+        return response(['valid' => $is_valid, 'origin_x' => $data['origin_x'], 'origin_y' => $data['origin_y'], 'pieces' => $piece_parts_offset]);
+    }
+
     private function getPieceMatrix(array $piece): array {
         $piece_pos = 0;
         $piece_matrix = [];

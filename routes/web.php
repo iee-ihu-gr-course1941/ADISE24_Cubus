@@ -37,6 +37,7 @@ Route::get('/lobby/disconnect', [GameSessionController::class, 'disconnect'])->n
 Route::middleware(\App\Http\Middleware\ManageInGameVerification::class)->group(function () {
     Route::resource('/game', GameController::class)->only(['index']);
     Route::post('/game/move', [GameController::class, 'move'])->name('game.move');
+    Route::post('/game/validate', [GameController::class, 'validate'])->name('game.validate');
 });
 
 Route::get('/card-demo', function () {
