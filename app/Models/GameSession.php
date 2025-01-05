@@ -14,6 +14,8 @@ class GameSession extends Model {
     protected $public = [
         'id', 'current_round', 'session_state', 'current_playing', 'board_state',
         'player_blue', 'player_red', 'player_green', 'player_yellow',
+        'player_blue_has_finished', 'player_red_has_finished', 'player_green_has_finished', 'player_yellow_has_finished',
+        'player_blue_points', 'player_red_points', 'player_green_points', 'player_yellow_points',
     ];
 
     function getPublic() {
@@ -26,7 +28,7 @@ class GameSession extends Model {
                 continue;
             }
 
-            if(str_starts_with($col, 'player')) {
+            if($col === 'player_blue' || $col === 'player_red' || $col === 'player_green' || $col === 'player_yellow') {
                 $public_data[$col] = $session_data[$col]?->getPublic();
                 continue;
             }
