@@ -21,6 +21,11 @@ class GameSession extends Model {
         $session_data = $this->getAll()[0];
 
         foreach($this->public as $col) {
+            if($col === 'board_state') {
+                $public_data[$col] = $this->convertBoardToVectors();
+                continue;
+            }
+
             if(str_starts_with($col, 'player')) {
                 $public_data[$col] = $session_data[$col]?->getPublic();
                 continue;
@@ -160,6 +165,25 @@ class GameSession extends Model {
         }
 
         return $cell;
+    }
+
+    function convertBoardToVectors(): array {
+        $piece_vectors = [];
+        $board = json_decode($this['board_state']);
+
+        for($y = 0; $y < count($board); $y++) {
+            for($x = 0; $x < count($board); $x++) {
+                if($board[$y][$x] === '') continue;
+
+                array_push($piece_vectors, [
+                    'x' => $x,
+                    'y' => $y,
+                    'data' => PlayerColor::colorFromChar($board[$y][$x]),
+                ]);
+            }
+        }
+
+        return $piece_vectors;
     }
 
     function visualizeGameHeader(): string {

@@ -16,6 +16,6 @@ enum PlayerColor: string {
         return array_filter(
             PlayerColor::values(),
             fn($color) => str_starts_with($color, $char)
-        );
+        )[0];
     }
 }
