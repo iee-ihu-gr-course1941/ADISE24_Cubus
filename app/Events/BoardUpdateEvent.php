@@ -2,35 +2,32 @@
 
 namespace App\Events;
 
-use Illuminate\Broadcasting\Channel;
+use App\Models\GameSession;
 use Illuminate\Broadcasting\InteractsWithSockets;
-use Illuminate\Broadcasting\PresenceChannel;
 use Illuminate\Broadcasting\PrivateChannel;
-use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
+use Illuminate\Contracts\Broadcasting\ShouldBroadcastNow;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 
-class BoardUpdateEvent
-{
+class BoardUpdateEvent implements ShouldBroadcastNow {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
-    /**
-     * Create a new event instance.
-     */
-    public function __construct()
-    {
-        //
-    }
+    public function __construct(
+        protected GameSession $game_session,
+        public string $player_id,
+        public string $player_color,
+        public int $origin_x,
+        public int $origin_y,
+        public string $piece_code,
+        public array $piece_positions,
+    ) {}
 
     /**
-     * Get the channels the event should broadcast on.
-     *
      * @return array<int, \Illuminate\Broadcasting\Channel>
      */
-    public function broadcastOn(): array
-    {
+    public function broadcastOn(): array {
         return [
-            new PrivateChannel('channel-name'),
+            new PrivateChannel('game.' . $this->game_session['id']),
         ];
     }
 }

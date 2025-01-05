@@ -21,6 +21,7 @@ export type ChannelSessionsEventsMap = {
 
 export type ChannelGameEventsMap = {
     'ConnectEvent': ConnectEvent,
+    'BoardUpdateEvent': BoardUpdateEvent,
 };
 
 export type LoginEvent = {
@@ -31,3 +32,12 @@ export type LoginEvent = {
 export type ConnectEvent = {
     'game_session': Game_session,
 };
+
+export type BoardUpdateEvent = {
+    'valid': boolean,
+    'origin_x': number,
+    'origin_y': number,
+    'piece_positions': {x: number, y: number}[],
+    'player_color': string,
+    'player_id': string,
+}

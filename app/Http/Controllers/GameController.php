@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Enums\GameSessionState;
+use App\Events\BoardUpdateEvent;
 use App\Models\GameSession;
 use Illuminate\Http\Request;
 use function GuzzleHttp\json_encode;
@@ -151,6 +152,7 @@ class GameController extends Controller {
                'y' => $part->y + $origin_offset['y'],
         ], $piece_parts);
 
+        broadcast(new BoardUpdateEvent($current_session, $player['id'], $player_color, $data['origin_x'], $data['origin_y'], $piece_code, $piece_parts_offset))->toOthers();
         return response(['valid' => $is_valid, 'origin_x' => $data['origin_x'], 'origin_y' => $data['origin_y'], 'pieces' => $piece_parts_offset]);
     }
 
@@ -232,6 +234,7 @@ class GameController extends Controller {
                'y' => $part->y + $origin_offset['y'],
         ], $piece_parts);
 
+        broadcast(new BoardUpdateEvent($current_session, $player['id'], $player_color, $data['origin_x'], $data['origin_y'], $piece_code, $piece_parts_offset))->toOthers();
         return response(['valid' => $is_valid, 'origin_x' => $data['origin_x'], 'origin_y' => $data['origin_y'], 'pieces' => $piece_parts_offset]);
     }
 
