@@ -1,11 +1,22 @@
 import useUserEvents from '@/Connection/useUserEvents';
 import { Experience } from "@/Game/Experience";
-import { Game_session } from '@/types/models/tables/Session';
+import { getGame } from '@/network/session_network';
+import { PageProps } from '@/types';
+import { GameResponse } from '@/types/game';
 import { User } from '@/types/models/tables/User';
+import { useEffect } from 'react';
 
-export default function Game({ user, sessions, flash }: PageProps<{ user: User, userSession?: Game_session }>) {
-    let { connectionState, currentSession } = useUserEvents();
+type GameProps = PageProps<{ user: User, userSession?: GameResponse }>;
 
+export default function Game({ user, userSession }: GameProps) {
+    let { connectionState, currentSession, joinGame } = useUserEvents();
+    console.log(userSession)
+    useEffect(() => {
+        /**
+         * * Join Game
+         */
+        joinGame();
+    }, [])
     return (
         <Experience/>
     );

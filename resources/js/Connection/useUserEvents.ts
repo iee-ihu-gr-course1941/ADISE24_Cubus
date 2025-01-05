@@ -8,13 +8,14 @@
 
 import { useEffect, useState } from "react";
 import useServerEvents from "./useServerEvents";
-import { Game_session } from "@/types/models/tables/Session";
 import { BoardUpdateEvent, LoginEvent } from "@/types/connection";
+import { getGame } from "@/network/session_network";
+import { GameResponse } from "@/types/game";
 
 export default function useUserEvents() {
     let { connectionState, listen, stopListening } = useServerEvents();
     let [ gameId, setGameId ] = useState<string>('1');
-    let [ session, setSession ] = useState<Game_session | null>(null);
+    let [ session, setSession ] = useState<GameResponse | null>(null);
     let [ latestMove, setLatestMove ] = useState<BoardUpdateEvent | null>(null);
 
     const cookies = parseCookies();
@@ -44,9 +45,17 @@ export default function useUserEvents() {
         }
     }, [connectionState, gameId]);
 
+    const joinGame = async () => {
+        const res = await getGame();
+        if(res){
+            setGameId(res.session.id.toString());
+            console.log('[JOINED GAME]', res)
+        }
+    }
+
     return {
         connectionState,
-        joinGame: setGameId,
+        joinGame: joinGame,
         currentSession: session,
         latestMove,
     };
