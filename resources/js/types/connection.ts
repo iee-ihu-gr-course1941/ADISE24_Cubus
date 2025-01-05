@@ -1,4 +1,4 @@
-import { Game_session } from "./models/tables/Session";
+import { GameResponse, Vector2 } from "./game";
 
 export enum ConnectionState {
     Connected = 'connected',
@@ -30,14 +30,13 @@ export type LoginEvent = {
 };
 
 export type ConnectEvent = {
-    'game_session': Game_session,
+    'game_session': GameResponse,
 };
 
 export type BoardUpdateEvent = {
-    'valid': boolean,
     'origin_x': number,
     'origin_y': number,
-    'piece_positions': {x: number, y: number}[],
+    'block_positions': Array<Vector2>,
     'player_color': string,
     'player_id': string,
 }
