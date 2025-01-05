@@ -1,4 +1,6 @@
-import { Game_session } from "./models/tables/Session";
+import { BoardUpdateEvent } from "./connection";
+import { GameState } from "./models/tables/Session";
+import { PieceCode, PieceRotation } from "./piece";
 
 export type SessionState = 'waiting' | 'playing' | 'paused' | 'complete';
 export type PlayerColor = 'blue' | 'green' | 'red' | 'yellow';
@@ -6,16 +8,19 @@ export type PlayerColor = 'blue' | 'green' | 'red' | 'yellow';
 export type BoardState = Array<ValorizedVector2>;
 
 export type GameResponse = {
-    session: Game_session;
-    player: Player;
+    session: GameState;
+    player: PlayerState;
 }
 
 type Player = {
     name?: string;
     icon?: string;
     public_id?: string;
+}
+
+type PlayerState = Player & {
     session_color?: PlayerColor;
-    session_valie_pieces: Array<boolean>;
+    session_valid_pieces: Array<boolean>;
 }
 
 export type Vector2 = {
@@ -26,3 +31,20 @@ export type Vector2 = {
 export type ValorizedVector2 = Vector2 & {
     data: PlayerColor
 }
+
+export type MovePayload = {
+    code: PieceCode;
+    origin_x: number;
+    origin_y: number;
+    rotation: PieceRotation;
+    flip: boolean;
+}
+
+export type MoveResponse = {
+    valid: boolean;
+    origin_x: number;
+    origin_y: number;
+    pieces: Array<Vector2>
+}
+
+export type OpponentMove = BoardUpdateEvent;
