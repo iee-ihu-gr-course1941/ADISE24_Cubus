@@ -146,8 +146,13 @@ class GameController extends Controller {
             $current_session->save();
         }
 
+        $piece_parts_offset = array_map(fn($part) => [
+               'x' => $part->x + $origin_offset['x'],
+               'y' => $part->y + $origin_offset['y'],
+        ], $piece_parts);
+
         if($request->expectsJson()) {
-            return response(['valid' => $is_valid, 'board' => $board]);
+            return response(['valid' => $is_valid, 'origin_x' => $data['origin_x'], 'origin_y' => $data['origin_y'], 'pieces' => $piece_parts_offset]);
         }
 
         return inertia('Game');
