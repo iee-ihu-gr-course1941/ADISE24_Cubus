@@ -2,6 +2,7 @@ import { PageProps as InertiaPageProps } from '@inertiajs/core';
 import { AxiosInstance } from 'axios';
 import { route as ziggyRoute } from 'ziggy-js';
 import { PageProps as AppPageProps } from './';
+import { Endpoints } from './constants';
 
 declare global {
     interface Window {
@@ -13,7 +14,7 @@ declare global {
     }
 
     /* eslint-disable no-var */
-    var route: typeof ziggyRoute;
+    var route: (endpoint: Endpoints) => string;
 }
 
 declare module '@inertiajs/core' {
