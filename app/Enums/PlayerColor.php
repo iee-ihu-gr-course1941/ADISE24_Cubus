@@ -13,9 +13,11 @@ enum PlayerColor: string {
     }
 
     static function colorFromChar(string $char) {
-        return array_filter(
-            PlayerColor::values(),
-            fn($color) => str_starts_with($color, $char)
-        )[0];
+        $colors = PlayerColor::values();
+        for($i = 0; $i < count($colors); $i++) {
+            if($colors[$i][0] === $char) return $colors[$i];
+        }
+
+        return '';
     }
 }
