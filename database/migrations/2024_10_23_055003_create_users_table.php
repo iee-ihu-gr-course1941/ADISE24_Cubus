@@ -23,8 +23,8 @@ return new class extends Migration
             $table->enum('auth_type', AuthenticationType::values())->nullable(true);
             $table->string('auth_identifier');
 
-            $table->string('name', length: 80)->nullable(true);
-            $table->string('icon')->nullable(true);
+            $table->string('name', length: 80)->default('');
+            $table->string('icon')->default('');
         });
     }
 
