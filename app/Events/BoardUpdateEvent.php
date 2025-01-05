@@ -19,7 +19,7 @@ class BoardUpdateEvent implements ShouldBroadcastNow {
         public int $origin_x,
         public int $origin_y,
         public string $piece_code,
-        public array $piece_positions,
+        public array $block_positions,
     ) {}
 
     /**
