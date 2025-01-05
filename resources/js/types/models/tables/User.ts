@@ -1,4 +1,4 @@
-import {Id, ForeignId, Timestamp, Timestamps} from '../index';
+import {Id, Timestamp} from '../index';
 
 export type User = {
     id: Id;

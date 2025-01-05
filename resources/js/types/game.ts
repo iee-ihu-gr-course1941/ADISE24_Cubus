@@ -44,7 +44,7 @@ export type MoveResponse = {
     valid: boolean;
     origin_x: number;
     origin_y: number;
-    pieces: Array<Vector2>
+    block_positions: Array<Vector2>
 }
 
 export type OpponentMove = BoardUpdateEvent;
