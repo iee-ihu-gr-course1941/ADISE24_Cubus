@@ -26,7 +26,7 @@ export function Button({text, color = 'default', onClick}: ButtonProps) {
 
                 hover:text-custom-pink-50
 
-                transition-colors duration-500
+                transition-colors duration-200
 
                 ${colors}
             `}
