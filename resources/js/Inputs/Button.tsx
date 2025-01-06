@@ -1,14 +1,14 @@
 import { Icon, SVG } from "@/Icons/SVG";
 
 type ButtonProps = {
-    text: string;
+    text?: string;
     color?: 'default' | 'red';
     icon?: Icon;
     isLeft?: boolean;
     onClick?: () => void;
 };
 
-export function Button({text, color = 'default', icon, isLeft = false, onClick}: ButtonProps) {
+export function Button({text = '', color = 'default', icon, isLeft = false, onClick}: ButtonProps) {
     let colors = `bg-light-default-bottom hover:bg-bright-default-bottom
         shadow-button-default hover:shadow-button-default-hover
         border-t-custom-gray-700 border-b-custom-gray-800 hover:border-t-white hover:border-b-custom-purple-600`;
@@ -23,7 +23,7 @@ export function Button({text, color = 'default', icon, isLeft = false, onClick}:
             className={`
                 group
                 flex gap-1.5 items-center
-                w-fit px-6 py-2.5
+                w-fit ${ text.length === 0 ? 'px-4' : 'px-6'} ${ text.length === 0 ? 'py-4' : 'py-2.5' }
 
                 text-custom-gray-400 font-bold
                 rounded-full border-t border-b-2
@@ -36,7 +36,7 @@ export function Button({text, color = 'default', icon, isLeft = false, onClick}:
             `}
             onClick={onClick}>
             { isLeft && icon && <SVG icon={icon} fill="fill-custom-gray-400 group-hover:fill-custom-pink-50" /> }
-            {text}
+            { text }
             { !isLeft && icon && <SVG icon={icon} fill="fill-custom-gray-400 group-hover:fill-custom-pink-50" /> }
         </button>
     );
