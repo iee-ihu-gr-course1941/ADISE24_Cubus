@@ -12,6 +12,11 @@ return new class extends Migration
      */
     public function up(): void
     {
+        Schema::create('user_portraits', function (Blueprint $table) {
+            $table->id();
+            $table->string('url');
+        });
+
         Schema::create('users', function (Blueprint $table) {
             $table->id();
             $table->timestamps();
@@ -24,7 +29,7 @@ return new class extends Migration
             $table->string('auth_identifier');
 
             $table->string('name', length: 80)->default('');
-            $table->string('icon')->default('');
+            $table->foreignId('icon')->nullable()->constrained('user_portraits');
         });
     }
 
@@ -34,5 +39,6 @@ return new class extends Migration
     public function down(): void
     {
         Schema::dropIfExists('users');
+        Schema::dropIfExists('user_portraits');
     }
 };

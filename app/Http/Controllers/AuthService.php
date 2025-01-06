@@ -41,7 +41,6 @@ class AuthService {
             'auth_type' => 'mock',
             'auth_identifier' => $user_id,
             'name' => 'mock_user',
-            'icon' => '',
         ]));
 
         Auth::login($user);

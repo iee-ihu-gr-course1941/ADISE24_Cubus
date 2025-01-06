@@ -38,6 +38,7 @@ Route::middleware(\App\Http\Middleware\ManageInGameVerification::class)->group(f
     Route::resource('/game', GameController::class)->only(['index']);
     Route::post('/game/move', [GameController::class, 'move'])->name('game.move');
     Route::post('/game/validate', [GameController::class, 'validate'])->name('game.validate');
+    Route::post('/game/test', [GameController::class, 'test'])->name('game.test');
 });
 
 Route::get('/card-demo', function () {
