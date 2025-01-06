@@ -19,6 +19,7 @@ export default {
                 'custom-gray': {
                     400: '#A897A8',
                     700: '#4E454E',
+                    800: '#232326',
                 },
                 'custom-pink': {
                     50: '#FBEDFB',
@@ -38,6 +39,14 @@ export default {
                     500: '#742327',
                     600: '#67322D',
                 },
+            },
+            backgroundImage: {
+                'light-default-bottom': 'radial-gradient(150% 100% ellipse at bottom, #2D2937 0%, #1B191F 39%)',
+                'bright-default-bottom': 'radial-gradient(150% 100% ellipse at bottom, #8E6FED 0%, #6330EF 52%)',
+            },
+            boxShadow: {
+                'button-default': '0 0 8px 0 #8960F945',
+                'button-default-hover': '0 0 0 4px #6330EF40'
             }
         },
     },

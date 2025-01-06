@@ -1,4 +1,5 @@
 import useUserEvents from '@/Connection/useUserEvents';
+import { Button } from '@/Inputs/Button';
 import { PageProps } from '@/types';
 import { User } from '@/types/models/tables/User';
 import { useState } from 'react';
