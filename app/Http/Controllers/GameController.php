@@ -128,17 +128,17 @@ class GameController extends Controller {
 
         $player_available_pieces[(int)$data['code']] = false;
 
-        if(count($current_session->getPlayingPlayerColors()) === 0) {
-            $current_session['session_state'] = GameSessionState::Complete;
-        } else {
-            $current_session['current_round'] = $current_session['current_round'] + 1;
-        }
-
         if($is_valid) {
             $this->update_board($board, $piece, $origin_offset, $player_color[0]);
 
             if(!$this->hasValidMoves($board, $player_color[0], $player_available_pieces)) {
                 $current_session['player_'.$player_color.'_has_finished'] = true;
+            }
+
+            if(count($current_session->getPlayingPlayerColors()) === 0) {
+                $current_session['session_state'] = GameSessionState::Complete;
+            } else {
+                $current_session['current_round'] = $current_session['current_round'] + 1;
             }
 
             $current_session['player_'.$player_color.'_inventory'] = $player_available_pieces;
