@@ -1,48 +1,36 @@
-import { useBoardState } from "@/Store/board_state";
-import { useGameDimensions } from "@/Store/game_dimensions";
-import { OpponentMovePayload, PieceCode, Vector2 } from "@/types/piece";
-import { useControls } from "leva";
-import { useEffect, useState } from "react";
-import * as THREE from "three";
-import { OpponentPiece } from "./OpponentPiece";
-import { PiecePositions } from "@/Constants/Piece";
+import {useBoardState} from '@/Store/board_state';
+import {useEffect, useState} from 'react';
+import * as THREE from 'three';
+import {OpponentPiece} from './OpponentPiece';
+import {OpponentMove} from '@/types/game';
+import {useUserEventsStore} from '@/Store/user_events_store';
+import {formatOpponentMoveOrigin} from '@/libs/move';
 
 export const OpponentsHand = () => {
-    const [occupations, setOccupations] = useState<OpponentMovePayload[]>([]);
-    const state = useBoardState(state => state.gameState.state);
-    const playerTurn = useBoardState(state => state.gameState.player_turn);
+    const [occupations, setOccupations] = useState<OpponentMove['move'][]>([]);
+    const latestMove = useUserEventsStore(state => state.latestMove);
+    console.log('latest move:', latestMove);
+    const ui_state = useBoardState(state => state.gameState.ui_state);
     const playerCount = useBoardState(state => state.gameState.player_count);
-    const blockSize = useGameDimensions(state => state.blockSize);
-    const getGridSize = useGameDimensions(state => state.getGridSize);
+    const session_color = useBoardState(
+        state => state.playerState?.session_color,
+    );
 
     useEffect(() => {
-
-        if(state === 'OpponentTurn'){
-            //* Generate a random opponent move for demo
-            const gridSize = getGridSize(playerCount);
-            const randomX = Math.round((((Math.random() - 0.5) * gridSize)) / blockSize) * blockSize;
-            const randomY = Math.round((((Math.random() - 0.5) * gridSize)) / blockSize) * blockSize;
-            const opponentMovePayload: OpponentMovePayload = {
-                block_positions: PiecePositions[occupations.length as PieceCode],
-                destination: {x: randomX, y: randomY},
-                opponent: playerTurn,
-            }
-            setTimeout(() => {
-                setOccupations([...occupations, opponentMovePayload])
-            }, Math.random() * 500 + 250)
+        console.log('latest move:', latestMove, ui_state);
+        if (latestMove && latestMove.move.player_color !== session_color) {
+            setOccupations([
+                ...occupations,
+                formatOpponentMoveOrigin(latestMove.move, playerCount),
+            ]);
         }
-
-    }, [state, playerTurn])
+    }, [latestMove]);
 
     return (
         <>
-            {
-                occupations.map((movement, index) => {
-                    return (
-                        <OpponentPiece key={index} {...movement}/>
-                    )
-                })
-            }
+            {occupations.map((movement, index) => {
+                return <OpponentPiece key={index} {...movement} />;
+            })}
         </>
     );
-}
+};

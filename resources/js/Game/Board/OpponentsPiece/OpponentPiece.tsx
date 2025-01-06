@@ -1,18 +1,18 @@
-import { PIECE_GEOMETRY } from "@/Constants/geometries";
-import { BOARD_PLACED_MATERIALS } from "@/Constants/materials";
-import { useBoardState } from "@/Store/board_state";
-import { useGameDimensions } from "@/Store/game_dimensions";
-import { OpponentMovePayload, PlayerIdentifier } from "@/types/piece"
-import gsap from "gsap";
-import { memo, useEffect, useRef, useState } from "react";
-import * as THREE from "three";
+import {PIECE_GEOMETRY} from '@/Constants/geometries';
+import {BOARD_PLACED_MATERIALS} from '@/Constants/materials';
+import {useBoardState} from '@/Store/board_state';
+import {useGameDimensions} from '@/Store/game_dimensions';
+import {OpponentMove} from '@/types/game';
+import gsap from 'gsap';
+import {memo, useEffect, useRef, useState} from 'react';
+import * as THREE from 'three';
 
-type Props = OpponentMovePayload
+type Props = OpponentMove['move'];
 
-export const OpponentPiece = memo(
-    ({block_positions,destination,opponent}: Props) => {
-
+export const OpponentPiece = memo((move: Props) => {
+    const {block_positions, origin_x, origin_y, player_color} = move;
     const ORIGIN_POSITION = new THREE.Vector3(0, 2, -5);
+    console.log('positioning enemy piece at: ', origin_x, origin_y);
 
     const blockSize = useGameDimensions(state => state.blockSize);
     const addBoardPiece = useBoardState(state => state.addBoardPiece);
@@ -24,35 +24,40 @@ export const OpponentPiece = memo(
     const onCompleteEnd = useRef<() => void>();
 
     useEffect(() => {
-
         onComplete.current = () => {
-            if(ref.current){
+            if (ref.current) {
                 gsap.to(ref.current.position, {
                     y: blockSize * 0.5,
                     duration: calculateDuration(ref.current.position),
-                    onComplete: onCompleteEnd.current
-                })
+                    onComplete: onCompleteEnd.current,
+                });
             }
-        }
+        };
 
         onCompleteEnd.current = () => {
-            if(ref.current){
+            if (ref.current) {
                 addBoardPiece(ref.current);
                 changeTurn();
             }
-        }
-
-    }, [ref.current])
+        };
+    }, [ref.current]);
 
     const calculateDuration = (position: THREE.Vector3) => {
-        const directionPosition = new THREE.Vector3(destination.x, blockSize * 0.5, destination.y).sub(position);
+        const directionPosition = new THREE.Vector3(
+            origin_x,
+            blockSize * 0.5,
+            origin_y,
+        ).sub(position);
         return directionPosition.length() * 0.2;
-    }
+    };
 
     useEffect(() => {
-
-        if(ref.current && !hasPlaced){
-            const destinationPosition = new THREE.Vector3(destination.x, 0, destination.y).sub(new THREE.Vector3(blockSize * 0.5, 0, blockSize * 0.5));
+        if (ref.current && !hasPlaced) {
+            const destinationPosition = new THREE.Vector3(
+                origin_x,
+                0,
+                origin_y,
+            ).sub(new THREE.Vector3(blockSize * 0.5, 0, blockSize * 0.5));
             setHasPlaced(true);
             gsap.to(ref.current.position, {
                 z: destinationPosition.z,
@@ -61,24 +66,26 @@ export const OpponentPiece = memo(
                 onComplete: onComplete.current,
             });
         }
-
-    }, [ref.current])
+    }, [ref.current]);
 
     return (
         <>
             <group ref={ref} position={ORIGIN_POSITION}>
-                {
-                    block_positions.map((position, index) => {
-                        return (
-                            <mesh
-                                key={index}
-                                position={[position.x * blockSize, 0, position.y * blockSize]}
-                                geometry={PIECE_GEOMETRY['block']} material={BOARD_PLACED_MATERIALS[opponent]}
-                            />
-                        )
-                    })
-                }
+                {block_positions.map((position, index) => {
+                    return (
+                        <mesh
+                            key={index}
+                            position={[
+                                position.x * blockSize,
+                                0,
+                                position.y * blockSize,
+                            ]}
+                            geometry={PIECE_GEOMETRY['block']}
+                            material={BOARD_PLACED_MATERIALS[player_color]}
+                        />
+                    );
+                })}
             </group>
         </>
-    )
+    );
 });
