@@ -240,7 +240,6 @@ class GameController extends Controller {
                'y' => $part->y + $origin_offset['y'],
         ], $piece_parts);
 
-        broadcast(new BoardUpdateEvent($current_session, $player['id'], $player_color, $data['origin_x'], $data['origin_y'], $piece_code, $piece_parts_offset))->toOthers();
         return response(['valid' => $is_valid, 'origin_x' => $data['origin_x'], 'origin_y' => $data['origin_y'], 'block_positions' => $piece_parts_offset]);
     }
 
