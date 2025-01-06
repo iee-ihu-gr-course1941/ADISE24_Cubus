@@ -6,17 +6,17 @@
  *
  */
 
-import { useEffect, useState } from "react";
-import useServerEvents from "./useServerEvents";
-import { BoardUpdateEvent, LoginEvent } from "@/types/connection";
-import { getGame } from "@/network/session_network";
-import { GameResponse } from "@/types/game";
+import {useEffect, useState} from 'react';
+import useServerEvents from './useServerEvents';
+import {BoardUpdateEvent, LoginEvent} from '@/types/connection';
+import {getGame} from '@/network/session_network';
+import {GameResponse} from '@/types/game';
 
 export default function useUserEvents() {
-    let { connectionState, listen, stopListening } = useServerEvents();
-    let [ gameId, setGameId ] = useState<string>('');
-    let [ session, setSession ] = useState<GameResponse | null>(null);
-    let [ latestMove, setLatestMove ] = useState<BoardUpdateEvent | null>(null);
+    let {connectionState, listen, stopListening} = useServerEvents();
+    let [gameId, setGameId] = useState<string>('');
+    let [session, setSession] = useState<GameResponse | null>(null);
+    let [latestMove, setLatestMove] = useState<BoardUpdateEvent | null>(null);
 
     const cookies = parseCookies();
     const publicUserToken = cookies.get('user-token')!;
@@ -27,7 +27,7 @@ export default function useUserEvents() {
             loginEventCallback(event, publicUserToken);
         });
 
-        if(gameId.length !== 0) {
+        if (gameId.length !== 0) {
             console.info('Creating game event ws listener for: ', gameId);
             listen(`.game.${gameId}`, 'ConnectEvent', event => {
                 setSession(event.game_session);
@@ -42,16 +42,16 @@ export default function useUserEvents() {
         return () => {
             stopListening(`session.${publicUserToken}`, 'LoginEvent');
             stopListening(`.game.${gameId}`, 'ConnectEvent');
-        }
+        };
     }, [connectionState, gameId]);
 
     const joinGame = async () => {
         const res = await getGame();
-        if(res){
+        if (res && res.session.id) {
             setGameId(res.session.id.toString());
-            console.log('[JOINED GAME]', res)
+            console.log('[JOINED GAME]', res);
         }
-    }
+    };
 
     return {
         connectionState,
@@ -62,13 +62,13 @@ export default function useUserEvents() {
 }
 
 function loginEventCallback(event: LoginEvent, publicUserToken?: string) {
-    if(publicUserToken == null || publicUserToken.length === 0) {
+    if (publicUserToken == null || publicUserToken.length === 0) {
         return;
     }
 
-    if(!event.success) return;
+    if (!event.success) return;
 
-    if(event.redirect_url === '') {
+    if (event.redirect_url === '') {
         location.reload();
     } else {
         location.assign(event.redirect_url);
@@ -77,5 +77,7 @@ function loginEventCallback(event: LoginEvent, publicUserToken?: string) {
 
 function parseCookies(): Map<string, string> {
     // @ts-ignore
-    return new Map(document.cookie.split('; ').map(cookie => cookie.split('=')));
-};
+    return new Map(
+        document.cookie.split('; ').map(cookie => cookie.split('=')),
+    );
+}
