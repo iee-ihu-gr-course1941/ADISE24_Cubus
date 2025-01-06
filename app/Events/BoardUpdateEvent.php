@@ -30,4 +30,18 @@ class BoardUpdateEvent implements ShouldBroadcastNow {
             new PrivateChannel('game.' . $this->game_session['id']),
         ];
     }
+
+    public function broadcastWith(): array {
+        return [
+            'session' => $this->game_session->getPublic(),
+            'move' => [
+                'player_id' => $this->player_id,
+                'player_color' => $this->player_color,
+                'origin_x' => $this->origin_x,
+                'origin_y' => $this->origin_y,
+                'piece_code' => $this->piece_code,
+                'block_positions' => $this->block_positions,
+            ],
+        ];
+    }
 }
