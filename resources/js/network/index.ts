@@ -84,7 +84,7 @@ class Network {
     }: PostRequestProps<T, K>): Promise<T | null> {
         const urlToCall = `${url}${this.createUrl<K>(params)}`;
         try {
-            const resToken = await fetch('http://localhost:8000/test/csrf');
+            const resToken = await fetch('/test/csrf');
             const currentMS1 = new Date().getTime();
             const response = await fetch(urlToCall, {
                 method: method,

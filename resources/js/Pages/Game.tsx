@@ -22,13 +22,11 @@ export default function Game({user, userSession}: GameProps) {
         }
     }, [latestMove]);
 
-    const session = useMemo(() => {
+    useEffect(() => {
         const session = currentSession ?? userSession;
         if (session) {
             setState({...session.session}, {...session.player});
         }
-
-        return session;
     }, [currentSession, userSession]);
 
     useEffect(() => {
