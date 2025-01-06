@@ -10,12 +10,19 @@ export const Interface = () => {
     const startGame = useBoardState(state => state.startGame);
     const lockTurn = useBoardState(state => state.lockTurn);
     const {current_playing} = useBoardState(state => state.gameState);
+    const playerState = useBoardState(state => state.playerState);
     const {ui_state, current_round, startTime} = useBoardState(
         state => state.gameState,
     );
 
     const move = useBoardState(state => state.move);
     const boardPieces = useBoardState(state => state.boardPieces);
+    const playerPoints = useBoardState(state => state.getPoints);
+    const getHasFinished = useBoardState(state => state.getHasFinished);
+    const hasFinished = getHasFinished();
+    const gameHasFinished = useBoardState(
+        state => state.gameState.ui_state === 'Finished',
+    );
     const [timer, setTimer] = useState(0);
     const {time} = useTimerStore();
     const {setAction, action} = useInterfaceState();
@@ -26,9 +33,6 @@ export const Interface = () => {
         );
     }, 100);
 
-    const onStartGame = () => {
-        startGame();
-    };
     return (
         <div className="interface">
             <div className="game-state">
@@ -37,6 +41,7 @@ export const Interface = () => {
                 {ui_state !== 'Ready' && (
                     <>
                         <p>Round: {current_round}</p>
+                        <p>Points: {playerPoints()}</p>
                         <p>Time: {timer}</p>
                         <p>Playing: {current_playing}</p>
                         <p className="playing">
@@ -65,23 +70,32 @@ export const Interface = () => {
                             </div>
                         </>
                     )}
-                    {ui_state !== 'Ready' && ui_state !== 'Finished' && (
-                        <button
-                            datatype={
-                                ui_state === 'OwnTurnPlaying' && move
-                                    ? ''
-                                    : 'blocked'
-                            }
-                            onClick={
-                                ui_state === 'OwnTurnPlaying' && move
-                                    ? lockTurn
-                                    : undefined
-                            }>
-                            Lock Turn
-                        </button>
+                    {ui_state !== 'Ready' &&
+                        ui_state !== 'Finished' &&
+                        !hasFinished && (
+                            <button
+                                datatype={
+                                    ui_state === 'OwnTurnPlaying' && move
+                                        ? ''
+                                        : 'blocked'
+                                }
+                                onClick={
+                                    ui_state === 'OwnTurnPlaying' && move
+                                        ? lockTurn
+                                        : undefined
+                                }>
+                                Lock Turn
+                            </button>
+                        )}
+                    {hasFinished && (
+                        <div className="absolute bottom-20 left-0 w-full py-10 px-4 bg-gray-300 opacity-35 text-center">
+                            {gameHasFinished
+                                ? 'The game has Finished!'
+                                : 'Waiting for other players to finish'}
+                        </div>
                     )}
                     {/* <button datatype={state === 'OpponentTurn' ? '' : 'blocked'} onClick={() => changeTurn('red')}>End Opponent Turn</button> */}
-                    {move && (
+                    {move && !hasFinished && (
                         <div className="flex gap-x-2">
                             <RotateIcon
                                 enabled={action === 'none'}

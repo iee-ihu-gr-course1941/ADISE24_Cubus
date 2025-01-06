@@ -28,6 +28,8 @@ type Actions = {
     canPlay: () => boolean;
     removeBoardPiece: (piece: THREE.Group) => void;
     changeTurn: () => void;
+    getPoints: () => number;
+    getHasFinished: () => boolean;
 };
 
 export type BoardState = State & Actions;
@@ -156,12 +158,47 @@ export const useBoardState = create<BoardState>()((set, get, _) => ({
                 ),
             };
         }),
+    getPoints: () => {
+        return (
+            (() => {
+                const playerState = get().playerState;
+                const gameState = get().gameState;
+                if (!playerState) return 0;
+                if (playerState.session_color === 'blue')
+                    return gameState.player_blue_points;
+                if (playerState.session_color === 'green')
+                    return gameState.player_green_points;
+                if (playerState.session_color === 'red')
+                    return gameState.player_red_points;
+                return gameState.player_yellow_points;
+            })() ?? 0
+        );
+    },
+    getHasFinished: () => {
+        return (
+            (() => {
+                const playerState = get().playerState;
+                const gameState = get().gameState;
+                if (!playerState) return false;
+                if (playerState.session_color === 'blue')
+                    return gameState.player_blue_has_finished;
+                if (playerState.session_color === 'green')
+                    return gameState.player_green_has_finished;
+                if (playerState.session_color === 'red')
+                    return gameState.player_red_has_finished;
+                return gameState.player_yellow_has_finished;
+            })() ?? false
+        );
+    },
 }));
 
 const getUiState = (
     game: GameSession,
     player: PlayerState | undefined | null,
 ) => {
+    if (game.board_state?.length === 0) {
+        return 'Ready';
+    }
     const ui_state =
         game.session_state === 'waiting'
             ? 'Ready'

@@ -14,15 +14,15 @@ export type GameSession = {
 
     player_blue?: User;
     player_blue_has_finished?: boolean;
-    player_blue_points?: boolean;
+    player_blue_points?: number;
     player_red_has_finished?: boolean;
-    player_red_points?: boolean;
+    player_red_points?: number;
     player_red?: User;
     player_green_has_finished?: boolean;
-    player_green_points?: boolean;
+    player_green_points?: number;
     player_green?: User;
     player_yellow_has_finished?: boolean;
-    player_yellow_points?: boolean;
+    player_yellow_points?: number;
     player_yellow?: User;
     current_playing?: PlayerColor;
 };
