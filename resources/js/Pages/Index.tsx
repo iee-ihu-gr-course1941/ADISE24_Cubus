@@ -1,6 +1,7 @@
 import useUserEvents from '@/Connection/useUserEvents';
 import { Icon } from '@/Icons/SVG';
 import { Button } from '@/Inputs/Button';
+import { TextInput } from '@/Inputs/TextInput';
 import { PageProps } from '@/types';
 import { User } from '@/types/models/tables/User';
 import { useState } from 'react';
