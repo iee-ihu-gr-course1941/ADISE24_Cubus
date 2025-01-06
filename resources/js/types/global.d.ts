@@ -14,7 +14,7 @@ declare global {
     }
 
     /* eslint-disable no-var */
-    var route: (endpoint: Endpoints) => string;
+    var route: (endpoint: Endpoints, data?: any) => string;
 }
 
 declare module '@inertiajs/core' {

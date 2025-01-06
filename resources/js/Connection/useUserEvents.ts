@@ -77,7 +77,5 @@ function loginEventCallback(event: LoginEvent, publicUserToken?: string) {
 
 function parseCookies(): Map<string, string> {
     // @ts-ignore
-    return new Map(
-        document.cookie.split('; ').map(cookie => cookie.split('=')),
-    );
-}
+    return new Map(document.cookie.split('; ').map(cookie => cookie.split('=')));
+};

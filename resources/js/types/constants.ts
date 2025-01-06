@@ -1,6 +1,8 @@
 
 
-export type Endpoints = ProfileEndpoints | GameEndpoints | LobbyEndpoints;
+export type Endpoints = ProfileEndpoints | GameEndpoints | LobbyEndpoints | UserEndpoints;
+
+export type UserEndpoints = 'index' | 'logout' | 'login.mock' | 'login.apps';
 
 export type ProfileEndpoints = 'profile.show' | 'profile.create' | 'profile.edit' | 'profile.store';
 
