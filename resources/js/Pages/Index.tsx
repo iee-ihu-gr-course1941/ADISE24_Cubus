@@ -1,4 +1,5 @@
 import useUserEvents from '@/Connection/useUserEvents';
+import { Portrait } from '@/Icons/Portrait';
 import { Icon } from '@/Icons/SVG';
 import { Button } from '@/Inputs/Button';
 import { List, ListElement } from '@/Inputs/List';
