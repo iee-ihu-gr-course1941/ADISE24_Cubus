@@ -1,202 +1,251 @@
-import { PiecePositions, Piece as PieceData } from "@/Constants/Piece";
-import { useGameDimensions } from "@/Store/game_dimensions";
-import { MovePayload, MoveType, PieceCode, PieceRotation } from "@/types/piece";
-import { DragControls } from "@react-three/drei";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import * as THREE from "three";
-import gsap from "gsap";
-import { ThreeEvent } from "@react-three/fiber";
+import {PiecePositions, Piece as PieceData} from '@/Constants/Piece';
+import {useGameDimensions} from '@/Store/game_dimensions';
+import {MoveType, PieceCode, PieceRotation} from '@/types/piece';
+import {DragControls} from '@react-three/drei';
+import {useCallback, useEffect, useMemo, useRef, useState} from 'react';
+import * as THREE from 'three';
+import gsap from 'gsap';
+import {ThreeEvent} from '@react-three/fiber';
 import {useControls} from 'leva';
-import { BoardState, useBoardState } from "@/Store/board_state";
-import { PieceModel } from "./PieceModel";
-import { PieceShadow } from "./PieceShadow";
-import { useInterfaceState } from "@/Store/interface_state";
+import {BoardState, useBoardState} from '@/Store/board_state';
+import {PieceModel} from './PieceModel';
+import {PieceShadow} from './PieceShadow';
+import {useInterfaceState} from '@/Store/interface_state';
+import {MovePayload} from '@/types/game';
+import {validateMove} from '@/network/session_network';
 
-type Props = MovePayload & {
-
-}
+type Props = MovePayload & {};
 
 const rotationToIndex = (rotation: number) => {
     const normalizedRotation = (rotation + 2 * Math.PI) % (2 * Math.PI);
-    return (Math.round(normalizedRotation / (Math.PI / 2))) % 4 as PieceRotation;
-  };
+    return (Math.round(normalizedRotation / (Math.PI / 2)) %
+        4) as PieceRotation;
+};
 
-export const Piece = ({code: pieceCode = 0, origin_position: position, rotation, flip}: Props) => {
+export const Piece = ({
+    code: pieceCode = 0,
+    origin_x,
+    origin_y,
+    rotation,
+    flip,
+}: Props) => {
     const blockSize = useGameDimensions(state => state.blockSize);
     const ref = useRef<THREE.Group>(null);
     const shadowRef = useRef<THREE.Group>(null);
 
+    const position = useMemo(() => {
+        return {
+            x: origin_x,
+            y: origin_y,
+        };
+    }, [origin_x, origin_y]);
+
     const [centerCalculated, setCenterCalculated] = useState(false);
     const [lockRotation, setLockRotation] = useState(false);
     const [prePosition, setPrePosition] = useState<THREE.Vector3 | null>(null);
-    const [preQuaternion, setPreQuaternion] = useState<THREE.Quaternion | null>(null);
-    const [preMovePosition, setPreMovePosition] = useState<THREE.Vector3 | null>(null);
-    const [preMoveQuaternion, setPreMoveQuaternion] = useState<THREE.Quaternion | null>(null);
+    const [preQuaternion, setPreQuaternion] = useState<THREE.Quaternion | null>(
+        null,
+    );
+    const [preMovePosition, setPreMovePosition] =
+        useState<THREE.Vector3 | null>(null);
+    const [preMoveQuaternion, setPreMoveQuaternion] =
+        useState<THREE.Quaternion | null>(null);
     const [hasMoved, setHasMoved] = useState(false);
     const [isDragging, setIsDragging] = useState(false);
     const [shadowPosition, setShadowPosition] = useState<THREE.Vector3>();
     const onStart = useRef<() => void>();
     const onComplete = useRef<(moveType: MoveType) => void>();
     const onDragAnimationEnd = useRef<() => void>();
-    const [boardState, setBoardState] = useState<BoardState>()
-    const {action, setAction} = useInterfaceState()
+    const [boardState, setBoardState] = useState<BoardState>();
+    const {action, setAction} = useInterfaceState();
 
     const canMovePiece = useMemo(() => {
-            return !lockRotation && boardState?.canPlay() && !boardState?.boardPieces.some(p => p.uuid === ref.current?.uuid);
-    }, [lockRotation, boardState?.gameState, boardState?.boardPieces, ref.current]);
+        return (
+            !lockRotation &&
+            boardState?.canPlay() &&
+            !boardState?.boardPieces.some(p => p.uuid === ref.current?.uuid)
+        );
+    }, [
+        lockRotation,
+        boardState?.gameState,
+        boardState?.boardPieces,
+        ref.current,
+    ]);
 
-    const {isPositionValid, dragHeight, animationDuration} = useControls(
-        {
-            isPositionValid: {
-                label: 'Valid Move',
-                value: true,
-            },
-            dragHeight: {
-                label: 'Drag Height',
-                value: 1.5,
-                min: 0.0,
-                max: 3,
-                step: 0.25,
-            },
-            animationDuration: {
-                label: 'Animation Duration',
-                value: 0.25,
-                min: 0.0,
-                max: 2,
-                step: 0.1,
-            }
-        }
-    )
+    const {isPositionValid, dragHeight, animationDuration} = useControls({
+        isPositionValid: {
+            label: 'Valid Move',
+            value: true,
+        },
+        dragHeight: {
+            label: 'Drag Height',
+            value: 1.5,
+            min: 0.0,
+            max: 3,
+            step: 0.25,
+        },
+        animationDuration: {
+            label: 'Animation Duration',
+            value: 0.25,
+            min: 0.0,
+            max: 2,
+            step: 0.1,
+        },
+    });
 
-    const {block_positions,center_offset,origin_center_distance} = PieceData[pieceCode];
-
+    const {block_positions, center_offset, origin_center_distance} =
+        PieceData[pieceCode];
 
     useEffect(() => {
-
         //* Listen to Action events
 
-        if(boardState?.move?.code !== pieceCode){
-            return ;
+        if (boardState?.move?.code !== pieceCode) {
+            return;
         }
 
-        if(action === 'rotate_pos'){
+        if (action === 'rotate_pos') {
             onRotate('pos');
-        }else if(action === 'rotate_neg'){
+        } else if (action === 'rotate_neg') {
             onRotate('neg');
-        }else if(action === 'flip'){
+        } else if (action === 'flip') {
             onFlip();
         }
-
-    }, [action])
+    }, [action]);
 
     useEffect(() => {
-
-        setBoardState(useBoardState.getState())
+        setBoardState(useBoardState.getState());
         //* We subscribe to the state instead of listening to it directly to avoid re-rendering before component's state is correctly updated
-        const unsubscribe = useBoardState.subscribe(state => setBoardState(state))
+        const unsubscribe = useBoardState.subscribe(state =>
+            setBoardState(state),
+        );
         return () => {
-            unsubscribe()
-        }
+            unsubscribe();
+        };
+    }, []);
 
-    }, [])
+    if (pieceCode === 0) {
+        console.log(boardState?.gameState.ui_state);
+    }
 
     useEffect(() => {
         //* LISTENERS
-        if(boardState?.gameState.state === 'OwnTurnPlaying'){
+        if (boardState?.gameState.ui_state === 'OwnTurnPlaying') {
             setHasMoved(false);
             onMoveStart();
-        }else if (boardState?.gameState.state === 'OwnTurnLocked'){
-            onLockIn()
+        } else if (boardState?.gameState.ui_state === 'OwnTurnLocked') {
+            onLockIn();
         }
-    }, [boardState?.gameState.state])
+    }, [boardState?.gameState.ui_state]);
 
     const onLockIn = (onComplete = true) => {
-        if(ref.current){
+        if (ref.current) {
             gsap.to(ref.current.position, {
-                y: blockSize*0.5,
+                y: blockSize * 0.5,
                 duration: animationDuration,
                 onComplete: onComplete ? onDragAnimationEnd.current : undefined,
             });
         }
-    }
+    };
 
     useEffect(() => {
-
-        if(ref.current){
-            positionElement()
+        if (ref.current) {
+            positionElement();
         }
-
-    }, [ref.current, position, pieceCode, rotation, flip])
+    }, [ref.current, position, pieceCode, rotation, flip]);
 
     useEffect(() => {
-
         onStart.current = () => {
-            if(ref.current){
+            if (ref.current) {
                 setIsDragging(false);
-                if(!preQuaternion){
+                if (!preQuaternion) {
                     const quaternion = new THREE.Quaternion();
-                    ref.current.getWorldQuaternion(quaternion)
+                    ref.current.getWorldQuaternion(quaternion);
                     setPreQuaternion(quaternion);
                 }
-                setLockRotation(true)
+                setLockRotation(true);
             }
-        }
+        };
 
         onComplete.current = (moveType: MoveType) => {
-            if(ref.current){
+            if (ref.current) {
                 setIsDragging(true);
-                setLockRotation(false)
+                setLockRotation(false);
                 setHasMoved(true);
                 onPositionChange(moveType, false);
             }
 
             //* Reset action
-            if(action!=='none'){
+            if (action !== 'none') {
                 setAction('none');
             }
-        }
-
-    }, [ref.current, preQuaternion, isPositionValid, prePosition, action])
+        };
+    }, [ref.current, preQuaternion, isPositionValid, prePosition, action]);
 
     useEffect(() => {
-
-        onDragAnimationEnd.current = () => {
-            if((!isPiecePositionValid() || boardState?.move?.code !== pieceCode) && hasMoved){
+        onDragAnimationEnd.current = async () => {
+            let isValid = false;
+            console.log(hasMoved);
+            if (
+                boardState &&
+                boardState.move &&
+                boardState?.move?.code === pieceCode
+            ) {
+                const moveResponse = await validateMove({
+                    ...boardState.move,
+                    origin_x: (boardState.move.origin_x + 5 - 0.5) * 2,
+                    origin_y: (boardState.move.origin_y + 5 - 0.5) * 2,
+                });
+                console.log('move response:', moveResponse);
+                isValid = moveResponse?.valid ?? false;
+            }
+            if (
+                (!isPiecePositionValid() ||
+                    boardState?.move?.code !== pieceCode) &&
+                hasMoved
+            ) {
                 onMoveReject();
-            }else if(isPositionValid && boardState?.move?.code === pieceCode && ref.current){
-                boardState?.addBoardPiece(ref.current)
+            } else if (
+                isValid &&
+                boardState?.move?.code === pieceCode &&
+                ref.current
+            ) {
+                boardState?.addBoardPiece(ref.current);
                 boardState?.endTurn();
-            }else if(hasMoved){
+            } else if (hasMoved) {
+                console.log('rejecting', pieceCode);
                 onMoveReject();
             }
             setIsDragging(false);
-        }
-
-    }, [boardState?.move, pieceCode, hasMoved, ref.current, isPositionValid])
+        };
+    }, [boardState?.move, pieceCode, hasMoved, ref.current, isPositionValid]);
 
     const getOriginalQuaternion = () => {
         const flipAxis = getFlipAxis();
         return new THREE.Quaternion().setFromEuler(
             new THREE.Euler(
-                (flipAxis === 'x' && flip) ? Math.PI : 0,
+                flipAxis === 'x' && flip ? Math.PI : 0,
                 rotation * (Math.PI * 0.5),
-                (flipAxis === 'z' && flip) ? Math.PI : 0
-            )
+                flipAxis === 'z' && flip ? Math.PI : 0,
+            ),
         );
-    }
+    };
 
     const positionElement = () => {
         if (ref.current && !centerCalculated) {
             //* Convert Origin's position to Piece's position
-            const piecePosition = new THREE.Vector3(position.x, blockSize * 0.5 + 0.01, position.y).sub(getOriginToCenterOffset());
+            const piecePosition = new THREE.Vector3(
+                position.x,
+                blockSize * 0.5 + 0.01,
+                position.y,
+            ).sub(getOriginToCenterOffset());
 
             const rotationQuaternion = getOriginalQuaternion();
 
             const pMatrix = new THREE.Matrix4().makeTranslation(
                 piecePosition.x,
                 piecePosition.y,
-                piecePosition.z
-            )
+                piecePosition.z,
+            );
 
             ref.current.applyMatrix4(pMatrix);
             shadowRef.current?.applyMatrix4(pMatrix);
@@ -213,17 +262,20 @@ export const Piece = ({code: pieceCode = 0, origin_position: position, rotation,
             center.z -= center_offset.y * blockSize;
 
             ref.current.children.forEach((child, i) => {
-              if (child instanceof THREE.Mesh) {
-                //* Move child based on position matrix
-                child.applyMatrix4(pMatrix);
-                shadowRef.current?.children[i].applyMatrix4(pMatrix);
+                if (child instanceof THREE.Mesh) {
+                    //* Move child based on position matrix
+                    child.applyMatrix4(pMatrix);
+                    shadowRef.current?.children[i].applyMatrix4(pMatrix);
 
-                //* Move child to center
-                child.position.sub(center);
-                shadowRef.current?.children[i].position.sub(center);
-                child.updateWorldMatrix(true, true);
-                shadowRef.current?.children[i].updateWorldMatrix(true, true);
-              }
+                    //* Move child to center
+                    child.position.sub(center);
+                    shadowRef.current?.children[i].position.sub(center);
+                    child.updateWorldMatrix(true, true);
+                    shadowRef.current?.children[i].updateWorldMatrix(
+                        true,
+                        true,
+                    );
+                }
             });
 
             //* Fix the position of the rotated/flipped piece
@@ -236,19 +288,23 @@ export const Piece = ({code: pieceCode = 0, origin_position: position, rotation,
             const postPosition = new THREE.Vector3();
             ref.current.children[0].getWorldPosition(postPosition);
 
-            const offset = new THREE.Vector3(postPosition.x - prePosition.x, 0, postPosition.z - prePosition.z);
+            const offset = new THREE.Vector3(
+                postPosition.x - prePosition.x,
+                0,
+                postPosition.z - prePosition.z,
+            );
 
             //* Subtract the offset from the position
             ref.current.position.sub(offset);
 
             ref.current.updateWorldMatrix(true, true);
 
-            setCenterCalculated(true)
-          }
-    }
+            setCenterCalculated(true);
+        }
+    };
 
     const saveMove = () => {
-        if(ref.current){
+        if (ref.current) {
             //* The position of the center of the origin block
             const centerPosition = new THREE.Vector3();
             ref.current.children[0].getWorldPosition(centerPosition);
@@ -264,289 +320,340 @@ export const Piece = ({code: pieceCode = 0, origin_position: position, rotation,
 
             const payload: MovePayload = {
                 code: pieceCode,
-                origin_position: position,
+                origin_x: position.x,
+                origin_y: position.z,
                 rotation: rotationIndex,
                 flip: isFlipped,
-            }
+            };
             // console.log('payload:', payload);
             boardState?.setMove(payload);
         }
-    }
+    };
 
     const onMoveStart = () => {
-        if(ref.current){
+        if (ref.current) {
             const quaternion = new THREE.Quaternion();
             ref.current.getWorldQuaternion(quaternion);
 
             setPreMovePosition(getPiecePosition());
             setPreMoveQuaternion(quaternion);
         }
-    }
+    };
 
     const isPiecePositionValid = () => {
-        return (isPieceOnBoard() && !isPieceInteractingWithOtherPieces());
-    }
+        return isPieceOnBoard() && !isPieceInteractingWithOtherPieces();
+    };
 
     const onPositionChange = (moveType: MoveType, rejectChange = true) => {
         //* Local Movement
         const isPieceInteracting = isPieceInteractingWithOtherPieces();
         const pieceOnBoard = isPieceOnBoard();
-        if(moveType==='flip' || moveType==='rotate'){
+        if (moveType === 'flip' || moveType === 'rotate') {
             const rotation = getRotationFromQuaternion();
             shadowRef.current?.rotation.set(rotation.x, rotation.y, rotation.z);
         }
-        if((isPieceInteracting || !pieceOnBoard) && rejectChange){
-            if(!isPieceInteracting && !pieceOnBoard && moveType==='move'){
+        if ((isPieceInteracting || !pieceOnBoard) && rejectChange) {
+            if (!isPieceInteracting && !pieceOnBoard && moveType === 'move') {
                 // //* Reject the move if the piece is not on the board
                 rejectPosition('lock', dragHeight);
-                if(pieceCode === boardState?.move?.code){
+                if (pieceCode === boardState?.move?.code) {
                     boardState?.rejectMove();
                     boardState?.lockTurn();
                 }
-            }else{
+            } else {
                 onPositionChangeReject(moveType);
             }
-        }else if(ref.current && isPositionValid){
+        } else if (ref.current && isPositionValid) {
             saveMove();
         }
-    }
+    };
 
     const getRotationFromQuaternion = () => {
-        if(ref.current){
+        if (ref.current) {
             const quaternion = new THREE.Quaternion();
             ref.current.getWorldQuaternion(quaternion);
-            const rotation = new THREE.Euler().setFromQuaternion(quaternion, 'YXZ');
+            const rotation = new THREE.Euler().setFromQuaternion(
+                quaternion,
+                'YXZ',
+            );
             return rotation;
-        }else{
+        } else {
             return new THREE.Euler();
         }
-    }
+    };
 
     const getOriginToCenterOffset = () => {
-        return new THREE.Vector3(origin_center_distance.x * blockSize, 0, origin_center_distance.y * blockSize);
-    }
+        return new THREE.Vector3(
+            origin_center_distance.x * blockSize,
+            0,
+            origin_center_distance.y * blockSize,
+        );
+    };
 
     const getPiecePosition = () => {
-        if(ref.current){
+        if (ref.current) {
             const position = new THREE.Vector3();
             ref.current.children[0].getWorldPosition(position);
             position.sub(getOriginToCenterOffset());
             return position;
         }
         return new THREE.Vector3();
-    }
+    };
 
     const snapPieceToGrid = () => {
-        if(ref.current){
+        if (ref.current) {
             const currentPosition = getPiecePosition();
             const snapX = Math.round(currentPosition.x / blockSize) * blockSize;
             const snapZ = Math.round(currentPosition.z / blockSize) * blockSize;
 
-            const translation = new THREE.Vector3(snapX, currentPosition.y, snapZ).sub(currentPosition);
+            const translation = new THREE.Vector3(
+                snapX,
+                currentPosition.y,
+                snapZ,
+            ).sub(currentPosition);
 
             const snapMatrix = new THREE.Matrix4().compose(
                 new THREE.Vector3(translation.x, 0, translation.z),
                 new THREE.Quaternion(),
-                new THREE.Vector3(1,1,1)
+                new THREE.Vector3(1, 1, 1),
             );
 
             ref.current.applyMatrix4(snapMatrix);
             ref.current.updateWorldMatrix(true, true);
         }
-    }
+    };
 
     const rejectPosition = (type: 'lock' | 'change', y = 0) => {
-        if(ref.current){
+        if (ref.current) {
             const currentPosition = getPiecePosition();
-            const _prePosition = (type==='lock' ? preMovePosition : prePosition) ?? new THREE.Vector3();
-            const translation = new THREE.Vector3(_prePosition.x - currentPosition.x, 0, _prePosition.z - currentPosition.z);
-            if(translation.length() === 0) return;
+            const _prePosition =
+                (type === 'lock' ? preMovePosition : prePosition) ??
+                new THREE.Vector3();
+            const translation = new THREE.Vector3(
+                _prePosition.x - currentPosition.x,
+                0,
+                _prePosition.z - currentPosition.z,
+            );
+            if (translation.length() === 0) return;
 
-            ref.current.applyMatrix4(new THREE.Matrix4().makeTranslation(translation.x, -0.5, translation.z));
+            ref.current.applyMatrix4(
+                new THREE.Matrix4().makeTranslation(
+                    translation.x,
+                    -0.5,
+                    translation.z,
+                ),
+            );
             ref.current.updateWorldMatrix(true, true);
 
             const newPosition = new THREE.Vector3();
             ref.current.getWorldPosition(newPosition);
             setShadowPosition(newPosition);
         }
-    }
+    };
 
     const rejectRotation = (type: 'lock' | 'change') => {
-        if(ref.current){
+        if (ref.current) {
             const currentQuaternion = new THREE.Quaternion();
             ref.current.getWorldQuaternion(currentQuaternion);
             const rotationQuaternion = getOriginalQuaternion();
 
             //* Subtract the previous rotation from the current rotation
             ref.current.applyQuaternion(
-                (((type==='lock' ? preMoveQuaternion : preQuaternion) ?? new THREE.Quaternion()).clone()
-                .multiply(currentQuaternion.clone().invert())
-                .multiply(rotationQuaternion).normalize()).normalize()
+                (
+                    (type === 'lock' ? preMoveQuaternion : preQuaternion) ??
+                    new THREE.Quaternion()
+                )
+                    .clone()
+                    .multiply(currentQuaternion.clone().invert())
+                    .multiply(rotationQuaternion)
+                    .normalize()
+                    .normalize(),
             );
 
             //* Fix any snapping issues
-            const euler = new THREE.Euler().setFromQuaternion(ref.current.quaternion);
+            const euler = new THREE.Euler().setFromQuaternion(
+                ref.current.quaternion,
+            );
             const snappedEuler = new THREE.Euler(
                 Math.round(euler.x / (Math.PI * 0.5)) * (Math.PI * 0.5),
                 Math.round(euler.y / (Math.PI * 0.5)) * (Math.PI * 0.5),
-                Math.round(euler.z / (Math.PI * 0.5)) * (Math.PI * 0.5)
+                Math.round(euler.z / (Math.PI * 0.5)) * (Math.PI * 0.5),
             );
             ref.current.quaternion.setFromEuler(snappedEuler);
             ref.current.updateWorldMatrix(true, true);
         }
-    }
+    };
 
     const onMoveReject = () => {
-        if(preMoveQuaternion){
+        if (preMoveQuaternion) {
             rejectRotation('lock');
             setPreMoveQuaternion(null);
         }
-        if(preMovePosition){
+        if (preMovePosition) {
             rejectPosition('lock');
             setPreMovePosition(null);
         }
-        if(ref.current){
+        if (ref.current) {
             //* Remove piece in case of it not being in the board previously
             boardState?.removeBoardPiece(ref.current);
         }
         boardState?.rejectMove();
-        if(boardState?.move?.code === pieceCode){
+        if (boardState?.move?.code === pieceCode) {
             boardState?.continueTurn();
         }
-    }
+    };
 
     const onPositionChangeReject = (moveType: MoveType) => {
-            if(!ref.current) return;
-            if(moveType === 'move'){
-                rejectPosition('change');
-                setPrePosition(null);
-            }
-            else if(moveType === 'rotate' || moveType === 'flip'){
-                rejectRotation('change');
-                setPreQuaternion(null);
-            }
-    }
+        if (!ref.current) return;
+        if (moveType === 'move') {
+            rejectPosition('change');
+            setPrePosition(null);
+        } else if (moveType === 'rotate' || moveType === 'flip') {
+            rejectRotation('change');
+            setPreQuaternion(null);
+        }
+    };
 
     const onDragStart = () => {
         setIsDragging(true);
         addDragAnimation();
         setHasMoved(true);
         setPrePosition(getPiecePosition());
-    }
+    };
 
     const onDragEnd = () => {
-
-        if(prePosition && hasMoved){
-            snapPieceToGrid()
+        if (prePosition && hasMoved) {
+            snapPieceToGrid();
             onPositionChange('move');
         }
-    }
+    };
 
     const getFlipAxis = () => {
-        if(ref.current){
+        if (ref.current) {
             const indexedRotation = rotationToIndex(ref.current.rotation.y);
-            if(indexedRotation === 0 || indexedRotation === 2){
-                return 'z'
+            if (indexedRotation === 0 || indexedRotation === 2) {
+                return 'z';
             }
         }
         return 'x';
-    }
+    };
 
     const onRotate = (direction: 'pos' | 'neg' = 'pos') => {
-        if(ref.current && canMovePiece){
-            const sign = (isPieceFlipped('z') ? -1 : 1) * (direction == 'pos' ? 1 : -1);
-            gsap.to(ref.current.rotation,
-                {
-                    y: ref.current.rotation.y  + (Math.PI * 0.5) * (sign),
-                    duration: animationDuration * 2.5,
-                    onStart: onStart.current,
-                    onComplete: () => onComplete.current?.('rotate'),
-                },
-            );
+        if (ref.current && canMovePiece) {
+            const sign =
+                (isPieceFlipped('z') ? -1 : 1) * (direction == 'pos' ? 1 : -1);
+            gsap.to(ref.current.rotation, {
+                y: ref.current.rotation.y + Math.PI * 0.5 * sign,
+                duration: animationDuration * 2.5,
+                onStart: onStart.current,
+                onComplete: () => onComplete.current?.('rotate'),
+            });
         }
-    }
+    };
 
     const isPieceFlipped = (axis: 'x' | 'z') => {
-        if(ref.current){
-            return (Math.abs(ref.current.rotation[axis]) >= Math.round(Math.PI));
-        }else{
+        if (ref.current) {
+            return Math.abs(ref.current.rotation[axis]) >= Math.round(Math.PI);
+        } else {
             return false;
         }
-    }
+    };
 
     const onFlip = (event?: ThreeEvent<MouseEvent>) => {
         event?.stopPropagation();
-        if(ref.current && canMovePiece){
+        if (ref.current && canMovePiece) {
             const axis = getFlipAxis();
-            const sign = ref.current.rotation[axis] < 0 ? -1 : 1 //* Fix problem being caused by the snapToGrid matrix which messes with the rotation sign
-            gsap.to(ref.current.rotation,
-            {
-                [axis]: (isPieceFlipped(axis) ? ref.current.rotation[axis] - (Math.PI * sign) : ref.current.rotation[axis] + (Math.PI * sign)),
+            const sign = ref.current.rotation[axis] < 0 ? -1 : 1; //* Fix problem being caused by the snapToGrid matrix which messes with the rotation sign
+            gsap.to(ref.current.rotation, {
+                [axis]: isPieceFlipped(axis)
+                    ? ref.current.rotation[axis] - Math.PI * sign
+                    : ref.current.rotation[axis] + Math.PI * sign,
                 duration: animationDuration * 2.5,
                 onStart: onStart.current,
                 onComplete: () => onComplete.current?.('flip'),
-            }
-            ,);
+            });
         }
-    }
+    };
     const isPieceOnBoard = () => {
         const board = boardState?.boardRef;
-        if(ref.current && board){
-            for(const child of ref.current.children){
+        if (ref.current && board) {
+            for (const child of ref.current.children) {
                 const raycaster = new THREE.Raycaster();
                 const position = new THREE.Vector3();
                 child.getWorldPosition(position);
 
-                raycaster.set(position, new THREE.Vector3(0, -1, 0).normalize());
+                raycaster.set(
+                    position,
+                    new THREE.Vector3(0, -1, 0).normalize(),
+                );
                 const intersects = raycaster.intersectObject(board);
-                if(intersects.length === 0){
+                if (intersects.length === 0) {
                     return false;
                 }
             }
             return true;
         }
         return false;
-    }
+    };
 
     const isPieceInteractingWithOtherPieces = () => {
         const piece = ref.current;
-        if(piece){
-            const pieces = boardState?.boardPieces.filter(item => item.uuid !== piece.uuid) ?? []
+        if (piece) {
+            const pieces =
+                boardState?.boardPieces.filter(
+                    item => item.uuid !== piece.uuid,
+                ) ?? [];
             //* Check if there are no other pieces
-            if(pieces.length === 0) {
+            if (pieces.length === 0) {
                 return false;
-            }else{
+            } else {
                 //* Get all the pieces positions that are on board;
-                const piecesPosition = pieces.map((p) => p.children.map(_ => new THREE.Vector3())).flat();
+                const piecesPosition = pieces
+                    .map(p => p.children.map(_ => new THREE.Vector3()))
+                    .flat();
                 let totalBlocks = 0;
-                for (let i=0;i<pieces.length;i++){
-                    const refPiece = pieces[i]
-                    for(let j=0;j<refPiece.children.length;j++){
-                        refPiece.children[j].getWorldPosition(piecesPosition[totalBlocks] ?? new THREE.Vector3())
+                for (let i = 0; i < pieces.length; i++) {
+                    const refPiece = pieces[i];
+                    for (let j = 0; j < refPiece.children.length; j++) {
+                        refPiece.children[j].getWorldPosition(
+                            piecesPosition[totalBlocks] ?? new THREE.Vector3(),
+                        );
                         totalBlocks++;
                     }
                 }
                 //* Traverse through all blocks to find if any pieces are on top of each other
-                for(const block of piece.children){
+                for (const block of piece.children) {
                     const blockPosition = new THREE.Vector3();
                     block.getWorldPosition(blockPosition);
                     //* Calculate all the distances between the piece's block and all the other pieces blocks but exclude "y" axis to avoid confusion with height/drag animation
-                    const minDistance = Math.min(...piecesPosition.map(p => (new THREE.Vector3(blockPosition.x, 0, blockPosition.z)).distanceTo(new THREE.Vector3(p.x, 0, p.z))));
+                    const minDistance = Math.min(
+                        ...piecesPosition.map(p =>
+                            new THREE.Vector3(
+                                blockPosition.x,
+                                0,
+                                blockPosition.z,
+                            ).distanceTo(new THREE.Vector3(p.x, 0, p.z)),
+                        ),
+                    );
                     const allowedDistance = blockSize * 0.5;
-                    if((allowedDistance >= (minDistance)) ){
+                    if (allowedDistance >= minDistance) {
                         return true;
                     }
                 }
             }
         }
         return false;
-    }
+    };
 
     const addDragAnimation = () => {
-        if(ref.current){
-            gsap.to(ref.current.position, {y: dragHeight * blockSize, duration: animationDuration * 2, ease: 'power1.inOut'});
+        if (ref.current) {
+            gsap.to(ref.current.position, {
+                y: dragHeight * blockSize,
+                duration: animationDuration * 2,
+                ease: 'power1.inOut',
+            });
         }
-    }
+    };
 
     const onDrag = () => {
         //* Snap the shadow to the grid
@@ -560,24 +667,44 @@ export const Piece = ({code: pieceCode = 0, origin_position: position, rotation,
         const position = new THREE.Vector3();
         ref.current?.getWorldPosition(position);
         // Get a corner position
-        const offset = new THREE.Vector3(blockSize * 0.5, 0, blockSize * 0.5)
+        const offset = new THREE.Vector3(blockSize * 0.5, 0, blockSize * 0.5);
         position.sub(offset);
 
         const snapX = Math.round(position.x / blockSize) * blockSize;
         const snapZ = Math.round(position.z / blockSize) * blockSize;
 
         const snapPosition = new THREE.Vector3(snapX, 0.05, snapZ).add(offset);
-        setShadowPosition(snapPosition)
-    }
+        setShadowPosition(snapPosition);
+    };
 
     return (
         <>
-            <DragControls axisLock="y" onDrag={onDrag} onDragEnd={onDragEnd} onDragStart={onDragStart} dragConfig={{enabled: canMovePiece, filterTaps: true}}>
-                <group onDoubleClick={() => setAction('flip')} onContextMenu={() => setAction('rotate_pos')} ref={ref}>
-                    <PieceModel isDragging={isDragging} pieceCode={pieceCode} block_positions={block_positions} blockSize={blockSize}/>
+            <DragControls
+                axisLock="y"
+                onDrag={onDrag}
+                onDragEnd={onDragEnd}
+                onDragStart={onDragStart}
+                dragConfig={{enabled: canMovePiece, filterTaps: true}}>
+                <group
+                    onDoubleClick={() => setAction('flip')}
+                    onContextMenu={() => setAction('rotate_pos')}
+                    ref={ref}>
+                    <PieceModel
+                        isDragging={isDragging}
+                        pieceCode={pieceCode}
+                        block_positions={block_positions}
+                        blockSize={blockSize}
+                    />
                 </group>
             </DragControls>
-            <PieceShadow isDragging={isDragging} pieceCode={pieceCode} shadowPosition={shadowPosition} ref={shadowRef} block_positions={block_positions} blockSize={blockSize}/>
+            <PieceShadow
+                isDragging={isDragging}
+                pieceCode={pieceCode}
+                shadowPosition={shadowPosition}
+                ref={shadowRef}
+                block_positions={block_positions}
+                blockSize={blockSize}
+            />
         </>
     );
-}
+};

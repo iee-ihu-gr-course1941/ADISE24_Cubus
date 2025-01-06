@@ -1,4 +1,4 @@
-import { GameResponse, Vector2 } from "./game";
+import { GameResponse, PlayerColor, Vector2 } from "./game";
 
 export enum ConnectionState {
     Connected = 'connected',
@@ -37,6 +37,6 @@ export type BoardUpdateEvent = {
     'origin_x': number,
     'origin_y': number,
     'block_positions': Array<Vector2>,
-    'player_color': string,
+    'player_color': PlayerColor,
     'player_id': string,
 }

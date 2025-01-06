@@ -1,4 +1,4 @@
-import { PlayerIdentifier } from "@/types/piece";
+import { PlayerColor } from "@/types/game";
 import * as THREE from "three";
 
 const materialRed = new THREE.MeshStandardMaterial({ color: 0xef4444 });
@@ -10,7 +10,7 @@ const materialBlueStrong = new THREE.MeshStandardMaterial({ color: 0x1d4ed8 });
 const materialYellow = new THREE.MeshStandardMaterial({ color: 0xfde047 });
 const materialYellowStrong = new THREE.MeshStandardMaterial({ color: 0xeab308 });
 
-export const BOARD_PLACED_MATERIALS: {[key in PlayerIdentifier]: THREE.MeshStandardMaterial} = Object.freeze(
+export const BOARD_PLACED_MATERIALS: {[key in PlayerColor]: THREE.MeshStandardMaterial} = Object.freeze(
     {
         ['red']: materialRed,
         ['green']: materialGreen,
@@ -18,7 +18,7 @@ export const BOARD_PLACED_MATERIALS: {[key in PlayerIdentifier]: THREE.MeshStand
         ['yellow']: materialYellow,
     }
 );
-export const BOARD_SELECTED_MATERIALS: {[key in PlayerIdentifier]: THREE.MeshStandardMaterial} = Object.freeze(
+export const BOARD_SELECTED_MATERIALS: {[key in PlayerColor]: THREE.MeshStandardMaterial} = Object.freeze(
     {
         ['red']: materialRedStrong,
         ['green']: materialGreenStrong,

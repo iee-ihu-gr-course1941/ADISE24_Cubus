@@ -177,6 +177,8 @@ class GameSession extends Model {
             for($x = 0; $x < count($board); $x++) {
                 if($board[$y][$x] === '') continue;
 
+                error_log($board[$y][$x]);
+
                 array_push($piece_vectors, [
                     'x' => $x,
                     'y' => $y,

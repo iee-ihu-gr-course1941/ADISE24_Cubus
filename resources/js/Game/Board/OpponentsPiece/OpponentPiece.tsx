@@ -2,15 +2,15 @@ import { PIECE_GEOMETRY } from "@/Constants/geometries";
 import { BOARD_PLACED_MATERIALS } from "@/Constants/materials";
 import { useBoardState } from "@/Store/board_state";
 import { useGameDimensions } from "@/Store/game_dimensions";
-import { OpponentMovePayload, PlayerIdentifier } from "@/types/piece"
+import { OpponentMove } from "@/types/game";
 import gsap from "gsap";
 import { memo, useEffect, useRef, useState } from "react";
 import * as THREE from "three";
 
-type Props = OpponentMovePayload
+type Props = OpponentMove
 
 export const OpponentPiece = memo(
-    ({block_positions,destination,opponent}: Props) => {
+    ({block_positions,origin_x,origin_y,player_color}: Props) => {
 
     const ORIGIN_POSITION = new THREE.Vector3(0, 2, -5);
 
@@ -45,14 +45,14 @@ export const OpponentPiece = memo(
     }, [ref.current])
 
     const calculateDuration = (position: THREE.Vector3) => {
-        const directionPosition = new THREE.Vector3(destination.x, blockSize * 0.5, destination.y).sub(position);
+        const directionPosition = new THREE.Vector3(origin_x, blockSize * 0.5, origin_y).sub(position);
         return directionPosition.length() * 0.2;
     }
 
     useEffect(() => {
 
         if(ref.current && !hasPlaced){
-            const destinationPosition = new THREE.Vector3(destination.x, 0, destination.y).sub(new THREE.Vector3(blockSize * 0.5, 0, blockSize * 0.5));
+            const destinationPosition = new THREE.Vector3(origin_x, 0, origin_y).sub(new THREE.Vector3(blockSize * 0.5, 0, blockSize * 0.5));
             setHasPlaced(true);
             gsap.to(ref.current.position, {
                 z: destinationPosition.z,
@@ -73,7 +73,7 @@ export const OpponentPiece = memo(
                             <mesh
                                 key={index}
                                 position={[position.x * blockSize, 0, position.y * blockSize]}
-                                geometry={PIECE_GEOMETRY['block']} material={BOARD_PLACED_MATERIALS[opponent]}
+                                geometry={PIECE_GEOMETRY['block']} material={BOARD_PLACED_MATERIALS[player_color]}
                             />
                         )
                     })
