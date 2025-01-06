@@ -75,11 +75,7 @@ export const Piece = ({
         ref.current,
     ]);
 
-    const {isPositionValid, dragHeight, animationDuration} = useControls({
-        isPositionValid: {
-            label: 'Valid Move',
-            value: true,
-        },
+    const {dragHeight, animationDuration} = useControls({
         dragHeight: {
             label: 'Drag Height',
             value: 1.5,
@@ -125,10 +121,6 @@ export const Piece = ({
             unsubscribe();
         };
     }, []);
-
-    if (pieceCode === 0) {
-        console.log(boardState?.gameState.ui_state);
-    }
 
     useEffect(() => {
         //* LISTENERS
@@ -182,22 +174,17 @@ export const Piece = ({
                 setAction('none');
             }
         };
-    }, [ref.current, preQuaternion, isPositionValid, prePosition, action]);
+    }, [ref.current, preQuaternion, prePosition, action]);
 
     useEffect(() => {
         onDragAnimationEnd.current = async () => {
             let isValid = false;
-            console.log(hasMoved);
             if (
                 boardState &&
                 boardState.move &&
                 boardState?.move?.code === pieceCode
             ) {
-                const offset = PieceData[pieceCode];
                 console.log(boardState.move);
-                const x = Math.round((boardState.move.origin_x + 3) * 2);
-                const y = Math.round((boardState.move.origin_y + 3) * 2);
-                console.log('x,y:', x, y);
                 const moveResponse = await validateMove(
                     formatMoveOrigin(boardState.move, playerCount),
                 );
@@ -218,12 +205,11 @@ export const Piece = ({
                 boardState?.addBoardPiece(ref.current);
                 boardState?.endTurn();
             } else if (hasMoved) {
-                console.log('rejecting', pieceCode);
                 onMoveReject();
             }
             setIsDragging(false);
         };
-    }, [boardState?.move, pieceCode, hasMoved, ref.current, isPositionValid]);
+    }, [boardState?.move, pieceCode, hasMoved, ref.current]);
 
     const getOriginalQuaternion = () => {
         const flipAxis = getFlipAxis();
@@ -321,9 +307,12 @@ export const Piece = ({
             position.z = Math.round(position.z * 100) / 100;
             position.y = Math.round(position.y * 100) / 100;
 
-            const isFlipped = isPieceFlipped('z') || isPieceFlipped('x');
             const rotation = getRotationFromQuaternion();
             const rotationIndex = rotationToIndex(rotation.y);
+
+            const isFlipped =
+                Math.abs(rotation['z']) >= Math.round(Math.PI) ||
+                Math.abs(rotation['x']) >= Math.round(Math.PI);
 
             const payload: MovePayload = {
                 code: pieceCode,
@@ -355,22 +344,30 @@ export const Piece = ({
         //* Local Movement
         const isPieceInteracting = isPieceInteractingWithOtherPieces();
         const pieceOnBoard = isPieceOnBoard();
+        const pieceTouchingBoard = isPieceTouchingBoard();
         if (moveType === 'flip' || moveType === 'rotate') {
             const rotation = getRotationFromQuaternion();
             shadowRef.current?.rotation.set(rotation.x, rotation.y, rotation.z);
         }
         if ((isPieceInteracting || !pieceOnBoard) && rejectChange) {
-            if (!isPieceInteracting && !pieceOnBoard && moveType === 'move') {
+            if (
+                !isPieceInteracting &&
+                moveType === 'move' &&
+                !pieceTouchingBoard
+            ) {
                 // //* Reject the move if the piece is not on the board
                 rejectPosition('lock', dragHeight);
                 if (pieceCode === boardState?.move?.code) {
-                    boardState?.rejectMove();
-                    boardState?.lockTurn();
+                    //! Deprecated feature
+                    // boardState?.rejectMove();
+                    // boardState?.lockTurn();
                 }
             } else {
-                onPositionChangeReject(moveType);
+                saveMove();
+                //! Deprecated feature
+                // onPositionChangeReject(moveType);
             }
-        } else if (ref.current && isPositionValid) {
+        } else if (ref.current) {
             saveMove();
         }
     };
@@ -599,6 +596,28 @@ export const Piece = ({
                 }
             }
             return true;
+        }
+        return false;
+    };
+
+    const isPieceTouchingBoard = () => {
+        const board = boardState?.boardRef;
+        if (ref.current && board) {
+            for (const child of ref.current.children) {
+                const raycaster = new THREE.Raycaster();
+                const position = new THREE.Vector3();
+                child.getWorldPosition(position);
+
+                raycaster.set(
+                    position,
+                    new THREE.Vector3(0, -1, 0).normalize(),
+                );
+                const intersects = raycaster.intersectObject(board);
+                if (intersects.length > 0) {
+                    return true;
+                }
+            }
+            return false;
         }
         return false;
     };
