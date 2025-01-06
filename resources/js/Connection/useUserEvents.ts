@@ -14,7 +14,7 @@ import { GameResponse } from "@/types/game";
 
 export default function useUserEvents() {
     let { connectionState, listen, stopListening } = useServerEvents();
-    let [ gameId, setGameId ] = useState<string>('1');
+    let [ gameId, setGameId ] = useState<string>('');
     let [ session, setSession ] = useState<GameResponse | null>(null);
     let [ latestMove, setLatestMove ] = useState<BoardUpdateEvent | null>(null);
 
