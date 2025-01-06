@@ -127,9 +127,6 @@ class GameController extends Controller {
 
 
         $player_available_pieces[(int)$data['code']] = false;
-        if($is_valid && !$this->hasValidMoves($board, $player_color, $player_available_pieces)) {
-            $current_session['player_'.$player_color.'_has_finished'] = true;
-        }
 
         if(count($current_session->getPlayingPlayerColors()) === 0) {
             $current_session['session_state'] = GameSessionState::Complete;
@@ -139,6 +136,11 @@ class GameController extends Controller {
 
         if($is_valid) {
             $this->update_board($board, $piece, $origin_offset, $player_color[0]);
+
+            if(!$this->hasValidMoves($board, $player_color[0], $player_available_pieces)) {
+                $current_session['player_'.$player_color.'_has_finished'] = true;
+            }
+
             $current_session['player_'.$player_color.'_inventory'] = $player_available_pieces;
             $addedScore = $this->calculateAddedScore(
                 $piece_code,
@@ -579,10 +581,10 @@ class GameController extends Controller {
      * EXTREMELY INEFFICIENT CODE THAT CALCULATES THE NEXT VALID MOVES FOR EACH POSITION.
      * For this reason once it identifies a valid move it escapes
      * */
-    function hasValidMoves(array $board, string $player_color, array $player_available_pieces): bool {
+    function hasValidMoves(array $board, string $player_color_char, array $player_available_pieces): bool {
         $pieces_object = $this->getAllPieceParts();
 
-        $board_valid_connections = $this->getValidCornerConnectionPositions($board, 'b', '');
+        $board_valid_connections = $this->getValidCornerConnectionPositions($board, $player_color_char, '');
 
         foreach($player_available_pieces as $piece_code => $available) {
             if(!$available) continue;
@@ -593,8 +595,6 @@ class GameController extends Controller {
                 if($flip === 1) $this->flipPiece($piece);
 
                 for($i = 0; $i < 4; $i++) {
-                    $this->rotatePiece($piece, $flip === 1);
-
                     $bordered_piece = $this->addBordersToPieceMatrix($piece);
                     $piece_valid_connections = $this->getPieceEdges($bordered_piece, 1, 0);
 
@@ -606,7 +606,7 @@ class GameController extends Controller {
                             ];
 
                             error_log('Board (' . $board_origin[0] . ', ' . $board_origin[1] . ') Piece (' . $piece_origin[0] . ', ' . $piece_origin[1] . ')');
-                            $move_validations = $this->validateMove($board, $bordered_piece, $origin_offset, $player_color[0]);
+                            $move_validations = $this->validateMove($board, $bordered_piece, $origin_offset, $player_color_char);
 
                             if($move_validations['is_touching_adjacent'] && $move_validations['is_valid']) {
                                 return true;
@@ -614,6 +614,7 @@ class GameController extends Controller {
                         }
                     }
 
+                    $this->rotatePiece($piece, $flip === 1);
                 }
             }
         }
