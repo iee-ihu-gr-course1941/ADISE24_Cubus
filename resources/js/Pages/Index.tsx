@@ -1,4 +1,5 @@
 import useUserEvents from '@/Connection/useUserEvents';
+import { Icon } from '@/Icons/SVG';
 import { Button } from '@/Inputs/Button';
 import { PageProps } from '@/types';
 import { User } from '@/types/models/tables/User';
