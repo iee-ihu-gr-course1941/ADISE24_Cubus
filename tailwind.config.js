@@ -15,6 +15,30 @@ export default {
             fontFamily: {
                 sans: ['"Space Grotesk"', ...defaultTheme.fontFamily.sans],
             },
+            colors: {
+                'custom-gray': {
+                    400: '#A897A8',
+                    700: '#4E454E',
+                },
+                'custom-pink': {
+                    50: '#FBEDFB',
+                    100: '#FFCBFF',
+                    600: '#BF3079',
+                },
+                'custom-magenta': {
+                    400: '#EB5AF6',
+                    500: '#B638F7',
+                },
+                'custom-purple': {
+                    400: '#6330EF',
+                    600: '#301985',
+                    800: '#01092A',
+                },
+                'custom-brown': {
+                    500: '#742327',
+                    600: '#67322D',
+                },
+            }
         },
     },
 
