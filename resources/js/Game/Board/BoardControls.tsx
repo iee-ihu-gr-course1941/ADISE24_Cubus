@@ -4,7 +4,7 @@ import { OrbitControls } from "@react-three/drei"
 import * as THREE from "three";
 
 export const BoardControls = () => {
-    const state = useBoardState(state => state.gameState.state)
+    const state = useBoardState(state => state.gameState.ui_state)
     return (
         <>
             <OrbitControls

@@ -44,7 +44,6 @@ export default function Welcome({ user, flash }: PageProps<{ user: User }>) {
 
             <p className='font-black text-lg'>Navigate to:</p>
             <ul className='list-["-"] list-inside'>
-                <li><a href={route('card-demo')} className='text-blue-600'>Card Demo</a></li>
 
                 <li><a
                     href={`${import.meta.env.VITE_APPS_LOGIN}&state=${location.pathname}`}
@@ -65,17 +64,6 @@ export default function Welcome({ user, flash }: PageProps<{ user: User }>) {
                     </Fragment>
                 }
             </ul>
-
-            <button onClick={async () => {
-                const response = await fetch(route('noa'), {
-                    headers: {
-                        'Accept': 'application/json'
-                    }
-                })
-                const data = await response.text();
-
-                console.log('Test result:', {response, data});
-            }}>Test</button>
         </div>
     );
 }

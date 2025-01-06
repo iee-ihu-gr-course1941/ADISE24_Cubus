@@ -1,15 +1,15 @@
 import useUserEvents from '@/Connection/useUserEvents';
 import { PageProps } from '@/types';
-import { Game_session } from '@/types/models/tables/Session';
+import { GameSession } from '@/types/models/tables/Session';
 import { User } from '@/types/models/tables/User';
 import { router } from '@inertiajs/react';
 import { useEffect } from 'react';
 
-export default function Sessions({ user, userSession, sessions, flash }: PageProps<{ user: User, userSession?: Game_session, sessions: Game_session[] }>) {
+export default function Sessions({ user, userSession, sessions, flash }: PageProps<{ user: User, userSession?: GameSession, sessions: GameSession[] }>) {
     let { connectionState, joinGame, currentSession } = useUserEvents();
 
     useEffect(() => {
-        const session = currentSession ?? userSession;
+        const session = currentSession?.session ?? userSession;
         if(!session) return;
 
         if(session.session_state === 'playing' || session.session_state === 'paused') {
@@ -19,7 +19,7 @@ export default function Sessions({ user, userSession, sessions, flash }: PagePro
 
     useEffect(() => {
         if(!userSession) return;
-        joinGame(userSession.id.toString());
+        joinGame();
     }, []);
 
     let UserData = () => (
@@ -58,7 +58,7 @@ export default function Sessions({ user, userSession, sessions, flash }: PagePro
                 <a href={route('lobby.create')}>Create Game</a>
             </div>
 
-            { userSession && <CurrentSessionVisualizer user={user} session={currentSession || userSession} /> }
+            { userSession && <CurrentSessionVisualizer user={user} session={currentSession?.session || userSession} /> }
 
             <p className='font-black text-lg'>Games</p>
             {
@@ -76,7 +76,7 @@ export default function Sessions({ user, userSession, sessions, flash }: PagePro
     );
 }
 
-function CurrentSessionVisualizer({ user, session }: { user?: User, session: Game_session }) {
+function CurrentSessionVisualizer({ user, session }: { user?: User, session: GameSession }) {
     return (
         <div className='bg-slate-100 w-fit rounded-md p-4'>
             <p className='font-bold text-lg'>Your game</p>
