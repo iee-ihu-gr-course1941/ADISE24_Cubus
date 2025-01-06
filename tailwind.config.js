@@ -41,6 +41,7 @@ export default {
                 },
             },
             backgroundImage: {
+                'radio-default-inner': 'radial-gradient(150% 100% ellipse at top, #000000 0%, #1B191F 39%)',
                 'light-default-bottom': 'radial-gradient(150% 100% ellipse at bottom, #2D2937 0%, #1B191F 39%)',
                 'bright-default-bottom': 'radial-gradient(150% 100% ellipse at bottom, #8E6FED 0%, #6330EF 52%)',
                 'light-red-bottom': 'radial-gradient(150% 100% ellipse at bottom, #33031B 0%, #1B191F 39%)',
