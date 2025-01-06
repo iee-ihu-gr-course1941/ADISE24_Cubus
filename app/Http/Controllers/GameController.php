@@ -157,8 +157,8 @@ class GameController extends Controller {
 
         $piece_parts_rotated = $this->convertPieceToParts($piece);
         $piece_parts_offset = array_map(fn($part) => [
-               'x' => $part->x + $origin_offset['x'],
-               'y' => $part->y + $origin_offset['y'],
+               'x' => $part['x'] + $origin_offset['x'],
+               'y' => $part['y'] + $origin_offset['y'],
         ], $piece_parts_rotated);
 
         if($is_valid) broadcast(new BoardUpdateEvent($current_session, $player['id'], $player_color, $data['origin_x'], $data['origin_y'], $piece_code, $piece_parts_offset))->toOthers();
