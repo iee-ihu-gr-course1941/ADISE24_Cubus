@@ -20,7 +20,7 @@
         "laravel-vite-plugin": "^1.0",
         "leva": "^0.9.35",
         "postcss": "^8.4.31",
-        "prettier": "^3.4.1",
+        "prettier": "^3.4.2",
         "pusher-js": "^8.4.0-rc2",
         "r3f-perf": "7.2",
         "react": "^18.2.0",
@@ -40,6 +40,7 @@
         "framer-motion": "^11.13.1",
         "gsap": "^3.12.5",
         "postprocessing": "^6.0.4",
+        "prettier-plugin-organize-imports": "^4.1.0",
         "three": "^0.159.0",
         "zustand": "^5.0.2"
     },
