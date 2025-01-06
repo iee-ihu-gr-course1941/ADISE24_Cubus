@@ -43,10 +43,14 @@ export default {
             backgroundImage: {
                 'light-default-bottom': 'radial-gradient(150% 100% ellipse at bottom, #2D2937 0%, #1B191F 39%)',
                 'bright-default-bottom': 'radial-gradient(150% 100% ellipse at bottom, #8E6FED 0%, #6330EF 52%)',
+                'light-red-bottom': 'radial-gradient(150% 100% ellipse at bottom, #33031B 0%, #1B191F 39%)',
+                'bright-red-bottom': 'radial-gradient(150% 100% ellipse at bottom, #BF3079 0%, #742327 52%)',
             },
             boxShadow: {
                 'button-default': '0 0 8px 0 #8960F945',
-                'button-default-hover': '0 0 0 4px #6330EF40'
+                'button-default-hover': '0 0 0 4px #6330EF40',
+                'button-red': '0 0 8px 0 #74232745',
+                'button-red-hover': '0 0 0 4px #BF307940'
             }
         },
     },
