@@ -112,7 +112,7 @@ class GameController extends Controller {
         $piece = $this->getPieceMatrix($piece_parts);
         if($data['flip']) $this->flipPiece($piece);
         for($i = 0; $i < $data['rotation']; $i++) {
-            $this->rotatePiece($piece, $data['flip']);
+            $this->rotatePiece($piece, !$data['flip']);
         }
 
         $origin_offset = $this->identifyOriginOffset($piece);
@@ -155,10 +155,11 @@ class GameController extends Controller {
             $current_session->save();
         }
 
+        $piece_parts_rotated = $this->convertPieceToParts($piece);
         $piece_parts_offset = array_map(fn($part) => [
                'x' => $part->x + $origin_offset['x'],
                'y' => $part->y + $origin_offset['y'],
-        ], $piece_parts);
+        ], $piece_parts_rotated);
 
         if($is_valid) broadcast(new BoardUpdateEvent($current_session, $player['id'], $player_color, $data['origin_x'], $data['origin_y'], $piece_code, $piece_parts_offset))->toOthers();
         return response(['valid' => $is_valid, 'origin_x' => $data['origin_x'], 'origin_y' => $data['origin_y'], 'block_positions' => $piece_parts_offset]);
@@ -171,30 +172,30 @@ class GameController extends Controller {
         $board = json_decode($current_session['board_state']);
         $player_available_pieces = json_decode($current_session['player_'.$player_color.'_inventory']);
 
-        if($current_session['session_state'] !== GameSessionState::Playing->value) {
-            if($request->expectsJson()) {
-                return response([
-                    'valid' => false,
-                    'board' => $board,
-                    'message' => 'The game hasn\'t started yet'
-                ])->setStatusCode(400);
-            } else {
-                return inertia('Game')->with('flash', 'The game hasn\'t started yet');
-            }
-        }
-
-        if($current_session['current_playing'] !== $player_color) {
-            if($request->expectsJson()) {
-                return response([
-                    'valid' => false,
-                    'board' => $board,
-                    'message' => 'It isn\'t your turn.'
-                ])->setStatusCode(400);
-            } else {
-                return inertia('Game')->with('flash', 'It isn\'t your turn.');
-            }
-        }
-
+        /*if($current_session['session_state'] !== GameSessionState::Playing->value) {*/
+        /*    if($request->expectsJson()) {*/
+        /*        return response([*/
+        /*            'valid' => false,*/
+        /*            'board' => $board,*/
+        /*            'message' => 'The game hasn\'t started yet'*/
+        /*        ])->setStatusCode(400);*/
+        /*    } else {*/
+        /*        return inertia('Game')->with('flash', 'The game hasn\'t started yet');*/
+        /*    }*/
+        /*}*/
+        /**/
+        /*if($current_session['current_playing'] !== $player_color) {*/
+        /*    if($request->expectsJson()) {*/
+        /*        return response([*/
+        /*            'valid' => false,*/
+        /*            'board' => $board,*/
+        /*            'message' => 'It isn\'t your turn.'*/
+        /*        ])->setStatusCode(400);*/
+        /*    } else {*/
+        /*        return inertia('Game')->with('flash', 'It isn\'t your turn.');*/
+        /*    }*/
+        /*}*/
+        /**/
         $board_size = count($board);
         $data = $request->validate([
             'code' => 'required|int|between:0,20',
@@ -224,7 +225,7 @@ class GameController extends Controller {
         $piece = $this->getPieceMatrix($piece_parts);
         if($data['flip']) $this->flipPiece($piece);
         for($i = 0; $i < $data['rotation']; $i++) {
-            $this->rotatePiece($piece, $data['flip']);
+            $this->rotatePiece($piece, !$data['flip']);
         }
 
         $origin_offset = $this->identifyOriginOffset($piece);
@@ -237,10 +238,13 @@ class GameController extends Controller {
             $current_session['current_round'] < $current_session['player_count'] && $move_validations['is_touching_board_corner'] ||
             $current_session['current_round'] >= $current_session['player_count'] && $move_validations['is_touching_adjacent']);
 
+        $piece_parts_rotated = $this->convertPieceToParts($piece);
         $piece_parts_offset = array_map(fn($part) => [
-               'x' => $part->x + $origin_offset['x'],
-               'y' => $part->y + $origin_offset['y'],
-        ], $piece_parts);
+               'x' => $part['x'] + $origin_offset['x'],
+               'y' => $part['y']+ $origin_offset['y'],
+        ], $piece_parts_rotated);
+
+        return response($this->displayFull($piece, [0 => '_']) . "\n" . json_encode($piece_parts_offset));
 
         return response(['valid' => $is_valid, 'origin_x' => $data['origin_x'], 'origin_y' => $data['origin_y'], 'block_positions' => $piece_parts_offset]);
     }
@@ -595,6 +599,7 @@ class GameController extends Controller {
                 if($flip === 1) $this->flipPiece($piece);
 
                 for($i = 0; $i < 4; $i++) {
+                    $this->rotatePiece($piece, $flip === 0);
                     $bordered_piece = $this->addBordersToPieceMatrix($piece);
                     $piece_valid_connections = $this->getPieceEdges($bordered_piece, 1, 0);
 
@@ -684,6 +689,20 @@ class GameController extends Controller {
         }
 
         return $board_string;
+    }
+
+    private function convertPieceToParts(array $piece_matrix): array {
+        $parts = [];
+
+        for($y = 0; $y < count($piece_matrix); $y++) {
+            for($x = 0; $x < count($piece_matrix); $x++) {
+                if($piece_matrix[$y][$x] !== 0) {
+                    array_push($parts, ['x' => $x, 'y' => $y]);
+                }
+            }
+        }
+
+        return $parts;
     }
 
 }
