@@ -27,7 +27,7 @@ export default function Index({ user, flash }: PageProps<{ user: User }>) {
         console.info('User selected login option:', loginOption);
 
         if(loginOption === 'ihu') {
-            window.open(`${import.meta.env.VITE_APPS_LOGIN}&state=${location.pathname}`, '_blank');
+            window.open(`${import.meta.env.VITE_APPS_LOGIN}&state=/game`, '_blank');
             return;
         }
 
