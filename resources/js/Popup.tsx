@@ -4,13 +4,14 @@ import { Icon, SVG } from "./Icons/SVG";
 import { create } from "zustand";
 import { TextInput } from "./Inputs/TextInput";
 import { Portrait } from "./Icons/Portrait";
+import { RadioButton } from "./Inputs/RadioButton";
 
 type PopupDetails = PropsWithChildren<{
     title?: string;
     showExit?: boolean;
 }>;
 
-type PopupType = 'mock-login' | 'credits' | 'user-settings';
+type PopupType = 'mock-login' | 'credits' | 'user-settings' | 'lobby-settings';
 
 type PopupState = {
     popup?: PopupType;
@@ -62,6 +63,7 @@ export function PopupContainer() {
                     { popup === 'mock-login' && <PopupMockLogin /> }
                     { popup === 'credits' && <PopupCredits /> }
                     { popup === 'user-settings' && <PopupUserSettings /> }
+                    { popup === 'lobby-settings' && <PopupLobbySettings /> }
 
             </div>
         </div>
@@ -147,6 +149,31 @@ function PopupUserSettings() {
                                 <button><Portrait key="icon" url={'/portraits/' + icon} /></button>
                             ))
                         }
+                    </div>
+                </div>
+            </div>
+
+            <footer className="py-4 px-6 flex justify-end gap-[12px]">
+                <Button icon={Icon.check} text="Confirm" />
+            </footer>
+        </>
+    );
+}
+
+function PopupLobbySettings() {
+    return (
+        <>
+            <div className="w-[550px] px-6 pt-2 pb-4">
+                <div className="pb-6 flex flex-col gap-1">
+                    <label className="pb-1 text-custom-pink-50">Lobby's Name</label>
+                    <TextInput maxWidth='100%' placeholder="Friends only" />
+                </div>
+
+                <div className="pb-6 flex flex-col gap-2">
+                    <label className="pb-2 text-custom-pink-50">Player Count</label>
+                    <div className="flex gap-4">
+                        <RadioButton name="player-count" value="2" checked={true} label="2 Players" />
+                        <RadioButton name="player-count" value="4" label="4 Players" />
                     </div>
                 </div>
             </div>
