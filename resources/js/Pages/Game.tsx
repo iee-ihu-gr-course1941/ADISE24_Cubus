@@ -42,7 +42,7 @@ function Lobby({ user, connectionState, serverMessage }: LobbyProps) {
 
     useEffect(() => {
         if(serverMessage && serverMessage === 'user_new') {
-            showPopup('user-settings', { title: 'Create Your Profile', showExit: true });
+            showPopup('user-settings', { title: 'Create Your Profile', denyExit: true });
         }
     }, []);
 

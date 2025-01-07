@@ -9,6 +9,7 @@ import { RadioButton } from "./Inputs/RadioButton";
 type PopupDetails = PropsWithChildren<{
     title?: string;
     showExit?: boolean;
+    denyExit?: boolean;
 }>;
 
 type PopupType = 'mock-login' | 'credits' | 'user-settings' | 'lobby-settings';
@@ -31,7 +32,7 @@ export function PopupContainer() {
     const { popup, popupDetails, hidePopup } = usePopup();
 
     function onCancelCallbackStrict(event: React.MouseEvent) {
-        if(event.target !== event.currentTarget) return;
+        if(event.target !== event.currentTarget || popupDetails?.denyExit) return;
         hidePopup();
     }
 
@@ -56,7 +57,10 @@ export function PopupContainer() {
                         { popupDetails?.title?.length !== 0 && <p className="font-bold text-custom-pink-50 px-4">{popupDetails?.title}</p> }
                     </div>
                     <div className="ml-auto">
-                        { popupDetails?.showExit == true && <Button icon={Icon.xmark} color="red" onClick={() => hidePopup()} /> }
+                        { popupDetails?.showExit == true && <Button icon={Icon.xmark} color="red" onClick={() => {
+                            if(popupDetails?.denyExit) return;
+                            hidePopup()
+                        }} /> }
                     </div>
                 </header>
 
