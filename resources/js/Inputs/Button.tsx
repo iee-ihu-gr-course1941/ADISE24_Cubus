@@ -18,6 +18,7 @@ export function Button({text = '', color = 'default', icon, isLeft = false, onCl
             border-t-custom-gray-700 border-b-custom-gray-800 hover:border-t-white hover:border-b-custom-brown-600`;
     }
 
+    const Icon = () => icon != null ? <SVG icon={icon} fill="fill-custom-gray-400 group-hover:fill-custom-pink-50" /> : <></>;
     return (
         <button
             className={`
@@ -35,9 +36,9 @@ export function Button({text = '', color = 'default', icon, isLeft = false, onCl
                 ${colors}
             `}
             onClick={onClick}>
-            { isLeft && icon && <SVG icon={icon} fill="fill-custom-gray-400 group-hover:fill-custom-pink-50" /> }
+            { isLeft && <Icon /> }
             { text }
-            { !isLeft && icon && <SVG icon={icon} fill="fill-custom-gray-400 group-hover:fill-custom-pink-50" /> }
+            { !isLeft && <Icon /> }
         </button>
     );
 }
