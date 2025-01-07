@@ -5,11 +5,11 @@ import { Icon, SVG } from '@/Icons/SVG';
 import { Button } from '@/Inputs/Button';
 import { List, ListElement } from '@/Inputs/List';
 import { PopupContainer, usePopup } from '@/Popup';
+import { useAppState } from '@/Store/app_state';
 import { PageProps } from '@/types';
 import { ConnectionState } from '@/types/connection';
 import { GameResponse } from '@/types/game';
 import { User } from '@/types/models/tables/User';
-import { GameState } from '@/types/piece';
 import { PropsWithChildren, useEffect } from 'react';
 
 type GameProps = PageProps<{
@@ -19,7 +19,10 @@ type GameProps = PageProps<{
 
 export default function Game({ user, userSession, flash }: GameProps) {
     let { connectionState, currentSession, joinGame } = useUserEvents();
+    let { setUser } = useAppState();
     const session = currentSession ?? userSession;
+
+    if(user != null) setUser(user);
 
     console.info('Initial server data:', {user, session});
 
