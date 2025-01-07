@@ -18,13 +18,13 @@ export default function Index({ user, flash }: PageProps<{ user: User }>) {
                     visibleLoginOptions &&
                     <List title="Connect With" onClick={(value) => console.log('Login with:', value)}>
                         <ListElement value="ihu">
-                                <div className="px-8 py-3.5 flex gap-2 items-center">
+                                <div className="w-full px-8 py-3.5 flex gap-2 items-center hover:bg-custom-purple-400 hover:text-custom-pink-50">
                                     <SVG icon={Icon.ieeIhu} />IEE IHU Account
                                 </div>
                             </ListElement>
                         <ListElement value="mock">
-                                <div className="px-8 py-3.5 flex gap-2 items-center">
-                                    <SVG icon={Icon.wrench} fill="fill-custom-gray-400" />Mock Account
+                                <div className="group w-full px-8 py-3.5 flex gap-2 items-center hover:bg-custom-purple-400 hover:text-custom-pink-50">
+                                    <SVG icon={Icon.wrench} fill="fill-custom-gray-400 group-hover:fill-custom-pink-50" />Mock Account
                                 </div>
                             </ListElement>
                     </List>
