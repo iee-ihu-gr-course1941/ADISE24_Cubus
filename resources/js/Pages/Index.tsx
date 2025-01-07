@@ -2,6 +2,7 @@ import useUserEvents from "@/Connection/useUserEvents";
 import { Icon, SVG } from "@/Icons/SVG";
 import { Button } from "@/Inputs/Button";
 import { List, ListElement } from "@/Inputs/List";
+import { PopupContainer, usePopup } from "@/Popup";
 import { PageProps } from "@/types";
 import { User } from "@/types/models/tables/User";
 import { useState } from "react";
@@ -9,6 +10,7 @@ import { useState } from "react";
 export default function Index({ user, flash }: PageProps<{ user: User }>) {
     const [visibleLoginOptions, setVisibleLoginOptions] = useState<boolean>(false);
     const { connectionState } = useUserEvents();
+    const { showPopup } = usePopup();
 
     console.info('Initial Server Data:', user, flash);
 
@@ -21,13 +23,14 @@ export default function Index({ user, flash }: PageProps<{ user: User }>) {
         }
 
         if(loginOption === 'mock') {
-            // Create a mock login popup for them to set their id
+            showPopup('mock-login', { title: 'Mock Login', showExit: true });
             return;
         }
     }
 
     return (
         <div className="w-screen h-screen bg-backdrop relative text-custom-gray-400 font-bold flex flex-col">
+            <PopupContainer />
             <section className="pt-[10%] flex flex-col gap-12 items-center grow">
                 <p className="text-custom-pink-50 text-9xl">CUBUS</p>
                 <Button text="Play Now" icon={Icon.largeStars} isLeft={true} onClick={() => setVisibleLoginOptions(true)} />
