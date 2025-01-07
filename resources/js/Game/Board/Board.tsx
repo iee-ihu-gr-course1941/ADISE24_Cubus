@@ -6,6 +6,7 @@ import {Grid} from '@react-three/drei';
 import {OpponentsHand} from './OpponentsPiece/OpponentsHand';
 import {useControls} from 'leva';
 import {BoardPlacedPieces} from './OpponentsPiece/BoardPlacedPieces';
+import {BOARD_MATERIALS} from '@/Constants/materials';
 
 export const Board = memo(() => {
     const {showGridHelper} = useControls({
@@ -25,7 +26,6 @@ export const Board = memo(() => {
         if (!playerCount) return;
         return getGridSize(parseInt(playerCount));
     }, [playerCount, blockSize]);
-    console.log('grid size:', gridSize);
 
     return (
         <>
@@ -36,15 +36,25 @@ export const Board = memo(() => {
                             args={[gridSize, gridSize, 1]}
                             position-y={0.06}
                             sectionSize={blockSize}
-                            sectionColor={0x00ff00}
+                            sectionColor={0xa7f3d0}
                         />
                     )}
                     <mesh
+                        receiveShadow
                         visible={true}
+                        rotation-x={-Math.PI * 0.5 * 0}
+                        position-y={-0.2}
                         ref={ref => setBoardRef(ref)}
-                        scale={[gridSize, 1, gridSize]}>
-                        <boxGeometry args={[1, 0.1, 1]} />
-                        <meshBasicMaterial color={0xffffff} />
+                        scale={[gridSize, 1, gridSize]}
+                        material={[
+                            BOARD_MATERIALS['sides'],
+                            BOARD_MATERIALS['sides'],
+                            BOARD_MATERIALS['front'],
+                            BOARD_MATERIALS['sides'],
+                            BOARD_MATERIALS['sides'],
+                            BOARD_MATERIALS['sides'],
+                        ]}>
+                        <boxGeometry args={[1, 0.5, 1, 100, 100]} />
                     </mesh>
                     <OpponentsHand />
                     <BoardPlacedPieces />

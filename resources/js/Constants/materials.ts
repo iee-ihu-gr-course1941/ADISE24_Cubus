@@ -29,3 +29,11 @@ export const BOARD_SELECTED_MATERIALS: {
     ['blue']: materialBlueStrong,
     ['yellow']: materialYellowStrong,
 });
+
+const boardSidesMaterial = new THREE.MeshStandardMaterial({color: 0x444444});
+const boardFrontMaterial = new THREE.MeshStandardMaterial({color: 0xffffff});
+
+export const BOARD_MATERIALS = Object.freeze({
+    ['sides']: boardSidesMaterial,
+    ['front']: boardFrontMaterial,
+});
