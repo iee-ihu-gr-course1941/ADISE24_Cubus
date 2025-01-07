@@ -23,6 +23,6 @@ export function TextInput({placeholder, defaultValue, maxWidth, onUpdate}: TextI
             style={{ maxWidth: maxWidth ?? '' }}
             placeholder={placeholder}
             defaultValue={defaultValue}
-            onKeyDown={onUpdate} />
+            onKeyUp={onUpdate} />
     );
 }
