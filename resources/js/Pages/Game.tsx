@@ -84,10 +84,9 @@ function LobbiesControls({ games }: LobbiesControlsProps) {
                 <Button text="Join Random" icon={Icon.random} />
             </header>
 
-            <List title="Available Games" maxListHeight='70vh' className="w-full max-w-[980px] h-full" onClick={(id) => console.info('Joining Game:', id)}>
+            <List title="Available Games" emptyText="No Games Available" maxListHeight='70vh' className="w-full max-w-[980px] h-full" onClick={(id) => console.info('Joining Game:', id)}>
                 {
-                    games == null || games.length === 0 ?
-                        <div className="w-full text-center pt-16">No Games Available</div> :
+                    games && games.length > 0 &&
                         games.map(game => (
                             <ListElement key={game.id} value={game.id.toString()}>
                                 <div className="group px-8 py-4 flex items-center gap-4 w-full hover:bg-custom-purple-400 hover:text-custom-pink-50">
