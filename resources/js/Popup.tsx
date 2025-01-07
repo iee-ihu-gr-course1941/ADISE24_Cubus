@@ -5,7 +5,6 @@ import { create } from "zustand";
 import { TextInput } from "./Inputs/TextInput";
 import { Portrait } from "./Icons/Portrait";
 import { RadioButton } from "./Inputs/RadioButton";
-import { setUncaughtExceptionCaptureCallback } from "process";
 import { useAppState } from "./Store/app_state";
 import Network from "./network";
 import { User } from "./types/models/tables/User";
@@ -93,7 +92,7 @@ function PopupMockLogin() {
 
     return (
         <>
-            <div className="max-w-[600px] px-6 pt-2 pb-4">
+            <div className="max-w-[600px] pl-10 pr-6 pt-2 pb-4">
                 <div className="flex items-center gap-2 rounded-full border border-custom-purple-400 bg-custom-purple-600 px-2 py-1">
                     <SVG icon={Icon.infoCircle} fill="fill-custom-pink-50" />
                     <p className="text-custom-pink-50">This is meant for testing purposes only.</p>
@@ -117,7 +116,7 @@ function PopupMockLogin() {
 
 function PopupCredits() {
     return (
-        <div className="w-[540px] px-6 pt-2 pb-4">
+        <div className="w-[540px] pl-10 pr-6 pt-2 pb-4">
             <p className="text-custom-pink-50">CUBUS was made as a project for the course ADISE.</p>
             <p>The team thanks you for trying the game out.</p>
 
@@ -177,7 +176,7 @@ function PopupUserSettings() {
 
     return (
         <>
-            <div className="max-w-[600px] px-6 pt-2 pb-4">
+            <div className="max-w-[600px] pl-10 pr-6 pt-2 pb-4">
                 <div className="pb-6 flex flex-col gap-1">
                     <label className="pb-1 text-custom-pink-50">Your Username</label>
                     <TextInput maxWidth='100%' placeholder="best_cubus_player" onUpdate={onUsernameUpdateCallback} defaultValue={username} />
@@ -195,7 +194,7 @@ function PopupUserSettings() {
                 </div>
             </div>
 
-            <footer className="py-4 px-6 flex justify-end gap-[12px]">
+            <footer className="py-4 pl-10 pr-6 flex justify-end gap-[12px]">
                 <Button icon={Icon.check} text="Confirm" onClick={onConfirmCallback} />
             </footer>
         </>
@@ -205,7 +204,7 @@ function PopupUserSettings() {
 function PopupLobbySettings() {
     return (
         <>
-            <div className="w-[550px] px-6 pt-2 pb-4">
+            <div className="w-[550px] pl-10 pr-6 pt-2 pb-4">
                 <div className="pb-6 flex flex-col gap-1">
                     <label className="pb-1 text-custom-pink-50">Lobby's Name</label>
                     <TextInput maxWidth='100%' placeholder="Friends only" />
@@ -220,7 +219,7 @@ function PopupLobbySettings() {
                 </div>
             </div>
 
-            <footer className="py-4 px-6 flex justify-end gap-[12px]">
+            <footer className="py-4 pl-10 pr-6 flex justify-end gap-[12px]">
                 <Button icon={Icon.check} text="Confirm" />
             </footer>
         </>
