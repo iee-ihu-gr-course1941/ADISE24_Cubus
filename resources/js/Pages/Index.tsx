@@ -34,7 +34,7 @@ export default function Index({ user, flash }: PageProps<{ user: User }>) {
             <footer className="flex gap-2 p-8">
                 <Button icon={Icon.cogs} />
                 <Button icon={Icon.info} />
-                <Button text="Give us a Star" icon={Icon.github} isLeft={true} />
+                <Button text="Give us a Star" icon={Icon.github} isLeft={true} onClick={() => window.open('https://github.com/iee-ihu-gr-course1941/ADISE24_Cubus', '_blank')}/>
             </footer>
         </div>
     );
