@@ -5,6 +5,7 @@ import { Button } from '@/Inputs/Button';
 import { List, ListElement } from '@/Inputs/List';
 import { RadioButton } from '@/Inputs/RadioButton';
 import { TextInput } from '@/Inputs/TextInput';
+import { Popup, PopupContainer } from '@/Popup';
 import { PageProps } from '@/types';
 import { User } from '@/types/models/tables/User';
 import { useState } from 'react';
@@ -50,7 +51,6 @@ export default function Welcome({ user, flash }: PageProps<{ user: User }>) {
 
             <p className='font-black text-lg'>Navigate to:</p>
             <ul className='list-["-"] list-inside'>
-
                 <li><a
                     href={`${import.meta.env.VITE_APPS_LOGIN}&state=${location.pathname}`}
                     target='_blank'
@@ -70,6 +70,23 @@ export default function Welcome({ user, flash }: PageProps<{ user: User }>) {
                     </Fragment>
                 }
             </ul>
+
+            <div className='flex flex-col gap-2'>
+                <Button text='Hello World' icon={Icon.play} />
+                <Button text='Hello World' color='red' />
+                <Button color='red' icon={Icon.xmark} />
+                <TextInput placeholder='Test' />
+                <RadioButton name='test' value='value1' label='Value 1' />
+                <RadioButton name='test' value='value2' label='Value 2' />
+                <List title='Funky List' onClick={(value) => console.log(value)}>
+                    <ListElement value='test'><p>Cringe</p></ListElement>
+                    <ListElement value='test 2'><p>Cringe 2</p></ListElement>
+                </List>
+
+                <Portrait url="/portraits/white-wizard.jpg" />
+            </div>
+
+            <PopupContainer />
         </div>
     );
 }
