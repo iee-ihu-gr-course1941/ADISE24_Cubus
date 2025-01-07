@@ -12,7 +12,7 @@ type PopupDetails = PropsWithChildren<{
     cancelCallback?: () => void;
 }>;
 
-type PopupType = undefined;
+type PopupType = 'mock-login';
 
 type PopupState = {
     popup?: PopupType;

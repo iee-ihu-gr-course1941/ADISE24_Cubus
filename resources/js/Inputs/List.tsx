@@ -2,12 +2,14 @@ import React, { Fragment, PropsWithChildren } from "react";
 
 type ListProps = PropsWithChildren<{
     title?: string;
+    className?: string;
+    maxListHeight?: string;
     onClick?: (value: string) => void;
 }>;
 
-export function List({title = '', children, onClick}: ListProps) {
+export function List({title = '', maxListHeight, className, children, onClick}: ListProps) {
     return (
-        <div className="
+        <div className={`
             w-fit min-w-[200px]
             rounded-[20px]
             text-bold text-custom-gray-400
@@ -17,9 +19,10 @@ export function List({title = '', children, onClick}: ListProps) {
             border-t
             border-b-2
             bg-light-default-bottom border-t-custom-gray-700 border-b-custom-gray-800
-            ">
+            ${className}
+            `}>
             { title.length !== 0 && <p className="font-bold text-custom-pink-50 px-8 pb-3.5 pb-2 border-b border-b-custom-gray-400">{title}</p> }
-            <ul className="flex flex-col justify-stretch">
+            <ul className={`flex flex-col justify-stretch overflow-y-auto`} style={{ maxHeight: maxListHeight}}>
                 {
                     children && React.Children.map(children, child => ListRow({child, onClick}))
                 }

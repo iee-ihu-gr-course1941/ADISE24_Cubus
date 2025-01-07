@@ -3,10 +3,12 @@ import { Experience } from "@/Game/Experience";
 import { Portrait } from '@/Icons/Portrait';
 import { Icon, SVG } from '@/Icons/SVG';
 import { Button } from '@/Inputs/Button';
+import { List, ListElement } from '@/Inputs/List';
 import { PageProps } from '@/types';
 import { ConnectionState } from '@/types/connection';
 import { GameResponse } from '@/types/game';
 import { User } from '@/types/models/tables/User';
+import { GameState } from '@/types/piece';
 import { PropsWithChildren, useEffect } from 'react';
 
 type GameProps = PageProps<{
@@ -56,11 +58,34 @@ function Lobby({ user, connectionState }: LobbyProps) {
     );
 }
 
-function LobbiesControls() {
+type LobbiesControlsProps = {
+    games?: Array<{id: number}>;
+};
+
+function LobbiesControls({ games }: LobbiesControlsProps) {
     return (
-        <div className="flex flex-col gap-4 grow">
-            Hi
-        </div>
+        <section className="flex flex-col gap-4 grow h-full">
+            <header className="flex gap gap-4">
+                <Button text="Create Game" icon={Icon.largeStars} />
+                <Button text="Join Random" icon={Icon.random} />
+            </header>
+
+            <List title="Available Games" maxListHeight='70vh' className="w-full max-w-[980px] h-full" onClick={(id) => console.info('Joining Game:', id)}>
+                {
+                    games == null || games.length === 0 ?
+                        <div className="w-full text-center pt-16">No Games Available</div> :
+                        games.map(game => (
+                            <ListElement key={game.id} value={game.id.toString()}>
+                                <div className="group px-8 py-4 flex items-center gap-4 w-full hover:bg-custom-purple-400 hover:text-custom-pink-50">
+                                    <p className="grow text-start">Game {game.id}</p>
+                                    <div className="flex gap-2 items-center"><SVG icon={Icon.crown} fill="fill-custom-gray-400 group-hover:fill-custom-pink-50" /><p>by Player</p></div>
+                                    <div className="flex gap-2 items-center"><SVG icon={Icon.users} fill="fill-custom-gray-400 group-hover:fill-custom-pink-50" /><p>1 of 2</p></div>
+                                </div>
+                            </ListElement>
+                        ))
+                }
+            </List>
+        </section>
     );
 }
 
