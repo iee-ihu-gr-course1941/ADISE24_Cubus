@@ -77,10 +77,12 @@ type LobbiesControlsProps = {
 };
 
 function LobbiesControls({ games }: LobbiesControlsProps) {
+    const { showPopup } = usePopup();
+
     return (
         <section className="flex flex-col gap-4 grow h-full">
             <header className="flex gap gap-4">
-                <Button text="Create Game" icon={Icon.largeStars} />
+                <Button text="Create Game" icon={Icon.largeStars} onClick={() => showPopup('lobby-settings', { title: 'Create Lobby', showExit: true })} />
                 <Button text="Join Random" icon={Icon.random} />
             </header>
 
