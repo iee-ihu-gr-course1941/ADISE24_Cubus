@@ -6,7 +6,7 @@ type RadioButtonProps = {
     onClick?: (event: React.MouseEvent<HTMLInputElement>) => void;
 };
 
-export function RadioButton({value, name, label = '', onClick}: RadioButtonProps) {
+export function RadioButton({value, name, label = '', checked, onClick}: RadioButtonProps) {
     return (
         <div className="w-fit flex gap-3 items-center">
             <div className="relative">
@@ -14,6 +14,7 @@ export function RadioButton({value, name, label = '', onClick}: RadioButtonProps
                 id={name + '-' + value}
                 value={value}
                 name={name}
+                defaultChecked={checked}
                 className="peer w-[40px] h-[40px] absolute top-0 left-0 z-10 opacity-0 cursor-pointer"
                 onClick={onClick} />
             <button className="
