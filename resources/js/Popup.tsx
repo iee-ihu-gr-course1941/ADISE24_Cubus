@@ -3,13 +3,14 @@ import { Button } from "./Inputs/Button";
 import { Icon, SVG } from "./Icons/SVG";
 import { create } from "zustand";
 import { TextInput } from "./Inputs/TextInput";
+import { Portrait } from "./Icons/Portrait";
 
 type PopupDetails = PropsWithChildren<{
     title?: string;
     showExit?: boolean;
 }>;
 
-type PopupType = 'mock-login' | 'credits';
+type PopupType = 'mock-login' | 'credits' | 'user-settings';
 
 type PopupState = {
     popup?: PopupType;
@@ -60,6 +61,7 @@ export function PopupContainer() {
 
                     { popup === 'mock-login' && <PopupMockLogin /> }
                     { popup === 'credits' && <PopupCredits /> }
+                    { popup === 'user-settings' && <PopupUserSettings /> }
 
             </div>
         </div>
@@ -77,7 +79,7 @@ function PopupMockLogin() {
                 </div>
 
                 <div className="pt-12 pb-6 flex flex-col gap-1">
-                    <label>Mock ID</label>
+                    <label className="text-custom-pink-50">Mock ID</label>
                     <TextInput maxWidth='100%' placeholder="Mock ID" />
                 </div>
 
@@ -113,5 +115,45 @@ function PopupCredits() {
             <p className="pb-1">Pandeli Bezolli</p>
 
         </div>
+    );
+}
+
+function PopupUserSettings() {
+    // WARN: THE ICONS ARE MANUALLY INSERTED & VISIBLE IN THIS LIST
+    // This is required to not unintentionally leak public icons, although it would be really nice to have a way to grab all these icons beforehand.
+
+    const icons = [
+        'black-elegance.jpg',
+        'black-mlady.jpg',
+        'white-cowboy.jpg',
+        'white-wizard.jpg',
+        'yellow-elegance.jpg',
+        'yellow-mlady.jpg',
+    ];
+
+    return (
+        <>
+            <div className="max-w-[600px] px-6 pt-2 pb-4">
+                <div className="pb-6 flex flex-col gap-1">
+                    <label className="pb-1 text-custom-pink-50">Your Username</label>
+                    <TextInput maxWidth='100%' placeholder="best_cubus_player" />
+                </div>
+
+                <div className="pb-6 flex flex-col gap-1">
+                    <label className="pb-1 text-custom-pink-50">Your Icon</label>
+                    <div className="grid grid-cols-3 gap-4">
+                        {
+                            icons.map(icon => (
+                                <button><Portrait key="icon" url={'/portraits/' + icon} /></button>
+                            ))
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <footer className="py-4 px-6 flex justify-end gap-[12px]">
+                <Button icon={Icon.check} text="Confirm" />
+            </footer>
+        </>
     );
 }
