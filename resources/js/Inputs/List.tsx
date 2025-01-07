@@ -12,13 +12,13 @@ export function List({title = '', children, onClick}: ListProps) {
             rounded-[20px]
             text-bold text-custom-gray-400
 
-            py-2
+            py-3.5
 
             border-t
             border-b-2
             bg-light-default-bottom border-t-custom-gray-700 border-b-custom-gray-800
             ">
-            { title.length !== 0 && <p className="font-bold text-custom-pink-50 px-4 pb-2 border-b border-b-custom-gray-400">{title}</p> }
+            { title.length !== 0 && <p className="font-bold text-custom-pink-50 px-8 pb-3.5 pb-2 border-b border-b-custom-gray-400">{title}</p> }
             <ul className="flex flex-col justify-stretch">
                 {
                     children && React.Children.map(children, child => ListRow({child, onClick}))
