@@ -1,5 +1,5 @@
 type PortraitProps = {
-    url: string;
+    url?: string;
 };
 
 export function Portrait({url}: PortraitProps) {
@@ -11,7 +11,9 @@ export function Portrait({url}: PortraitProps) {
             bg-light-default-bottom
             ">
             <div className="p-[1px] bg-portrait-default rounded-[21px]">
-                <img src={url} className="w-[128px] h-[128px] rounded-[20px]" />
+                <div className="w-[128px] h-[128px] rounded-[20px]">
+                    { url && <img src={url} className="w-[128px] h-[128px] rounded-[20px]" /> }
+                </div>
             </div>
         </div>
     );
