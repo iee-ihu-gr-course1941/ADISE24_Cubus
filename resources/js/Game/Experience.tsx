@@ -1,4 +1,4 @@
-import {OrbitControls} from '@react-three/drei';
+import {Environment, OrbitControls} from '@react-three/drei';
 import {Camera, Canvas, Object3DNode, useThree} from '@react-three/fiber';
 import {Board} from './Board/Board';
 import {Lights} from './Ligths';
@@ -29,7 +29,9 @@ export const Experience = memo(() => {
     return (
         <>
             <Canvas
-                onCreated={({camera}) => {
+                onCreated={({camera, gl}) => {
+                    gl.shadowMap.autoUpdate = true;
+                    gl.toneMapping = THREE.ACESFilmicToneMapping;
                     if (ui_state === 'Ready') {
                         camera.position.set(
                             ORIGIN_CAMERA_POSITION.x,
