@@ -4,6 +4,7 @@ import { Portrait } from '@/Icons/Portrait';
 import { Icon, SVG } from '@/Icons/SVG';
 import { Button } from '@/Inputs/Button';
 import { List, ListElement } from '@/Inputs/List';
+import { PopupContainer, usePopup } from '@/Popup';
 import { PageProps } from '@/types';
 import { ConnectionState } from '@/types/connection';
 import { GameResponse } from '@/types/game';
@@ -16,7 +17,7 @@ type GameProps = PageProps<{
     userSession?: GameResponse
 }>;
 
-export default function Game({ user, userSession }: GameProps) {
+export default function Game({ user, userSession, flash }: GameProps) {
     let { connectionState, currentSession, joinGame } = useUserEvents();
     const session = currentSession ?? userSession;
 
@@ -26,18 +27,28 @@ export default function Game({ user, userSession }: GameProps) {
         if(session != null) joinGame();
     }, [])
 
-    if(!session) return <Lobby user={user} connectionState={connectionState} />;
+    if(!session) return <Lobby user={user} connectionState={connectionState} serverMessage={flash} />;
     return <Experience/>;
 }
 
 type LobbyProps = {
     user: User;
     connectionState: ConnectionState;
+    serverMessage?: string;
 };
 
-function Lobby({ user, connectionState }: LobbyProps) {
+function Lobby({ user, connectionState, serverMessage }: LobbyProps) {
+    const { showPopup } = usePopup();
+
+    useEffect(() => {
+        if(serverMessage && serverMessage === 'user_new') {
+            showPopup('user-settings', { title: 'Create Your Profile', showExit: true });
+        }
+    }, []);
+
     return (
         <div className="w-screen h-screen bg-backdrop relative text-custom-gray-400 font-bold flex flex-col">
+            <PopupContainer />
             <section className="pt-8 px-8 flex gap-8 grow items-start">
                 <LobbiesControls />
                 <PlayerDetails username={user.name ?? ''} icon='/portraits/white-wizard.jpg' points={3} />

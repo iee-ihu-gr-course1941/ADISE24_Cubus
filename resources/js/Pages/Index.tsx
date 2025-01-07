@@ -14,7 +14,16 @@ export default function Index({ user, flash }: PageProps<{ user: User }>) {
 
     console.info('Initial Server Data:', user, flash);
 
-    function handleLogin(loginOption: string) {
+    function showLoginOptionsCallback() {
+        if(user != null) {
+            window.open('/game', '_self');
+            return;
+        }
+
+        setVisibleLoginOptions(true);
+    }
+
+    function handleLoginCallback(loginOption: string) {
         console.info('User selected login option:', loginOption);
 
         if(loginOption === 'ihu') {
@@ -33,11 +42,11 @@ export default function Index({ user, flash }: PageProps<{ user: User }>) {
             <PopupContainer />
             <section className="pt-[10%] flex flex-col gap-12 items-center grow">
                 <p className="text-custom-pink-50 text-9xl">CUBUS</p>
-                <Button text="Play Now" icon={Icon.largeStars} isLeft={true} onClick={() => setVisibleLoginOptions(true)} />
+                <Button text="Play Now" icon={Icon.largeStars} isLeft={true} onClick={showLoginOptionsCallback} />
 
                 {
                     visibleLoginOptions &&
-                    <List title="Connect With" onClick={handleLogin}>
+                    <List title="Connect With" onClick={handleLoginCallback}>
                         <ListElement value="ihu">
                                 <div className="w-full px-8 py-3.5 flex gap-2 items-center hover:bg-custom-purple-400 hover:text-custom-pink-50">
                                     <SVG icon={Icon.ieeIhu} />IEE IHU Account

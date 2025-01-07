@@ -1,4 +1,4 @@
-import { PropsWithChildren } from "react";
+import { PropsWithChildren, useState } from "react";
 import { Button } from "./Inputs/Button";
 import { Icon, SVG } from "./Icons/SVG";
 import { create } from "zustand";
@@ -71,6 +71,17 @@ export function PopupContainer() {
 }
 
 function PopupMockLogin() {
+    const [mockID, setMockID] = useState<string>();
+
+    function onUpdate(event: React.KeyboardEvent<HTMLInputElement>) {
+        const data = event?.currentTarget?.value ?? '';
+        setMockID(oldData => data);
+    }
+
+    function onConfirm() {
+        console.log('Attempting to login with mock id:', mockID);
+        window.open(route('login.mock', mockID), '_self');
+    }
 
     return (
         <>
@@ -82,7 +93,7 @@ function PopupMockLogin() {
 
                 <div className="pt-12 pb-6 flex flex-col gap-1">
                     <label className="text-custom-pink-50">Mock ID</label>
-                    <TextInput maxWidth='100%' placeholder="Mock ID" />
+                    <TextInput maxWidth='100%' placeholder="Mock ID" onUpdate={onUpdate} />
                 </div>
 
                 <p className="pb-2">You can use whatever id you want.</p>
@@ -90,7 +101,7 @@ function PopupMockLogin() {
             </div>
 
             <footer className="py-4 px-6 flex justify-end gap-[12px]">
-                <Button icon={Icon.check} text="Confirm" />
+                <Button icon={Icon.check} text="Confirm" onClick={onConfirm} />
             </footer>
         </>
     );

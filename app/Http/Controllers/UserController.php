@@ -53,7 +53,7 @@ class UserController extends Controller {
             return response($user->getPublic())->withHeaders(['Content-Type' => 'application/json']);
         }
 
-        return redirect()->route('index');
+        return redirect()->route('game.index')->with('flash', ($user['is_new'] ? 'user_new' : 'user_old'));
     }
 
     public function show(): \Illuminate\Http\Response {
