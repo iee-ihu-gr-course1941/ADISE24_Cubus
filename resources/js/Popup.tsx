@@ -9,7 +9,7 @@ type PopupDetails = PropsWithChildren<{
     showExit?: boolean;
 }>;
 
-type PopupType = 'mock-login';
+type PopupType = 'mock-login' | 'credits';
 
 type PopupState = {
     popup?: PopupType;
@@ -58,9 +58,8 @@ export function PopupContainer() {
                     </div>
                 </header>
 
-                    {
-                        popup === 'mock-login' && <PopupMockLogin />
-                    }
+                    { popup === 'mock-login' && <PopupMockLogin /> }
+                    { popup === 'credits' && <PopupCredits /> }
 
             </div>
         </div>
@@ -90,5 +89,29 @@ function PopupMockLogin() {
                 <Button icon={Icon.check} text="Confirm" />
             </footer>
         </>
+    );
+}
+
+function PopupCredits() {
+    return (
+        <div className="w-[540px] px-6 pt-2 pb-4">
+            <p className="text-custom-pink-50">CUBUS was made as a project for the course ADISE.</p>
+            <p>The team thanks you for trying the game out.</p>
+
+            <p className="pt-4 pb-2 text-custom-pink-50">Lead Developers</p>
+            <p className="pb-1">Tryfonas Mazarakis</p>
+            <p className="pb-1">Pandeli Bezolli</p>
+
+            <p className="pt-4 pb-2 text-custom-pink-50">2D Artists</p>
+            <p className="pb-1">Tryfonas Mazarakis</p>
+            <p className="pb-1">Pandeli Bezolli</p>
+
+            <p className="pt-4 pb-2 text-custom-pink-50">3D Artists</p>
+            <p className="pb-1">Tryfonas Mazarakis</p>
+
+            <p className="pt-4 pb-2 text-custom-pink-50">Music and Sound Effects</p>
+            <p className="pb-1">Pandeli Bezolli</p>
+
+        </div>
     );
 }
