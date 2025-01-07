@@ -24,7 +24,7 @@ export function Button({text = '', color = 'default', icon, isLeft = false, onCl
             className={`
                 group
                 flex gap-1.5 items-center
-                w-fit ${ text.length === 0 ? 'px-4' : 'px-6'} ${ text.length === 0 ? 'py-4' : 'py-2.5' }
+                w-fit ${ text.length === 0 ? 'px-[1.125rem]' : 'px-6'} ${ text.length === 0 ? 'py-4' : 'py-2.5' }
 
                 text-custom-gray-400 font-bold
                 rounded-full border-t border-b-2
