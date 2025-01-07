@@ -22,11 +22,11 @@ export default function Game({ user, userSession, flash }: GameProps) {
     let { setUser } = useAppState();
     const session = currentSession ?? userSession;
 
-    if(user != null) setUser(user);
-
     console.info('Initial server data:', {user, session});
 
     useEffect(() => {
+        setUser(user);
+
         if(session != null) joinGame();
     }, [])
 
@@ -110,12 +110,14 @@ type PlayerDetailsProps = {
 };
 
 function PlayerDetails({username, icon, points}: PlayerDetailsProps) {
+    const { showPopup } = usePopup();
+
     return (
         <div className="flex gap-4 items-start">
             <section className="flex flex-col gap-[9px] items-end">
                 <TextTile>{username}</TextTile>
                 <TextTile>{points} <SVG icon={Icon.points} fill='fill-custom-gray-400' /></TextTile>
-                <Button icon={Icon.editProfile} />
+                <Button icon={Icon.editProfile} onClick={() => showPopup('user-settings', { title: 'Edit Your Profile', showExit: true })} />
             </section>
 
             <Portrait url={icon} />

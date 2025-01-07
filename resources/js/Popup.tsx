@@ -5,6 +5,10 @@ import { create } from "zustand";
 import { TextInput } from "./Inputs/TextInput";
 import { Portrait } from "./Icons/Portrait";
 import { RadioButton } from "./Inputs/RadioButton";
+import { setUncaughtExceptionCaptureCallback } from "process";
+import { useAppState } from "./Store/app_state";
+import Network from "./network";
+import { User } from "./types/models/tables/User";
 
 type PopupDetails = PropsWithChildren<{
     title?: string;
@@ -138,7 +142,6 @@ function PopupCredits() {
 function PopupUserSettings() {
     // WARN: THE ICONS ARE MANUALLY INSERTED & VISIBLE IN THIS LIST
     // This is required to not unintentionally leak public icons, although it would be really nice to have a way to grab all these icons beforehand.
-
     const icons = [
         'black-elegance.jpg',
         'black-mlady.jpg',
@@ -148,20 +151,44 @@ function PopupUserSettings() {
         'yellow-mlady.jpg',
     ];
 
+    const { hidePopup } = usePopup();
+    const { user, setUser } = useAppState();
+    console.info('Opening user settings with data:', { user });
+    const [username, setUsername] = useState<string>(user?.name ?? '');
+    const [icon, setIcon] = useState<number>(user?.icon ? (icons.indexOf(user.icon) + 1) : 0);
+
+    function onUsernameUpdateCallback(event: React.KeyboardEvent<HTMLInputElement>) {
+        const data = event?.currentTarget.value ?? '';
+        setUsername(() => data);
+    }
+
+    async function onConfirmCallback() {
+        console.info('Attempting to update user setting with: ', {username, icon});
+        const result = await Network.post<User>({ url: route('profile.store'), body: { name: username, icon } });
+        let newUser = user ?? result!;
+        if(user) {
+            newUser.name = username;
+            newUser.icon = '/portraits/' + icons[icon - 1];
+        }
+
+        if(result) setUser(newUser);
+        hidePopup();
+    }
+
     return (
         <>
             <div className="max-w-[600px] px-6 pt-2 pb-4">
                 <div className="pb-6 flex flex-col gap-1">
                     <label className="pb-1 text-custom-pink-50">Your Username</label>
-                    <TextInput maxWidth='100%' placeholder="best_cubus_player" />
+                    <TextInput maxWidth='100%' placeholder="best_cubus_player" onUpdate={onUsernameUpdateCallback} defaultValue={username} />
                 </div>
 
                 <div className="pb-6 flex flex-col gap-1">
                     <label className="pb-1 text-custom-pink-50">Your Icon</label>
                     <div className="grid grid-cols-3 gap-4">
                         {
-                            icons.map(icon => (
-                                <button><Portrait key="icon" url={'/portraits/' + icon} /></button>
+                            icons.map((icon, index) => (
+                                <button key={icon} onClick={() => setIcon(index + 1)}><Portrait url={'/portraits/' + icon} /></button>
                             ))
                         }
                     </div>
@@ -169,7 +196,7 @@ function PopupUserSettings() {
             </div>
 
             <footer className="py-4 px-6 flex justify-end gap-[12px]">
-                <Button icon={Icon.check} text="Confirm" />
+                <Button icon={Icon.check} text="Confirm" onClick={onConfirmCallback} />
             </footer>
         </>
     );
