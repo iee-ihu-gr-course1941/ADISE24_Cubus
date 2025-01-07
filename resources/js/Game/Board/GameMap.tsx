@@ -25,6 +25,23 @@ const GameMap = () => {
     const {time} = useTimerStore();
     const timeRef = useRef(0);
 
+    const {scene, gl} = useThree();
+
+    useEffect(() => {
+        const skyLoader = new THREE.CubeTextureLoader();
+        const skyTexture = skyLoader.load([
+            '/sky/px.png',
+            '/sky/nx.png',
+            '/sky/py.png',
+            '/sky/ny.png',
+            '/sky/pz.png',
+            '/sky/nz.png',
+        ]);
+        scene.background = skyTexture;
+        scene.environment = skyTexture;
+        scene.backgroundBlurriness = 0;
+    }, []);
+
     useFrame(({camera}, delta) => {
         //* Camera Animation
         if (
