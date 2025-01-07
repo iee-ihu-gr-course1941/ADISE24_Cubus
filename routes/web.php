@@ -33,9 +33,9 @@ Route::get('/lobby/current', [GameSessionController::class, 'show'])->name('lobb
 Route::get('/lobby/match',  [GameSessionController::class, 'search'])->name('lobby.match');
 Route::get('/lobby/{game_session}/join', [GameSessionController::class, 'join'])->name('lobby.join');
 Route::get('/lobby/disconnect', [GameSessionController::class, 'disconnect'])->name('lobby.disconnect');
+Route::get('/game', [GameController::class, 'index'])->name('game.index');
 
 Route::middleware(\App\Http\Middleware\ManageInGameVerification::class)->group(function () {
-    Route::resource('/game', GameController::class)->only(['index']);
     Route::post('/game/move', [GameController::class, 'move'])->name('game.move');
     Route::post('/game/validate', [GameController::class, 'validate'])->name('game.validate');
     Route::post('/game/test', [GameController::class, 'test'])->name('game.test');

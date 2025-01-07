@@ -33,19 +33,19 @@ class GameController extends Controller {
         }
 
         $public_player_data = $player->getPublic();
-        $public_player_data['session_color'] = $player->getCurrentSessionColor()->value;
-        $public_player_data['session_valid_pieces'] = json_decode($current_session['player_'.$player->getCurrentSessionColor()->value.'_inventory']);
+        if(!is_null($current_session)) $public_player_data['session_color'] = $player->getCurrentSessionColor()->value;
+        if(!is_null($current_session)) $public_player_data['session_valid_pieces'] = json_decode($current_session['player_'.$player->getCurrentSessionColor()->value.'_inventory']);
 
         if($request->expectsJson()) {
             return response([
-                'session' => $current_session->getPublic(),
+                'session' => $current_session ? $current_session->getPublic() : null,
                 'player' => $public_player_data,
             ]);
         }
 
         return inertia('Game', [
             'user' => $player->getPublic(),
-            'userSession' => [
+            'userSession' => !$current_session ? null : [
                 'session' => $current_session->getPublic(),
                 'player' => $public_player_data,
             ]
