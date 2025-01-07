@@ -109,18 +109,21 @@ type PlayerDetailsProps = {
     points: number,
 };
 
-function PlayerDetails({username, icon, points}: PlayerDetailsProps) {
+function PlayerDetails({}: PlayerDetailsProps) {
+    const { user } = useAppState();
     const { showPopup } = usePopup();
+
+    if(user == null) return;
 
     return (
         <div className="flex gap-4 items-start">
             <section className="flex flex-col gap-[9px] items-end">
-                <TextTile>{username}</TextTile>
-                <TextTile>{points} <SVG icon={Icon.points} fill='fill-custom-gray-400' /></TextTile>
+                <TextTile>{user.name}</TextTile>
+                <TextTile>10 <SVG icon={Icon.points} fill='fill-custom-gray-400' /></TextTile>
                 <Button icon={Icon.editProfile} onClick={() => showPopup('user-settings', { title: 'Edit Your Profile', showExit: true })} />
             </section>
 
-            <Portrait url={icon} />
+            <Portrait url={user.icon} />
         </div>
     )
 }
