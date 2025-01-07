@@ -47,6 +47,7 @@ export default {
                 'light-red-bottom': 'radial-gradient(150% 100% ellipse at bottom, #33031B 0%, #1B191F 39%)',
                 'bright-red-bottom': 'radial-gradient(150% 100% ellipse at bottom, #BF3079 0%, #742327 52%)',
                 'backdrop': 'radial-gradient(50% 50%, #EB5AF660, transparent), radial-gradient(100% 100% ellipse at bottom left, #6330EF80, #000000A0 80%), linear-gradient(to top, #000, #01092A)',
+                'portrait-default': 'linear-gradient(to top, #01092A, #EB5AF6)',
             },
             boxShadow: {
                 'button-default': '0 0 8px 0 #8960F945',
