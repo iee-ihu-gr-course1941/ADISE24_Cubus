@@ -22,9 +22,9 @@ type GameProps = PageProps<{
 }>;
 
 export default function Game(props: GameProps) {
-    let { connectionState, currentSession } = useUserEvents();
+    let { connectionState } = useUserEvents();
 
-    return <GameContent {...props } userSession={currentSession ?? props?.userSession} connectionState={connectionState} />
+    return <GameContent {...props } connectionState={connectionState} />
 }
 
 type GameContentProps = GameProps & {
@@ -32,7 +32,8 @@ type GameContentProps = GameProps & {
 }
 
 function GameContent({ user, availableSessions, userSession, connectionState, flash }: GameContentProps) {
-    let { setUser, setCurrentSession } = useAppState();
+    const { currentSession, setUser, setCurrentSession } = useAppState();
+    const session = currentSession ?? userSession?.session;
     const {setState} = useBoardState();
     console.info('Initial server data:', {user, userSession, availableSessions});
 
@@ -44,7 +45,7 @@ function GameContent({ user, availableSessions, userSession, connectionState, fl
         setState({...userSession.session}, userSession.player);
     }, [])
 
-    if(userSession?.session == null || userSession.session.session_state === 'waiting') {
+    if(session == null || session.session_state === 'waiting') {
         return <Lobby user={user} availableSessions={availableSessions} connectionState={connectionState} serverMessage={flash} />;
     }
     return <Experience/>;
@@ -82,11 +83,10 @@ function Lobby({
             <PopupContainer />
             <section className="pt-8 px-8 flex gap-8 grow items-start">
                 <LobbiesControls games={availableSessions} />
-                <PlayerDetails
-                    username={user.name ?? ''}
-                    icon="/portraits/white-wizard.jpg"
-                    points={3}
-                />
+                <div className='flex gap-4 flex-col'>
+                    <PlayerDetails username={user.name ?? ''} icon='/portraits/white-wizard.jpg' points={3} />
+                    <CurrentSessionDetails />
+                </div>
             </section>
 
             <footer className="flex items-center gap-2 p-8">
@@ -218,10 +218,31 @@ function PlayerDetails({}: PlayerDetailsProps) {
     );
 }
 
-function TextTile({
-    className,
-    children,
-}: PropsWithChildren<{className?: string}>) {
+function CurrentSessionDetails() {
+    const { currentSession } = useAppState();
+
+    if(!currentSession) return;
+
+    return (
+        <div className="
+            px-8 py-4
+
+            rounded-[30px]
+            border-t border-b-2
+            bg-light-default-bottom border-t-custom-gray-700 border-b-custom-gray-800
+            ">
+            <p className="text-custom-pink-50 pb-4">Waiting for the game to begin</p>
+            <div className="flex justify-between">
+                <p>{currentSession.name}</p>
+                <div className="flex gap-2 items-center"><SVG icon={Icon.users} fill="fill-custom-gray-400 group-hover:fill-custom-pink-50" /><p>
+                    {currentSession.current_player_count} of {currentSession.player_count}
+                </p></div>
+            </div>
+        </div>
+    );
+}
+
+function TextTile({className, children}: PropsWithChildren<{className?: string}>) {
     return (
         <div
             className={`

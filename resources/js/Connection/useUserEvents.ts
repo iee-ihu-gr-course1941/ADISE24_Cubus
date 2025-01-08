@@ -15,8 +15,7 @@ import { useAppState } from '@/Store/app_state';
 
 export default function useUserEvents() {
     let {connectionState, listen, stopListening} = useServerEvents();
-    let { currentSession } = useAppState();
-    let [session, setSession] = useState<GameResponse | null>(null);
+    let { currentSession, setCurrentSession } = useAppState();
     let [latestMove, setLatestMove] = useState<BoardUpdateEvent | null>(null);
 
     const cookies = parseCookies();
@@ -33,7 +32,7 @@ export default function useUserEvents() {
             console.info('Creating game event ws listener for: ', gameId);
             listen(`.game.${gameId}`, 'ConnectEvent', event => {
                 console.log('Received session update:', event);
-                setSession(event.game_session);
+                setCurrentSession(event.game_session);
             });
 
             listen(`.game.${gameId}`, 'BoardUpdateEvent', event => {
@@ -55,7 +54,6 @@ export default function useUserEvents() {
 
     return {
         connectionState,
-        currentSession: session,
         latestMove,
     };
 }
