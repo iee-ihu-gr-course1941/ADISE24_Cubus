@@ -194,7 +194,7 @@ class GameSessionController extends Controller {
         $game_session->save();
 
         broadcast(new ConnectEvent($game_session));
-        return response($game_session)->withHeaders(['Content-Type' => 'application/json']);
+        return response($game_session->getPublic())->withHeaders(['Content-Type' => 'application/json']);
     }
 
     public function disconnect(): \Illuminate\Http\RedirectResponse | \Illuminate\Http\Response {

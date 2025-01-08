@@ -4,11 +4,13 @@ import { Portrait } from '@/Icons/Portrait';
 import { Icon, SVG } from '@/Icons/SVG';
 import { Button } from '@/Inputs/Button';
 import { List, ListElement } from '@/Inputs/List';
+import Network from '@/network';
 import { PopupContainer, usePopup } from '@/Popup';
 import { useAppState } from '@/Store/app_state';
 import { PageProps } from '@/types';
 import { ConnectionState } from '@/types/connection';
 import { GameResponse } from '@/types/game';
+import { GameSession } from '@/types/models/tables/Session';
 import { User } from '@/types/models/tables/User';
 import { PropsWithChildren, useEffect } from 'react';
 
@@ -80,12 +82,19 @@ type LobbiesControlsProps = {
 
 function LobbiesControls({ games }: LobbiesControlsProps) {
     const { showPopup } = usePopup();
+    const { setCurrentSession } = useAppState();
+
+    async function joinRandomGameCallback() {
+        let response = await Network.get<GameSession>({ url: route('lobby.match')});
+        if(!response) return;
+        setCurrentSession(response);
+    }
 
     return (
         <section className="flex flex-col gap-4 grow h-full">
             <header className="flex gap gap-4">
                 <Button text="Create Game" icon={Icon.largeStars} onClick={() => showPopup('lobby-settings', { title: 'Create Lobby', showExit: true })} />
-                <Button text="Join Random" icon={Icon.random} />
+                <Button text="Join Random" icon={Icon.random} onClick={joinRandomGameCallback} />
             </header>
 
             <List title="Available Games" emptyText="No Games Available" maxListHeight='70vh' className="w-full max-w-[980px] h-full" onClick={(id) => console.info('Joining Game:', id)}>
