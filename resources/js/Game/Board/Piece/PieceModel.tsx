@@ -7,22 +7,21 @@ import {useBoardState} from '@/Store/board_state';
 import {PieceCode, Vector2} from '@/types/piece';
 import {useEffect, useRef} from 'react';
 import * as THREE from 'three';
-import vertexShader from '../../../../shaders/piece/vertex.glsl'
-import fragmentShader from '../../../../shaders/piece/fragment.glsl'
-import { extend } from "@react-three/fiber";
-import { shaderMaterial } from '@react-three/drei';
-import { COLORS } from '@/Constants/colors';
+import vertexShader from '../../../../shaders/piece/vertex.glsl';
+import fragmentShader from '../../../../shaders/piece/fragment.glsl';
+import {extend} from '@react-three/fiber';
+import {shaderMaterial} from '@react-three/drei';
+import {COLORS} from '@/Constants/colors';
 
 const PieceMaterial = shaderMaterial(
     {
-      uColor: new THREE.Color(0xff0000),
+        uColor: new THREE.Color(0xff0000),
     },
     vertexShader,
     fragmentShader,
-  );
+);
 
 extend({PieceMaterial});
-
 
 type Props = {
     block_positions: Vector2[];
@@ -48,7 +47,6 @@ export const PieceModel = ({
         //* Highlight latest move pieces
 
         if (playerIdentifier) {
-
         }
     }, [latestMove, playerIdentifier]);
 
@@ -71,9 +69,10 @@ export const PieceModel = ({
                                 0,
                                 position.y * blockSize,
                             ]}
-                            geometry={PIECE_GEOMETRY['block']}
-                            >
-                            <PieceMaterialComponent color={COLORS[playerIdentifier]} />
+                            geometry={PIECE_GEOMETRY['block']}>
+                            <PieceMaterialComponent
+                                color={COLORS[playerIdentifier]}
+                            />
                         </mesh>
                     );
                 })}
@@ -83,15 +82,13 @@ export const PieceModel = ({
 
 type PieceMaterialProps = {
     color: number;
-}
+};
 const PieceMaterialComponent = ({color}: PieceMaterialProps) => {
     const ref = useRef<THREE.ShaderMaterial>(null);
     useEffect(() => {
-
-        if(ref.current){
+        if (ref.current) {
             ref.current.uniforms.uColor.value = new THREE.Color(color);
         }
-
-    }, [color])
-    return <pieceMaterial ref={ref} />
-}
+    }, [color]);
+    return <pieceMaterial ref={ref} />;
+};

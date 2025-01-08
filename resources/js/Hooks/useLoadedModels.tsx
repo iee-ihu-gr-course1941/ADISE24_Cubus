@@ -51,7 +51,10 @@ export const useLoadedModels = () => {
             models.board.material !== materials['metal']
         ) {
             console.log('adding material');
-            models.board.material = new THREE.MeshStandardMaterial({color: 0x64748b});
+            models.board.material = new THREE.MeshStandardMaterial({
+                color: 0x64748b,
+                side: THREE.DoubleSide,
+            });
             // models.board.material = materials['metal'];
         }
     }, [boardScene, materials]);

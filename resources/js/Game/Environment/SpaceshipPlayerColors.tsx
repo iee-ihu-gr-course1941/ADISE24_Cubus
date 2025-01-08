@@ -49,9 +49,10 @@ const LightNoiseMaterial = shaderMaterial(
 
 extend({LightNoiseMaterial});
 type Props = {
-    playerColor: PlayerColor;
+    playerColor?: PlayerColor;
 };
 export const SpaceshipPlayerColors = memo(({playerColor}: Props) => {
+    if (!playerColor) return null;
     return (
         <>
             <LightObject
@@ -83,7 +84,7 @@ export const SpaceshipPlayerColors = memo(({playerColor}: Props) => {
                 })}
         </>
     );
-})
+});
 
 type LightProps = {
     color: number;

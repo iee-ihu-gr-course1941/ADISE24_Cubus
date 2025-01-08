@@ -5,15 +5,12 @@ import * as THREE from 'three';
 
 export const BoardControls = () => {
     const ui_state = useBoardState(state => state.gameState.ui_state);
+    const isGameOnGoing = useBoardState(state => state.isGameOnGoing);
     return (
         <>
             <OrbitControls
-                enabled={
-                    ui_state === 'OpponentTurn' ||
-                    ui_state === 'OwnTurnLocked' ||
-                    ui_state === 'OwnTurnPlaying'
-                }
-                target={DESTINATION_CAMERA_LOOK_AT}
+                enabled={isGameOnGoing()}
+                target={new THREE.Vector3(0, 0, 0)}
                 minPolarAngle={Math.PI * 0.025}
                 maxPolarAngle={Math.PI * 0.35}
                 maxAzimuthAngle={Math.PI * 0.05}
