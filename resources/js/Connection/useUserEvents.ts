@@ -11,10 +11,11 @@ import useServerEvents from './useServerEvents';
 import {BoardUpdateEvent, LoginEvent} from '@/types/connection';
 import {getGame} from '@/network/session_network';
 import {GameResponse} from '@/types/game';
+import { useAppState } from '@/Store/app_state';
 
 export default function useUserEvents() {
     let {connectionState, listen, stopListening} = useServerEvents();
-    let [gameId, setGameId] = useState<string>('');
+    let { currentSession } = useAppState();
     let [session, setSession] = useState<GameResponse | null>(null);
     let [latestMove, setLatestMove] = useState<BoardUpdateEvent | null>(null);
 
@@ -27,9 +28,11 @@ export default function useUserEvents() {
             loginEventCallback(event, publicUserToken);
         });
 
-        if (gameId.length !== 0) {
+        if (currentSession != null) {
+            const gameId = currentSession.id;
             console.info('Creating game event ws listener for: ', gameId);
             listen(`.game.${gameId}`, 'ConnectEvent', event => {
+                console.log('Received session update:', event);
                 setSession(event.game_session);
             });
 
@@ -41,21 +44,17 @@ export default function useUserEvents() {
 
         return () => {
             stopListening(`session.${publicUserToken}`, 'LoginEvent');
-            stopListening(`.game.${gameId}`, 'ConnectEvent');
-        };
-    }, [connectionState, gameId]);
 
-    const joinGame = async () => {
-        const res = await getGame();
-        if (res && res.session.id) {
-            setGameId(res.session.id.toString());
-            console.log('[JOINED GAME]', res);
-        }
-    };
+            if(currentSession != null) {
+                const gameId = currentSession.id;
+                stopListening(`.game.${gameId}`, 'ConnectEvent');
+                stopListening(`.game.${gameId}`, 'BoardUpdateEvent');
+            }
+        };
+    }, [connectionState, currentSession]);
 
     return {
         connectionState,
-        joinGame: joinGame,
         currentSession: session,
         latestMove,
     };

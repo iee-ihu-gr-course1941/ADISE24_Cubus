@@ -31,7 +31,7 @@ export type LoginEvent = {
 };
 
 export type ConnectEvent = {
-    game_session: GameResponse;
+    game_session: GameSession;
 };
 
 export type BoardUpdateEvent = {

@@ -21,47 +21,33 @@ type GameProps = PageProps<{
     availableSessions?: GameSession[];
 }>;
 
-export default function Game({
-    user,
-    availableSessions,
-    userSession,
-    flash,
-}: GameProps) {
-    let {connectionState, currentSession, joinGame} = useUserEvents();
-    let {
-        currentSession: appSession,
-        setUser,
-        setCurrentSession,
-    } = useAppState();
+export default function Game(props: GameProps) {
+    let { connectionState, currentSession } = useUserEvents();
+
+    return <GameContent {...props } userSession={currentSession ?? props?.userSession} connectionState={connectionState} />
+}
+
+type GameContentProps = GameProps & {
+    connectionState: ConnectionState;
+}
+
+function GameContent({ user, availableSessions, userSession, connectionState, flash }: GameContentProps) {
+    let { setUser, setCurrentSession } = useAppState();
     const {setState} = useBoardState();
-
-    const session =
-        currentSession?.session ?? userSession?.session ?? appSession;
-
-    console.info('Initial server data:', {user, session, availableSessions});
+    console.info('Initial server data:', {user, userSession, availableSessions});
 
     useEffect(() => {
         setUser(user);
 
-        if (appSession == null && session != null) {
-            setCurrentSession(session);
-            if (userSession) {
-                setState({...session}, userSession.player);
-            }
-        }
-        if (session != null) joinGame();
-    }, [session]);
+        if(userSession == null) return;
+        setCurrentSession(userSession.session);
+        setState({...userSession.session}, userSession.player);
+    }, [])
 
-    if (!session)
-        return (
-            <Lobby
-                user={user}
-                availableSessions={availableSessions}
-                connectionState={connectionState}
-                serverMessage={flash}
-            />
-        );
-    return <Experience />;
+    if(userSession?.session == null || userSession.session.session_state === 'waiting') {
+        return <Lobby user={user} availableSessions={availableSessions} connectionState={connectionState} serverMessage={flash} />;
+    }
+    return <Experience/>;
 }
 
 type LobbyProps = {

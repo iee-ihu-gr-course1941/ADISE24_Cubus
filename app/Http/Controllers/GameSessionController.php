@@ -77,6 +77,7 @@ class GameSessionController extends Controller {
         error_log('Creating lobby with name '. $data['name']);
 
         $game_session['name'] = $data['name'];
+        $game_session['session_state'] = GameSessionState::Waiting->value;
         $game_session['player_host_id'] = $user['id'];
         $game_session['player_count'] = (string)$data['player_count'];
         $game_session['current_player_count'] = 1;
@@ -153,12 +154,12 @@ class GameSessionController extends Controller {
         }
         $game_session->save();
 
+        broadcast(new ConnectEvent($game_session));
         if($request->expectsJson()) {
-            return response($game_session)->withHeaders(['Content-Type' => 'application/json']);
+            return response($game_session->getPublic())->withHeaders(['Content-Type' => 'application/json']);
         }
 
-        broadcast(new ConnectEvent($game_session));
-        return redirect()->route('lobby.index')->with('flash', 'Joined game!');
+        return redirect()->route('game');
     }
 
     public function search(Request $request): \Inertia\ResponseFactory | \Inertia\Response | \Illuminate\Http\RedirectResponse | \Illuminate\Http\Response {
