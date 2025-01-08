@@ -12,7 +12,7 @@ export const Board = memo(() => {
     const {showGridHelper} = useControls({
         showGridHelper: {
             label: 'Show Grid Helper',
-            value: true,
+            value: false,
         },
     });
 
@@ -31,7 +31,7 @@ export const Board = memo(() => {
         <>
             {gridSize && (
                 <>
-                    {showGridHelper && (
+                    {showGridHelper  && (
                         <Grid
                             args={[gridSize, gridSize, 1]}
                             position-y={0.06}
