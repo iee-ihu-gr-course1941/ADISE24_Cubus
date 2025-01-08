@@ -76,6 +76,7 @@ class GameSessionController extends Controller {
 
         $game_session['name'] = (string)$data['name'];
         $game_session['player_count'] = (string)$data['player_count'];
+        $game_session['current_player_count'] = 1;
         $game_session['board_state'] = json_encode(GameSession::generateBoard($data['player_count']));
         $game_session->save();
 
@@ -143,6 +144,7 @@ class GameSessionController extends Controller {
 
         $user_color = $valid_colors[rand(0,count($valid_colors) - 1)];
         $game_session['player_'.$user_color.'_id'] = $user['id'];
+        $game_session['current_player_count'] = $game_session['current_player_count'] + 1;
         error_log('valid colors:' . count($valid_colors));
         if(count($valid_colors) == 1) {
             $game_session['session_state'] = GameSessionState::Playing->value;
@@ -184,6 +186,7 @@ class GameSessionController extends Controller {
         $game_session = $available_sessions[rand(0, count($available_sessions) - 1)];
         $valid_colors = $game_session->getEmptyPlayerColors();
         $user_color = $valid_colors[rand(0,count($valid_colors) - 1)];
+        $game_session['current_player_count'] = $game_session['current_player_count'] + 1;
         $game_session['player_'.$user_color.'_id'] = $user['id'];
         if(count($valid_colors) == 1) {
             $game_session['session_state'] = GameSessionState::Playing->value;
