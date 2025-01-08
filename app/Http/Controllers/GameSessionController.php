@@ -74,7 +74,10 @@ class GameSessionController extends Controller {
 
         $game_session = new GameSession();
 
-        $game_session['name'] = (string)$data['name'];
+        error_log('Creating lobby with name '. $data['name']);
+
+        $game_session['name'] = $data['name'];
+        $game_session['player_host_id'] = $user['id'];
         $game_session['player_count'] = (string)$data['player_count'];
         $game_session['current_player_count'] = 1;
         $game_session['board_state'] = json_encode(GameSession::generateBoard($data['player_count']));
@@ -82,7 +85,6 @@ class GameSessionController extends Controller {
 
         $valid_colors = $game_session->getValidPlayerColors();
         $host_color = $valid_colors[rand(0,count($valid_colors) - 1)];
-        $game_session['name'] = $user['id'];
         $game_session['player_'.$host_color.'_id'] = $user['id'];
         $game_session['current_playing'] = $host_color;
         for($i = 0; $i < count($valid_colors); $i++) {

@@ -16,16 +16,17 @@ import { PropsWithChildren, useEffect } from 'react';
 
 type GameProps = PageProps<{
     user: User;
-    userSession?: GameResponse
+    userSession?: GameResponse;
+    availableSessions?: GameSession[];
 }>;
 
-export default function Game({ user, userSession, flash }: GameProps) {
+export default function Game({ user, availableSessions, userSession, flash }: GameProps) {
     let { connectionState, currentSession, joinGame } = useUserEvents();
     let { currentSession: appSession, setUser, setCurrentSession } = useAppState();
 
     const session = currentSession?.session ?? userSession?.session ?? appSession;
 
-    console.info('Initial server data:', {user, session});
+    console.info('Initial server data:', {user, session, availableSessions});
 
     useEffect(() => {
         setUser(user);
@@ -34,17 +35,18 @@ export default function Game({ user, userSession, flash }: GameProps) {
         if(session != null) joinGame();
     }, [session])
 
-    if(!session) return <Lobby user={user} connectionState={connectionState} serverMessage={flash} />;
+    if(!session) return <Lobby user={user} availableSessions={availableSessions} connectionState={connectionState} serverMessage={flash} />;
     return <Experience/>;
 }
 
 type LobbyProps = {
     user: User;
     connectionState: ConnectionState;
+    availableSessions?: GameSession[];
     serverMessage?: string;
 };
 
-function Lobby({ user, connectionState, serverMessage }: LobbyProps) {
+function Lobby({ user, connectionState, availableSessions, serverMessage }: LobbyProps) {
     const { showPopup } = usePopup();
 
     useEffect(() => {
@@ -57,7 +59,7 @@ function Lobby({ user, connectionState, serverMessage }: LobbyProps) {
         <div className="w-screen h-screen bg-backdrop relative text-custom-gray-400 font-bold flex flex-col">
             <PopupContainer />
             <section className="pt-8 px-8 flex gap-8 grow items-start">
-                <LobbiesControls />
+                <LobbiesControls games={availableSessions} />
                 <PlayerDetails username={user.name ?? ''} icon='/portraits/white-wizard.jpg' points={3} />
             </section>
 
@@ -77,7 +79,7 @@ function Lobby({ user, connectionState, serverMessage }: LobbyProps) {
 }
 
 type LobbiesControlsProps = {
-    games?: Array<{id: number}>;
+    games?: GameSession[];
 };
 
 function LobbiesControls({ games }: LobbiesControlsProps) {
@@ -90,6 +92,12 @@ function LobbiesControls({ games }: LobbiesControlsProps) {
         setCurrentSession(response);
     }
 
+    async function joinGameCallback(gameId: string) {
+        let response = await Network.get<GameSession>({ url: route('lobby.join', gameId)});
+        if(!response) return;
+        setCurrentSession(response);
+    }
+
     return (
         <section className="flex flex-col gap-4 grow h-full">
             <header className="flex gap gap-4">
@@ -97,15 +105,15 @@ function LobbiesControls({ games }: LobbiesControlsProps) {
                 <Button text="Join Random" icon={Icon.random} onClick={joinRandomGameCallback} />
             </header>
 
-            <List title="Available Games" emptyText="No Games Available" maxListHeight='70vh' className="w-full max-w-[980px] h-full" onClick={(id) => console.info('Joining Game:', id)}>
+            <List title="Available Games" emptyText="No Games Available" maxListHeight='70vh' className="w-full max-w-[980px] h-full" onClick={joinGameCallback}>
                 {
                     games && games.length > 0 &&
                         games.map(game => (
-                            <ListElement key={game.id} value={game.id.toString()}>
+                            <ListElement key={game?.id} value={game?.id?.toString() ?? ''}>
                                 <div className="group px-8 py-4 flex items-center gap-4 w-full hover:bg-custom-purple-400 hover:text-custom-pink-50">
-                                    <p className="grow text-start">Game {game.id}</p>
-                                    <div className="flex gap-2 items-center"><SVG icon={Icon.crown} fill="fill-custom-gray-400 group-hover:fill-custom-pink-50" /><p>by Player</p></div>
-                                    <div className="flex gap-2 items-center"><SVG icon={Icon.users} fill="fill-custom-gray-400 group-hover:fill-custom-pink-50" /><p>1 of 2</p></div>
+                                    <p className="grow text-start">{game.name}</p>
+                                    <div className="flex gap-2 items-center"><SVG icon={Icon.crown} fill="fill-custom-gray-400 group-hover:fill-custom-pink-50" /><p>by {game.player_host?.name}</p></div>
+                                    <div className="flex gap-2 items-center"><SVG icon={Icon.users} fill="fill-custom-gray-400 group-hover:fill-custom-pink-50" /><p>{game.current_player_count} of {game.player_count}</p></div>
                                 </div>
                             </ListElement>
                         ))

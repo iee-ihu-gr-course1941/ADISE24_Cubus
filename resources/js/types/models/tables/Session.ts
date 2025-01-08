@@ -7,11 +7,14 @@ export type GameSession = {
      * Backend Info
      */
     id: Id | null;
+    name: string;
     current_round: number; //* [Default value]: 0
     board_state?: Array<ValorizedVector2>;
     session_state?: SessionState;
+    current_player_count?: number;
     player_count?: '2' | '4';
 
+    player_host?: User;
     player_blue?: User;
     player_blue_has_finished?: boolean;
     player_blue_points?: number;

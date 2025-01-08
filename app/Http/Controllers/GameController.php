@@ -3,8 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Enums\GameSessionState;
+use App\Enums\PlayerColor;
 use App\Events\BoardUpdateEvent;
 use App\Models\GameSession;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use function GuzzleHttp\json_encode;
 
@@ -32,6 +34,19 @@ class GameController extends Controller {
             );
         }
 
+        $sessions = GameSession::where('session_state', GameSessionState::Waiting);
+        foreach(PlayerColor::values() as $color) {
+            $sessions = $sessions->where(function (Builder $query) use ($player, $color) {
+                $query
+                    ->whereNull('player_'.$color.'_id')
+                    ->orWhere('player_'.$color.'_id', '!=', $player['id']);
+            });
+        }
+        $sessions = $sessions->get();
+        for($i = 0; $i < count($sessions); $i++) {
+            $sessions[$i] = $sessions[$i]->getPublic();
+        }
+
         $public_player_data = $player->getPublic();
         if(!is_null($current_session)) $public_player_data['session_color'] = $player->getCurrentSessionColor()->value;
         if(!is_null($current_session)) $public_player_data['session_valid_pieces'] = json_decode($current_session['player_'.$player->getCurrentSessionColor()->value.'_inventory']);
@@ -45,6 +60,7 @@ class GameController extends Controller {
 
         return inertia('Game', [
             'user' => $player->getPublic(),
+            'availableSessions' => $sessions,
             'userSession' => !$current_session ? null : [
                 'session' => $current_session->getPublic(),
                 'player' => $public_player_data,
