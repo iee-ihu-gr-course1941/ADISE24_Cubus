@@ -8,7 +8,7 @@ export type PlayerColor = 'blue' | 'green' | 'red' | 'yellow';
 export type BoardState = Array<ValorizedVector2>;
 
 export type GameResponse = {
-    session: GameState;
+    session: GameSession;
     player: PlayerState;
 };
 

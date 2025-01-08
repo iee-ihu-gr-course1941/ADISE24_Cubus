@@ -8,6 +8,7 @@ import { RadioButton } from "./Inputs/RadioButton";
 import { useAppState } from "./Store/app_state";
 import Network from "./network";
 import { User } from "./types/models/tables/User";
+import { GameSession } from "./types/models/tables/Session";
 
 type PopupDetails = PropsWithChildren<{
     title?: string;
@@ -202,25 +203,53 @@ function PopupUserSettings() {
 }
 
 function PopupLobbySettings() {
+    const [lobbyName, setLobbyName] = useState<string>('');
+    const [playerCount, setPlayerCount] = useState<number>(2);
+    const { setCurrentSession } = useAppState();
+    const { hidePopup } = usePopup();
+
+    function onLobbyNameChangeCallback(event: React.KeyboardEvent<HTMLInputElement>) {
+        const data = event?.currentTarget?.value ?? '';
+        setLobbyName(data);
+    }
+
+    function onPlayerCountChange(event: React.MouseEvent<HTMLInputElement>) {
+        const data = event?.currentTarget?.value ?? '';
+        setPlayerCount(parseInt(data));
+    }
+
+    async function onConfirmCallback() {
+        console.info('Attempting to create lobby with:', {lobbyName, playerCount});
+        const result = await Network.post<GameSession>({ url: route('lobby.store'), body: { 'name': lobbyName, 'player_count': playerCount } });
+
+        if(!result) {
+            hidePopup();
+            return;
+        }
+
+        setCurrentSession(result);
+        hidePopup();
+    }
+
     return (
         <>
             <div className="w-[550px] pl-10 pr-6 pt-2 pb-4">
                 <div className="pb-6 flex flex-col gap-1">
                     <label className="pb-1 text-custom-pink-50">Lobby's Name</label>
-                    <TextInput maxWidth='100%' placeholder="Friends only" />
+                    <TextInput maxWidth='100%' placeholder="Friends only" onUpdate={onLobbyNameChangeCallback} />
                 </div>
 
                 <div className="pb-6 flex flex-col gap-2">
                     <label className="pb-2 text-custom-pink-50">Player Count</label>
                     <div className="flex gap-4">
-                        <RadioButton name="player-count" value="2" checked={true} label="2 Players" />
-                        <RadioButton name="player-count" value="4" label="4 Players" />
+                        <RadioButton name="player-count" value="2" checked={true} label="2 Players" onClick={onPlayerCountChange} />
+                        <RadioButton name="player-count" value="4" label="4 Players" onClick={onPlayerCountChange} />
                     </div>
                 </div>
             </div>
 
             <footer className="py-4 pl-10 pr-6 flex justify-end gap-[12px]">
-                <Button icon={Icon.check} text="Confirm" />
+                <Button icon={Icon.check} text="Confirm" onClick={onConfirmCallback} />
             </footer>
         </>
     );

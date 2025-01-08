@@ -91,7 +91,7 @@ class GameSessionController extends Controller {
         $game_session->save();
 
         if($request->expectsJson()) {
-            return response($game_session)->withHeaders(['Content-Type' => 'application/json']);
+            return response($game_session->getPublic())->withHeaders(['Content-Type' => 'application/json']);
         }
 
         return redirect()->route('lobby.index');

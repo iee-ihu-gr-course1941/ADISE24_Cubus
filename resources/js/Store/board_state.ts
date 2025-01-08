@@ -14,7 +14,7 @@ type State = {
 };
 
 type Actions = {
-    setState: (game: GameState, player: PlayerState) => void;
+    setState: (game: GameSession, player: PlayerState) => void;
     updateGameState: (game: GameSession) => void;
     setBoardRef: (boardRef: THREE.Mesh | null) => void;
     addBoardPiece: (piece: THREE.Group) => void;

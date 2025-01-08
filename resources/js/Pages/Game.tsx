@@ -19,16 +19,18 @@ type GameProps = PageProps<{
 
 export default function Game({ user, userSession, flash }: GameProps) {
     let { connectionState, currentSession, joinGame } = useUserEvents();
-    let { setUser } = useAppState();
-    const session = currentSession ?? userSession;
+    let { currentSession: appSession, setUser, setCurrentSession } = useAppState();
+
+    const session = currentSession?.session ?? userSession?.session ?? appSession;
 
     console.info('Initial server data:', {user, session});
 
     useEffect(() => {
         setUser(user);
 
+        if(appSession == null && session != null) setCurrentSession(session);
         if(session != null) joinGame();
-    }, [])
+    }, [session])
 
     if(!session) return <Lobby user={user} connectionState={connectionState} serverMessage={flash} />;
     return <Experience/>;
