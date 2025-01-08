@@ -30,6 +30,7 @@ type Actions = {
     changeTurn: () => void;
     getPoints: () => number;
     getHasFinished: () => boolean;
+    isGameOnGoing: () => boolean;
 };
 
 export type BoardState = State & Actions;
@@ -74,6 +75,14 @@ export const useBoardState = create<BoardState>()((set, get, _) => ({
     },
     canPlay: () => {
         return get().gameState.ui_state === 'OwnTurnPlaying';
+    },
+    isGameOnGoing: () => {
+        const ui_state = get().gameState.ui_state;
+        return (
+            ui_state === 'OpponentTurn' ||
+            ui_state === 'OwnTurnLocked' ||
+            ui_state === 'OwnTurnPlaying'
+        );
     },
     startGame: () => {
         const timer = useTimerStore.getState();
