@@ -1,11 +1,12 @@
 import {useLoadedModels} from '@/Hooks/useLoadedModels';
 import {shaderMaterial} from '@react-three/drei';
 import {extend, useFrame} from '@react-three/fiber';
-import {memo, useEffect, useRef} from 'react';
+import {memo, useEffect, useMemo, useRef} from 'react';
 import * as THREE from 'three';
 import vertexShader from '../../../shaders/spaceship/air_modules/pattern_1/vertex.glsl';
 import fragmentShader from '../../../shaders/spaceship/air_modules/pattern_1/fragment.glsl';
 import {useControls} from 'leva';
+import { useBoardState } from '@/Store/board_state';
 
 const geometry = new THREE.PlaneGeometry(1, 1, 48, 48);
 geometry.rotateX(-Math.PI / 2);
@@ -30,6 +31,8 @@ const AirModuleMaterial = shaderMaterial(
 extend({AirModuleMaterial});
 
 export const SpaceshipAirModules = memo(() => {
+    const isGameOnGoing = useBoardState(s => s.isGameOnGoing);
+    const ui_state = useBoardState(s => s.gameState.ui_state);
     const {depth, colorStart} = useControls({
         depth: {
             value: 0.6,
@@ -39,6 +42,13 @@ export const SpaceshipAirModules = memo(() => {
         },
         colorStart: '#1f1131',
     });
+    const speed = useMemo(() => {
+        if(isGameOnGoing()){
+            return 0.15;
+        }else{
+            return 0.3;
+        }
+    }, [isGameOnGoing, ui_state])
     const height = 0.85 - depth;
     return (
         <>
@@ -47,22 +57,26 @@ export const SpaceshipAirModules = memo(() => {
                 depth={depth}
                 position={[-7.8, height, 7.85]}
                 isClose={true}
+                speed={speed}
             />
             <AirModule
                 colorStart={colorStart}
                 depth={depth}
                 position={[7.8, height, 7.85]}
                 isClose={true}
+                speed={speed}
             />
             <AirModule
                 colorStart={colorStart}
                 depth={depth}
                 position={[7.8, height, -7.85]}
+                speed={speed}
             />
             <AirModule
                 colorStart={colorStart}
                 depth={depth}
                 position={[-7.8, height, -7.85]}
+                speed={speed}
             />
         </>
     );
@@ -72,15 +86,19 @@ type AirModuleProps = {
     isClose?: boolean;
     depth?: number;
     colorStart?: string;
+    speed?: number;
 };
 const AirModule = ({
     position,
     isClose = false,
     depth,
     colorStart,
+    speed,
 }: AirModuleProps) => {
     const lightRef = useRef<THREE.PointLight>(null);
     const materialRef = useRef<THREE.ShaderMaterial>(null);
+
+
     useFrame((_, delta) => {
         if (materialRef.current) {
             materialRef.current.uniforms.uTime.value += delta;
@@ -102,6 +120,14 @@ const AirModule = ({
             materialRef.current.uniforms.uRandomFactor.value = 3;
         }
     }, [materialRef]);
+
+    useEffect(() => {
+
+        if(materialRef.current){
+            materialRef.current.uniforms.uSpeed.value = speed;
+        }
+
+    }, [speed, materialRef])
 
     useEffect(() => {
         if (materialRef.current) {

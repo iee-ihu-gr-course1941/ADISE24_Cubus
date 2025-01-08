@@ -1,8 +1,8 @@
-import { useFrame, useThree} from '@react-three/fiber';
+import {useFrame, useThree} from '@react-three/fiber';
 import {Lights} from '../Ligths';
 import {Board} from './Board';
 import Hand from './Hand';
-import {useEffect, useRef} from 'react';
+import {useEffect, useMemo, useRef} from 'react';
 import {useBoardState} from '@/Store/board_state';
 import {useTimerStore} from '@/Store/timer';
 import * as THREE from 'three';
@@ -15,12 +15,14 @@ import {
     ORIGIN_CAMERA_POSITION,
 } from '@/Constants/camera';
 import {Spaceship} from '../Environment/Spaceship';
+import {Float} from '@react-three/drei';
 
 const GameMap = () => {
     const playerIdentifier = useBoardState(
         state => state.gameState.current_playing,
     );
     const ui_state = useBoardState(state => state.gameState.ui_state);
+    const isGameOnGoing = useBoardState(state => state.isGameOnGoing);
     const skyTextureRef = useRef<THREE.CubeTexture>();
 
     const {time} = useTimerStore();
@@ -106,17 +108,26 @@ const GameMap = () => {
         camera.updateProjectionMatrix();
     });
 
+    const GameEnvironmentChildren = useMemo(() => {
+        return (
+            <>
+                <Board />
+                {playerIdentifier && isGameOnGoing() && <Hand />}
+                <Spaceship />
+            </>
+        );
+    }, [ui_state]);
+
     return (
         <>
-
             <Lights />
-            <Board />
-            {playerIdentifier &&
-                (ui_state === 'OpponentTurn' ||
-                    ui_state === 'OwnTurnLocked' ||
-                    ui_state === 'OwnTurnPlaying') &&
-                <Hand />}
-            <Spaceship />
+            {isGameOnGoing() ? (
+                <>{GameEnvironmentChildren}</>
+            ) : (
+                <Float floatIntensity={15} speed={7.5} rotationIntensity={0.3}>
+                    {GameEnvironmentChildren}
+                </Float>
+            )}
         </>
     );
 };
