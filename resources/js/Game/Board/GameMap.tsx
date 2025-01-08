@@ -1,9 +1,8 @@
-import {useFrame, useThree} from '@react-three/fiber';
+import { useFrame, useThree} from '@react-three/fiber';
 import {Lights} from '../Ligths';
 import {Board} from './Board';
 import Hand from './Hand';
 import {useEffect, useRef} from 'react';
-import {useControls} from 'leva';
 import {useBoardState} from '@/Store/board_state';
 import {useTimerStore} from '@/Store/timer';
 import * as THREE from 'three';
@@ -15,17 +14,19 @@ import {
     ORIGIN_CAMERA_LOOK_AT,
     ORIGIN_CAMERA_POSITION,
 } from '@/Constants/camera';
+import {Spaceship} from '../Environment/Spaceship';
 
 const GameMap = () => {
     const playerIdentifier = useBoardState(
         state => state.gameState.current_playing,
     );
     const ui_state = useBoardState(state => state.gameState.ui_state);
+    const skyTextureRef = useRef<THREE.CubeTexture>();
 
     const {time} = useTimerStore();
     const timeRef = useRef(0);
 
-    const {scene, gl} = useThree();
+    const {scene} = useThree();
 
     useEffect(() => {
         const skyLoader = new THREE.CubeTextureLoader();
@@ -37,8 +38,10 @@ const GameMap = () => {
             '/sky/pz.png',
             '/sky/nz.png',
         ]);
+        skyTextureRef.current = skyTexture;
+        skyTexture.anisotropy = 8;
+        scene.backgroundRotation = new THREE.Euler(3.14, 0, -3.14);
         scene.background = skyTexture;
-        scene.environment = skyTexture;
         scene.backgroundBlurriness = 0;
     }, []);
 
@@ -105,12 +108,14 @@ const GameMap = () => {
 
     return (
         <>
+
             <Lights />
             <Board />
             {playerIdentifier &&
                 (ui_state === 'OpponentTurn' ||
                     ui_state === 'OwnTurnLocked' ||
-                    ui_state === 'OwnTurnPlaying') && <Hand />}
+                    ui_state === 'OwnTurnPlaying') &&
+                <Hand />}
         </>
     );
 };
