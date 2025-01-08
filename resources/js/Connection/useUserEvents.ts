@@ -64,7 +64,7 @@ function loginEventCallback(event: LoginEvent, publicUserToken?: string) {
     }
 
     if (!event.success) return;
-    location.assign('/game');
+    setTimeout(() => window.open('/game', '_self'), 50);
 }
 
 function parseCookies(): Map<string, string> {
