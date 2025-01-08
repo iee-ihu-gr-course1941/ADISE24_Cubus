@@ -12,7 +12,7 @@ class GameSession extends Model {
     const EMPTY_BOARD_CELL = '';
 
     protected $public = [
-        'id', 'current_round', 'session_state', 'current_playing', 'board_state', 'player_count',
+        'id', 'name', 'current_round', 'session_state', 'current_playing', 'board_state', 'player_count',
         'player_blue', 'player_red', 'player_green', 'player_yellow',
         'player_blue_has_finished', 'player_red_has_finished', 'player_green_has_finished', 'player_yellow_has_finished',
         'player_blue_points', 'player_red_points', 'player_green_points', 'player_yellow_points',

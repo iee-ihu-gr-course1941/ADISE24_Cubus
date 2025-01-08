@@ -63,6 +63,7 @@ class GameSessionController extends Controller {
         $user = AuthService::getUser();
 
         $data = $request->validate([
+            'name' => 'required|string|max:80|regex:/^[a-zA-Z-0-9_\-.!#$%^&* ]*$/',
             'player_count' => ['required', Rule::enum(GameSessionPlayerCount::class)],
         ]);
 
@@ -73,12 +74,14 @@ class GameSessionController extends Controller {
 
         $game_session = new GameSession();
 
+        $game_session['name'] = (string)$data['name'];
         $game_session['player_count'] = (string)$data['player_count'];
         $game_session['board_state'] = json_encode(GameSession::generateBoard($data['player_count']));
         $game_session->save();
 
         $valid_colors = $game_session->getValidPlayerColors();
         $host_color = $valid_colors[rand(0,count($valid_colors) - 1)];
+        $game_session['name'] = $user['id'];
         $game_session['player_'.$host_color.'_id'] = $user['id'];
         $game_session['current_playing'] = $host_color;
         for($i = 0; $i < count($valid_colors); $i++) {
