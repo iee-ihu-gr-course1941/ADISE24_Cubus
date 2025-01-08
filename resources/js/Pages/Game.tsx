@@ -50,7 +50,7 @@ function Lobby({ user, connectionState, availableSessions, serverMessage }: Lobb
     const { showPopup } = usePopup();
 
     useEffect(() => {
-        if(serverMessage && serverMessage === 'user_new') {
+        if(serverMessage && serverMessage === 'user_new' || user && (user.icon == null || user.icon.length === 0)) {
             showPopup('user-settings', { title: 'Create Your Profile', denyExit: true });
         }
     }, []);

@@ -88,7 +88,7 @@ class AuthService {
         return new User([
             'auth_type' => AuthenticationType::Apps->value,
             'auth_identifier' => $profile_body['id'],
-            'name' => $profile_body['cn'],
+            'name' => str_replace(' ', '_', $profile_body['cn']),
         ]);
     }
 
