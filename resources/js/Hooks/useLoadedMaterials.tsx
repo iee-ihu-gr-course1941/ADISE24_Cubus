@@ -24,12 +24,13 @@ export const useLoadedMaterials = () => {
         },
     );
 
-    const metalRepeatScale = new THREE.Vector2(10, 10);
+    const metalRepeatScale = new THREE.Vector2(6, 6);
     metalTextures.forEach((texture, index) => {
         texture.wrapS = THREE.RepeatWrapping;
         texture.wrapT = THREE.RepeatWrapping;
         texture.repeat = metalRepeatScale;
         texture.flipY = true;
+        texture.anisotropy = 8;
 
         if (index === 0) {
             texture.colorSpace = THREE.SRGBColorSpace;
