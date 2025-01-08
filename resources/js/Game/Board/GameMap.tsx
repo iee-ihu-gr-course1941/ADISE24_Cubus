@@ -116,6 +116,7 @@ const GameMap = () => {
                     ui_state === 'OwnTurnLocked' ||
                     ui_state === 'OwnTurnPlaying') &&
                 <Hand />}
+            <Spaceship />
         </>
     );
 };
