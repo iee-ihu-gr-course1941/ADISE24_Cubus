@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use App\Models\User;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 
 class DatabaseSeeder extends Seeder
 {
@@ -13,11 +14,13 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // User::factory(10)->create();
-
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
+        DB::table('user_portraits')->insert([
+            ['url' => '/portraits/black-elegance.jpg'],
+            ['url' => '/portraits/black-mlady.jpg'],
+            ['url' => '/portraits/white-cowboy.jpg'],
+            ['url' => '/portraits/white-wizard.jpg'],
+            ['url' => '/portraits/yellow-elegance.jpg'],
+            ['url' => '/portraits/yellow-mlady.jpg'],
         ]);
     }
 }

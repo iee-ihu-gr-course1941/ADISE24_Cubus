@@ -1,69 +1,77 @@
-import useUserEvents from '@/Connection/useUserEvents';
-import { PageProps } from '@/types';
-import { User } from '@/types/models/tables/User';
-import { useState } from 'react';
-import { Fragment } from 'react/jsx-runtime';
+import useUserEvents from "@/Connection/useUserEvents";
+import { Icon, SVG } from "@/Icons/SVG";
+import { Button } from "@/Inputs/Button";
+import { List, ListElement } from "@/Inputs/List";
+import { PopupContainer, usePopup } from "@/Popup";
+import { PageProps } from "@/types";
+import { User } from "@/types/models/tables/User";
+import { useState } from "react";
 
-export default function Welcome({ user, flash }: PageProps<{ user: User }>) {
-    let { connectionState } = useUserEvents();
-    let [ mockId, setMockId ] = useState('');
+export default function Index({ user, flash }: PageProps<{ user: User }>) {
+    const [visibleLoginOptions, setVisibleLoginOptions] = useState<boolean>(false);
+    const { connectionState } = useUserEvents();
+    const { showPopup } = usePopup();
 
-    console.log('INITIAL: ', {window, route: route('index')});
+    console.info('Initial Server Data:', user, flash);
 
-    let UserData = () => (
-        <div>
-            <h2 className="font-black text-xl">User Info</h2>
-            <p>{ user.name }</p>
-            {
-                user.icon && (
-                    <div>
-                        <p>Icon Preview</p>
-                        <img src={user.icon} className='object-cover w-[128px] h-[128px]' />
-                    </div>
-                )
-            }
+    function showLoginOptionsCallback() {
+        if(user != null) {
+            window.open('/game', '_self');
+            return;
+        }
 
-            <a href={route('logout')}>Logout</a>
-        </div>
-    );
+        setVisibleLoginOptions(true);
+    }
+
+    function handleLoginCallback(loginOption: string) {
+        console.info('User selected login option:', loginOption);
+
+        if(loginOption === 'ihu') {
+            window.open(`${import.meta.env.VITE_APPS_LOGIN}&state=/game`, '_blank');
+            return;
+        }
+
+        if(loginOption === 'mock') {
+            showPopup('mock-login', { title: 'Mock Login', showExit: true });
+            return;
+        }
+    }
 
     return (
-        <div className='p-8'>
-            <div className='pb-16'>
-                <h1 className='font-black text-3xl'>Lord of the Rings Card Game</h1>
-                <p>Connection: {connectionState}</p>
-                { user && <UserData /> }
-            </div>
+        <div className="w-screen h-screen bg-backdrop relative text-custom-gray-400 font-bold flex flex-col">
+            <PopupContainer />
+            <section className="pt-[10%] flex flex-col gap-12 items-center grow">
+                <p className="text-custom-pink-50 text-9xl">CUBUS</p>
+                <Button text="Play Now" icon={Icon.largeStars} isLeft={true} onClick={showLoginOptionsCallback} />
 
-            {
-                flash &&
-                <div>
-                    <p className='text-red-500'>{ flash }</p>
-                </div>
-            }
-
-            <p className='font-black text-lg'>Navigate to:</p>
-            <ul className='list-["-"] list-inside'>
-
-                <li><a
-                    href={`${import.meta.env.VITE_APPS_LOGIN}&state=${location.pathname}`}
-                    target='_blank'
-                    className='text-blue-600'>
-                    Login
-                </a></li>
-
-                <li>
-                    <input placeholder='mock id' value={mockId} onChange={(e) => setMockId(e.target.value)} />
-                    <a href={route('login.mock', mockId)} className='text-blue-600'>Mock Login</a>
-                </li>
-
-                { user &&
-                    <Fragment>
-                        <li><a href={route('profile.edit', {profile: user.name })} className='text-blue-600'>Edit</a></li>
-                        <li><a href={route('lobby.index')} className='text-blue-600'>Lobbies</a></li>
-                    </Fragment>
+                {
+                    visibleLoginOptions &&
+                    <List title="Connect With" onClick={handleLoginCallback}>
+                        <ListElement value="ihu">
+                                <div className="w-full px-8 py-3.5 flex gap-2 items-center hover:bg-custom-purple-400 hover:text-custom-pink-50">
+                                    <SVG icon={Icon.ieeIhu} />IEE IHU Account
+                                </div>
+                            </ListElement>
+                        <ListElement value="mock">
+                                <div className="group w-full px-8 py-3.5 flex gap-2 items-center hover:bg-custom-purple-400 hover:text-custom-pink-50">
+                                    <SVG icon={Icon.wrench} fill="fill-custom-gray-400 group-hover:fill-custom-pink-50" />Mock Account
+                                </div>
+                            </ListElement>
+                    </List>
                 }
-            </ul>
+            </section>
+
+            <footer className="flex items-center gap-2 p-8">
+                <Button icon={Icon.cogs} />
+                <Button icon={Icon.info} onClick={() => showPopup('credits', { title: 'Credits', showExit: true })} />
+                <Button text="Give us a Star" icon={Icon.github} isLeft={true} onClick={() => window.open('https://github.com/iee-ihu-gr-course1941/ADISE24_Cubus', '_blank')}/>
+
+                <p className="ml-auto">Server Status: &nbsp;
+                    <span className={`${connectionState === 'connected' ? 'text-green-400' : 'text-custom-brown-500' }`}>
+                        {connectionState}
+                    </span>
+                </p>
+            </footer>
         </div>
     );
 }

@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Enums\PlayerColor;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Support\Facades\DB;
 
 class User extends Authenticatable {
     use HasFactory;
@@ -23,6 +24,11 @@ class User extends Authenticatable {
         $public_instance = [];
 
         foreach($this->public as $col) {
+            if($col === 'icon') {
+                $public_instance[$col] = $this->getUserIconUrl();
+                continue;
+            }
+
             $public_instance[$col] = $this[$col];
         }
 
@@ -52,5 +58,12 @@ class User extends Authenticatable {
         }
 
         return null;
+    }
+
+    function getUserIconUrl(): string {
+        if(is_null($this['icon'])) return '';
+
+        $data = DB::table('user_portraits')->where('id', $this['icon'])->first() ?? [];
+        return $data->url;
     }
 }

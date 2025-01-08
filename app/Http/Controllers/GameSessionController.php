@@ -63,6 +63,7 @@ class GameSessionController extends Controller {
         $user = AuthService::getUser();
 
         $data = $request->validate([
+            'name' => 'required|string|max:80|regex:/^[a-zA-Z-0-9_\-.!#$%^&* ]*$/',
             'player_count' => ['required', Rule::enum(GameSessionPlayerCount::class)],
         ]);
 
@@ -73,7 +74,12 @@ class GameSessionController extends Controller {
 
         $game_session = new GameSession();
 
+        error_log('Creating lobby with name '. $data['name']);
+
+        $game_session['name'] = $data['name'];
+        $game_session['player_host_id'] = $user['id'];
         $game_session['player_count'] = (string)$data['player_count'];
+        $game_session['current_player_count'] = 1;
         $game_session['board_state'] = json_encode(GameSession::generateBoard($data['player_count']));
         $game_session->save();
 
@@ -87,7 +93,7 @@ class GameSessionController extends Controller {
         $game_session->save();
 
         if($request->expectsJson()) {
-            return response($game_session)->withHeaders(['Content-Type' => 'application/json']);
+            return response($game_session->getPublic())->withHeaders(['Content-Type' => 'application/json']);
         }
 
         return redirect()->route('lobby.index');
@@ -140,6 +146,7 @@ class GameSessionController extends Controller {
 
         $user_color = $valid_colors[rand(0,count($valid_colors) - 1)];
         $game_session['player_'.$user_color.'_id'] = $user['id'];
+        $game_session['current_player_count'] = $game_session['current_player_count'] + 1;
         error_log('valid colors:' . count($valid_colors));
         if(count($valid_colors) == 1) {
             $game_session['session_state'] = GameSessionState::Playing->value;
@@ -181,6 +188,7 @@ class GameSessionController extends Controller {
         $game_session = $available_sessions[rand(0, count($available_sessions) - 1)];
         $valid_colors = $game_session->getEmptyPlayerColors();
         $user_color = $valid_colors[rand(0,count($valid_colors) - 1)];
+        $game_session['current_player_count'] = $game_session['current_player_count'] + 1;
         $game_session['player_'.$user_color.'_id'] = $user['id'];
         if(count($valid_colors) == 1) {
             $game_session['session_state'] = GameSessionState::Playing->value;
@@ -188,7 +196,7 @@ class GameSessionController extends Controller {
         $game_session->save();
 
         broadcast(new ConnectEvent($game_session));
-        return response($game_session)->withHeaders(['Content-Type' => 'application/json']);
+        return response($game_session->getPublic())->withHeaders(['Content-Type' => 'application/json']);
     }
 
     public function disconnect(): \Illuminate\Http\RedirectResponse | \Illuminate\Http\Response {

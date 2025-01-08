@@ -14,9 +14,13 @@ return new class extends Migration {
             $table->timestamps();
 
             // General Session Info
+            $table->string('name', length: 80);
+            $table->foreignId('player_host_id')->nullable()->constrained('users');
+
             $table->unsignedInteger('current_round')->default(0);
             $table->enum('current_playing', PlayerColor::values())->default(PlayerColor::Blue);
             $table->enum('session_state', GameSessionState::values())->default(GameSessionState::Waiting);
+            $table->unsignedInteger('current_player_count')->default(0);
             $table->enum('player_count', GameSessionPlayerCount::values())->default(GameSessionPlayerCount::Four);
             $table->json('board_state');
 

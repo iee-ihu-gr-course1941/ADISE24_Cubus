@@ -14,7 +14,7 @@ type State = {
 };
 
 type Actions = {
-    setState: (game: GameState, player: PlayerState) => void;
+    setState: (game: GameSession, player: PlayerState) => void;
     updateGameState: (game: GameSession) => void;
     setBoardRef: (boardRef: THREE.Mesh | null) => void;
     addBoardPiece: (piece: THREE.Group) => void;
@@ -40,6 +40,7 @@ export const useBoardState = create<BoardState>()((set, get, _) => ({
     move: null,
     gameState: {
         id: null,
+        name: '',
         startTime: 0,
         endTime: 0,
         current_round: 0,

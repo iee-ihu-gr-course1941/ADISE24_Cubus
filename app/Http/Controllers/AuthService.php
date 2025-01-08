@@ -41,7 +41,6 @@ class AuthService {
             'auth_type' => 'mock',
             'auth_identifier' => $user_id,
             'name' => 'mock_user',
-            'icon' => '',
         ]));
 
         Auth::login($user);
@@ -89,7 +88,7 @@ class AuthService {
         return new User([
             'auth_type' => AuthenticationType::Apps->value,
             'auth_identifier' => $profile_body['id'],
-            'name' => $profile_body['cn'],
+            'name' => str_replace(' ', '_', $profile_body['cn']),
         ]);
     }
 

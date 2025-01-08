@@ -3,8 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Enums\GameSessionState;
+use App\Enums\PlayerColor;
 use App\Events\BoardUpdateEvent;
 use App\Models\GameSession;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use function GuzzleHttp\json_encode;
 
@@ -32,20 +34,34 @@ class GameController extends Controller {
             );
         }
 
+        $sessions = GameSession::where('session_state', GameSessionState::Waiting);
+        foreach(PlayerColor::values() as $color) {
+            $sessions = $sessions->where(function (Builder $query) use ($player, $color) {
+                $query
+                    ->whereNull('player_'.$color.'_id')
+                    ->orWhere('player_'.$color.'_id', '!=', $player['id']);
+            });
+        }
+        $sessions = $sessions->get();
+        for($i = 0; $i < count($sessions); $i++) {
+            $sessions[$i] = $sessions[$i]->getPublic();
+        }
+
         $public_player_data = $player->getPublic();
-        $public_player_data['session_color'] = $player->getCurrentSessionColor()->value;
-        $public_player_data['session_valid_pieces'] = json_decode($current_session['player_'.$player->getCurrentSessionColor()->value.'_inventory']);
+        if(!is_null($current_session)) $public_player_data['session_color'] = $player->getCurrentSessionColor()->value;
+        if(!is_null($current_session)) $public_player_data['session_valid_pieces'] = json_decode($current_session['player_'.$player->getCurrentSessionColor()->value.'_inventory']);
 
         if($request->expectsJson()) {
             return response([
-                'session' => $current_session->getPublic(),
+                'session' => $current_session ? $current_session->getPublic() : null,
                 'player' => $public_player_data,
             ]);
         }
 
         return inertia('Game', [
             'user' => $player->getPublic(),
-            'userSession' => [
+            'availableSessions' => $sessions,
+            'userSession' => !$current_session ? null : [
                 'session' => $current_session->getPublic(),
                 'player' => $public_player_data,
             ]
@@ -112,10 +128,14 @@ class GameController extends Controller {
         $piece = $this->getPieceMatrix($piece_parts);
         if($data['flip']) $this->flipPiece($piece);
         for($i = 0; $i < $data['rotation']; $i++) {
-            $this->rotatePiece($piece, !$data['flip']);
+            $this->rotatePiece($piece);
         }
 
         $origin_offset = $this->identifyOriginOffset($piece);
+
+        error_log('Information for ' . $player_color . '(' . $piece_code . ') moving at: ' . $data['origin_x'] . ',' . $data['origin_y']);
+        error_log('Origin offset' . json_encode($origin_offset) . "\n" . $this->displayFull($piece, [0 => '.']));
+
         $origin_offset['y'] = $data['origin_y'] - $origin_offset['y'];
         $origin_offset['x'] = $data['origin_x'] - $origin_offset['x'];
 
@@ -166,6 +186,8 @@ class GameController extends Controller {
     }
 
     function validate(Request $request): \Inertia\Response | \Inertia\ResponseFactory | \Illuminate\Http\Response {
+        return response(['cookies' => $request->cookies ]);
+
         $player = AuthService::getUser();
         $player_color = $player->getCurrentSessionColor()->value;
         $current_session = $player->getCurrentSession();
@@ -205,17 +227,17 @@ class GameController extends Controller {
             'flip' => 'required|boolean',
         ]);
 
-        if(!$player_available_pieces[(int)$data['code']]) {
-            if($request->expectsJson()) {
-                return response([
-                    'valid' => false,
-                    'board' => $board,
-                    'message' => 'The piece is not available to you'
-                ])->setStatusCode(400);
-            } else {
-                return inertia('Game')->with('flash', 'The piece is not available to you');
-            }
-        }
+        /*if(!$player_available_pieces[(int)$data['code']]) {*/
+        /*    if($request->expectsJson()) {*/
+        /*        return response([*/
+        /*            'valid' => false,*/
+        /*            'board' => $board,*/
+        /*            'message' => 'The piece is not available to you'*/
+        /*        ])->setStatusCode(400);*/
+        /*    } else {*/
+        /*        return inertia('Game')->with('flash', 'The piece is not available to you');*/
+        /*    }*/
+        /*}*/
 
 
         $pieces_object = $this->getAllPieceParts();
@@ -225,7 +247,7 @@ class GameController extends Controller {
         $piece = $this->getPieceMatrix($piece_parts);
         if($data['flip']) $this->flipPiece($piece);
         for($i = 0; $i < $data['rotation']; $i++) {
-            $this->rotatePiece($piece, !$data['flip']);
+            $this->rotatePiece($piece);
         }
 
         $origin_offset = $this->identifyOriginOffset($piece);
@@ -282,13 +304,13 @@ class GameController extends Controller {
         }
     }
 
-    private function rotatePiece(array &$piece, bool $clockwise): void {
+    private function rotatePiece(array &$piece): void {
         $copy = [...$piece];
 
         for($y = 0; $y < RELATIVE_MATRIX_SIZE; $y++) {
             for($x = 0; $x < RELATIVE_MATRIX_SIZE; $x++) {
-                $new_x = $clockwise ? $y : RELATIVE_MATRIX_SIZE - $y - 1;
-                $new_y = $clockwise ? RELATIVE_MATRIX_SIZE - $x - 1 : $x;
+                $new_x = $y;
+                $new_y = RELATIVE_MATRIX_SIZE - $x - 1;
 
                 $piece[$new_y][$new_x] = $copy[$y][$x];
             }
@@ -397,6 +419,7 @@ class GameController extends Controller {
         }
 
         error_log('Is valid: ' . ($is_valid ? 'true' : 'false') . ' Is touching piece: ' . ($is_touching_adjacent ? 'true' : 'false') . " Is touching corner: " . ($is_touching_board_corner ? 'true' : 'false'));
+        error_log("Board: \n". $this->displayFull($board, ['' => '.']));
 
         return ['is_valid' => $is_valid, 'is_touching_board_corner' => $is_touching_board_corner, 'is_touching_adjacent' => $is_touching_adjacent];
     }
@@ -599,7 +622,7 @@ class GameController extends Controller {
                 if($flip === 1) $this->flipPiece($piece);
 
                 for($i = 0; $i < 4; $i++) {
-                    $this->rotatePiece($piece, $flip === 0);
+                    $this->rotatePiece($piece);
                     $bordered_piece = $this->addBordersToPieceMatrix($piece);
                     $piece_valid_connections = $this->getPieceEdges($bordered_piece, 1, 0);
 
@@ -619,7 +642,7 @@ class GameController extends Controller {
                         }
                     }
 
-                    $this->rotatePiece($piece, $flip === 1);
+                    $this->rotatePiece($piece);
                 }
             }
         }

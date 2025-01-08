@@ -53,7 +53,7 @@ class UserController extends Controller {
             return response($user->getPublic())->withHeaders(['Content-Type' => 'application/json']);
         }
 
-        return redirect()->route('index');
+        return redirect()->route('game.index')->with('flash', ($user['is_new'] ? 'user_new' : 'user_old'));
     }
 
     public function show(): \Illuminate\Http\Response {
@@ -105,7 +105,7 @@ class UserController extends Controller {
 
         $data = $request->validate([
             'name' => 'required|string|max:80|regex:/^[a-zA-Z-0-9_\-.!#$%^&*]*$/',
-            'icon' => 'required|url:http,https',
+            'icon' => 'required|exists:user_portraits,id',
         ]);
 
         $user['name'] = $data['name'];

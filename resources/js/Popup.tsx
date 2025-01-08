@@ -1,0 +1,256 @@
+import { PropsWithChildren, useState } from "react";
+import { Button } from "./Inputs/Button";
+import { Icon, SVG } from "./Icons/SVG";
+import { create } from "zustand";
+import { TextInput } from "./Inputs/TextInput";
+import { Portrait } from "./Icons/Portrait";
+import { RadioButton } from "./Inputs/RadioButton";
+import { useAppState } from "./Store/app_state";
+import Network from "./network";
+import { User } from "./types/models/tables/User";
+import { GameSession } from "./types/models/tables/Session";
+
+type PopupDetails = PropsWithChildren<{
+    title?: string;
+    showExit?: boolean;
+    denyExit?: boolean;
+}>;
+
+type PopupType = 'mock-login' | 'credits' | 'user-settings' | 'lobby-settings';
+
+type PopupState = {
+    popup?: PopupType;
+    popupDetails?: PopupDetails;
+    showPopup: (title: PopupType, details: PopupDetails) => void;
+    hidePopup: () => void;
+}
+
+export const usePopup = create<PopupState>((set) => ({
+    popup: undefined,
+    popupDetails: { showExit: true },
+    showPopup: (popup, details) => set({popup, popupDetails: details}),
+    hidePopup: () =>  set({popup: undefined, }),
+}));
+
+export function PopupContainer() {
+    const { popup, popupDetails, hidePopup } = usePopup();
+
+    function onCancelCallbackStrict(event: React.MouseEvent) {
+        if(event.target !== event.currentTarget || popupDetails?.denyExit) return;
+        hidePopup();
+    }
+
+    if(popup == null) return;
+    return (
+        <div className="fixed inset-0 bg-black/75 pt-[128px]" onClick={onCancelCallbackStrict}>
+            <div className="
+                relative left-1/2 -translate-x-1/2
+
+                w-fit min-w-[200px]
+                rounded-[40px]
+                text-bold text-custom-gray-400
+
+                py-2
+
+                border-t
+                border-b-2
+                bg-light-default-bottom border-t-custom-gray-700 border-b-custom-gray-800
+                ">
+                <header className="pl-[24px] pr-[16px] py-[8px] h-[62px] min-w-[300px] flex items-center">
+                    <div>
+                        { popupDetails?.title?.length !== 0 && <p className="font-bold text-custom-pink-50 px-4">{popupDetails?.title}</p> }
+                    </div>
+                    <div className="ml-auto">
+                        { popupDetails?.showExit == true && <Button icon={Icon.xmark} color="red" onClick={() => {
+                            if(popupDetails?.denyExit) return;
+                            hidePopup()
+                        }} /> }
+                    </div>
+                </header>
+
+                    { popup === 'mock-login' && <PopupMockLogin /> }
+                    { popup === 'credits' && <PopupCredits /> }
+                    { popup === 'user-settings' && <PopupUserSettings /> }
+                    { popup === 'lobby-settings' && <PopupLobbySettings /> }
+
+            </div>
+        </div>
+    );
+}
+
+function PopupMockLogin() {
+    const [mockID, setMockID] = useState<string>();
+
+    function onUpdate(event: React.KeyboardEvent<HTMLInputElement>) {
+        const data = event?.currentTarget?.value ?? '';
+        setMockID(oldData => data);
+    }
+
+    function onConfirm() {
+        console.log('Attempting to login with mock id:', mockID);
+        window.open(route('login.mock', mockID), '_self');
+    }
+
+    return (
+        <>
+            <div className="max-w-[600px] pl-10 pr-6 pt-2 pb-4">
+                <div className="flex items-center gap-2 rounded-full border border-custom-purple-400 bg-custom-purple-600 px-2 py-1">
+                    <SVG icon={Icon.infoCircle} fill="fill-custom-pink-50" />
+                    <p className="text-custom-pink-50">This is meant for testing purposes only.</p>
+                </div>
+
+                <div className="pt-12 pb-6 flex flex-col gap-1">
+                    <label className="text-custom-pink-50">Mock ID</label>
+                    <TextInput maxWidth='100%' placeholder="Mock ID" onUpdate={onUpdate} />
+                </div>
+
+                <p className="pb-2">You can use whatever id you want.</p>
+                <p>If a user with that mock id doesn't exist it will create a new user, otherwise it will connect you to an existing one.</p>
+            </div>
+
+            <footer className="py-4 px-6 flex justify-end gap-[12px]">
+                <Button icon={Icon.check} text="Confirm" onClick={onConfirm} />
+            </footer>
+        </>
+    );
+}
+
+function PopupCredits() {
+    return (
+        <div className="w-[540px] pl-10 pr-6 pt-2 pb-4">
+            <p className="text-custom-pink-50">CUBUS was made as a project for the course ADISE.</p>
+            <p>The team thanks you for trying the game out.</p>
+
+            <p className="pt-4 pb-2 text-custom-pink-50">Lead Developers</p>
+            <p className="pb-1">Tryfonas Mazarakis</p>
+            <p className="pb-1">Pandeli Bezolli</p>
+
+            <p className="pt-4 pb-2 text-custom-pink-50">2D Artists</p>
+            <p className="pb-1">Tryfonas Mazarakis</p>
+            <p className="pb-1">Pandeli Bezolli</p>
+
+            <p className="pt-4 pb-2 text-custom-pink-50">3D Artists</p>
+            <p className="pb-1">Tryfonas Mazarakis</p>
+
+            <p className="pt-4 pb-2 text-custom-pink-50">Music and Sound Effects</p>
+            <p className="pb-1">Pandeli Bezolli</p>
+
+        </div>
+    );
+}
+
+function PopupUserSettings() {
+    // WARN: THE ICONS ARE MANUALLY INSERTED & VISIBLE IN THIS LIST
+    // This is required to not unintentionally leak public icons, although it would be really nice to have a way to grab all these icons beforehand.
+    const icons = [
+        'black-elegance.jpg',
+        'black-mlady.jpg',
+        'white-cowboy.jpg',
+        'white-wizard.jpg',
+        'yellow-elegance.jpg',
+        'yellow-mlady.jpg',
+    ];
+
+    const { hidePopup } = usePopup();
+    const { user, setUser } = useAppState();
+    console.info('Opening user settings with data:', { user });
+    const [username, setUsername] = useState<string>(user?.name ?? '');
+    const [icon, setIcon] = useState<number>(user?.icon ? (icons.indexOf(user.icon) + 1) : 0);
+
+    function onUsernameUpdateCallback(event: React.KeyboardEvent<HTMLInputElement>) {
+        const data = event?.currentTarget.value ?? '';
+        setUsername(() => data);
+    }
+
+    async function onConfirmCallback() {
+        console.info('Attempting to update user setting with: ', {username, icon});
+        const result = await Network.post<User>({ url: route('profile.store'), body: { name: username, icon } });
+        let newUser = user ?? result!;
+        if(user) {
+            newUser.name = username;
+            newUser.icon = '/portraits/' + icons[icon - 1];
+        }
+
+        if(result) setUser(newUser);
+        hidePopup();
+    }
+
+    return (
+        <>
+            <div className="max-w-[600px] pl-10 pr-6 pt-2 pb-4">
+                <div className="pb-6 flex flex-col gap-1">
+                    <label className="pb-1 text-custom-pink-50">Your Username</label>
+                    <TextInput maxWidth='100%' placeholder="best_cubus_player" onUpdate={onUsernameUpdateCallback} defaultValue={username} />
+                </div>
+
+                <div className="pb-6 flex flex-col gap-1">
+                    <label className="pb-1 text-custom-pink-50">Your Icon</label>
+                    <div className="grid grid-cols-3 gap-4">
+                        {
+                            icons.map((icon, index) => (
+                                <button key={icon} onClick={() => setIcon(index + 1)}><Portrait url={'/portraits/' + icon} /></button>
+                            ))
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <footer className="py-4 pl-10 pr-6 flex justify-end gap-[12px]">
+                <Button icon={Icon.check} text="Confirm" onClick={onConfirmCallback} />
+            </footer>
+        </>
+    );
+}
+
+function PopupLobbySettings() {
+    const [lobbyName, setLobbyName] = useState<string>('');
+    const [playerCount, setPlayerCount] = useState<number>(2);
+    const { setCurrentSession } = useAppState();
+    const { hidePopup } = usePopup();
+
+    function onLobbyNameChangeCallback(event: React.KeyboardEvent<HTMLInputElement>) {
+        const data = event?.currentTarget?.value ?? '';
+        setLobbyName(data);
+    }
+
+    function onPlayerCountChange(event: React.MouseEvent<HTMLInputElement>) {
+        const data = event?.currentTarget?.value ?? '';
+        setPlayerCount(parseInt(data));
+    }
+
+    async function onConfirmCallback() {
+        console.info('Attempting to create lobby with:', {lobbyName, playerCount});
+        const result = await Network.post<GameSession>({ url: route('lobby.store'), body: { 'name': lobbyName, 'player_count': playerCount } });
+
+        if(!result) {
+            hidePopup();
+            return;
+        }
+
+        setCurrentSession(result);
+        hidePopup();
+    }
+
+    return (
+        <>
+            <div className="w-[550px] pl-10 pr-6 pt-2 pb-4">
+                <div className="pb-6 flex flex-col gap-1">
+                    <label className="pb-1 text-custom-pink-50">Lobby's Name</label>
+                    <TextInput maxWidth='100%' placeholder="Friends only" onUpdate={onLobbyNameChangeCallback} />
+                </div>
+
+                <div className="pb-6 flex flex-col gap-2">
+                    <label className="pb-2 text-custom-pink-50">Player Count</label>
+                    <div className="flex gap-4">
+                        <RadioButton name="player-count" value="2" checked={true} label="2 Players" onClick={onPlayerCountChange} />
+                        <RadioButton name="player-count" value="4" label="4 Players" onClick={onPlayerCountChange} />
+                    </div>
+                </div>
+            </div>
+
+            <footer className="py-4 pl-10 pr-6 flex justify-end gap-[12px]">
+                <Button icon={Icon.check} text="Confirm" onClick={onConfirmCallback} />
+            </footer>
+        </>
+    );
+}

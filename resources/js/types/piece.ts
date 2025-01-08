@@ -17,3 +17,22 @@ export type Vector2 = {
 
 export type MoveType = 'move' | 'rotate' | 'flip';
 
+export type PlayerIdentifier = 'green' | 'red' | 'blue' | 'yellow';
+
+export type GameState = {
+    id: number;
+    startTime?: number;
+    endTime?: number | null;
+    round: number;
+    player_turn: PlayerIdentifier;
+    player_identifier: PlayerIdentifier | null;
+    player_count: number;
+    state: 'Ready' | 'Starting' | 'Finished' | 'OwnTurnPlaying' | 'OwnTurnLocked' | 'OpponentTurn';
+}
+
+export type OpponentMovePayload = {
+    block_positions: Vector2[]
+    destination: Vector2;
+    opponent: PlayerIdentifier;
+}
+

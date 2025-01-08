@@ -67,12 +67,7 @@ function loginEventCallback(event: LoginEvent, publicUserToken?: string) {
     }
 
     if (!event.success) return;
-
-    if (event.redirect_url === '') {
-        location.reload();
-    } else {
-        location.assign(event.redirect_url);
-    }
+    location.assign('/game');
 }
 
 function parseCookies(): Map<string, string> {
