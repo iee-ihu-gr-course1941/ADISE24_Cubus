@@ -1,5 +1,6 @@
 import {useLoadedModels} from '@/Hooks/useLoadedModels';
 import {memo} from 'react';
+import {SpaceshipPlayerColors} from './SpaceshipPlayerColors';
 
 export const Spaceship = memo(() => {
     const models = useLoadedModels();
@@ -7,6 +8,7 @@ export const Spaceship = memo(() => {
     return (
         <>
             {models.board && <primitive object={models.board} />}
+            <SpaceshipPlayerColors playerColor="red" />
         </>
     );
 });

@@ -30,7 +30,6 @@ export const Experience = memo(() => {
         <>
             <Canvas
                 onCreated={({camera, gl}) => {
-                    gl.shadowMap.autoUpdate = true;
                     gl.toneMapping = THREE.ACESFilmicToneMapping;
                     if (ui_state === 'Ready') {
                         camera.position.set(
