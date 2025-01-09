@@ -14,13 +14,13 @@ type ButtonProps = {
 export function Button({text = '', color = 'default', icon, isLeft = false, blocked = false, onClick}: ButtonProps) {
     let colors = `bg-light-default-bottom shadow-button-default
         ${blocked ? '' : 'hover:bg-bright-default-bottom hover:shadow-button-default-hover'}
-        border-t-custom-gray-700 border-b-custom-gray-800
-        ${blocked ? '' : 'hover:border-t-white hover:border-b-custom-purple-600'}`;
+        border-t-custom-gray-700 border-b-custom-purple-500
+        ${blocked ? '' : 'hover:border-t-purple-300 hover:border-b-custom-purple-600'}`;
     if(color === 'red') {
         colors = `bg-light-red-bottom shadow-button-red
             ${blocked ? '' : 'hover:bg-bright-red-bottom hover:shadow-button-red-hover' }
             border-t-custom-gray-700 border-b-custom-gray-800
-            ${blocked ? '' : 'hover:border-t-white hover:border-b-custom-brown-600' }`;
+            ${blocked ? '' : 'hover:border-purple-300 hover:border-b-custom-brown-600' }`;
     }
 
     const Icon = () => icon != null ? <SVG icon={icon} fill={`fill-custom-gray-400 ${blocked ? '' : 'group-hover:fill-custom-pink-50'}`} /> : <></>;
