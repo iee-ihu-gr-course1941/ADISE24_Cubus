@@ -143,32 +143,69 @@ function PopupUserSettings() {
     // WARN: THE ICONS ARE MANUALLY INSERTED & VISIBLE IN THIS LIST
     // This is required to not unintentionally leak public icons, although it would be really nice to have a way to grab all these icons beforehand.
     const icons = [
-        'black-elegance.jpg',
-        'black-mlady.jpg',
-        'white-cowboy.jpg',
-        'white-wizard.jpg',
-        'yellow-elegance.jpg',
-        'yellow-mlady.jpg',
+        '/portraits/black-elegance.jpg',
+        '/portraits/black-mlady.jpg',
+        '/portraits/white-cowboy.jpg',
+        '/portraits/white-wizard.jpg',
+        '/portraits/yellow-elegance.jpg',
+        '/portraits/yellow-mlady.jpg',
     ];
 
     const { hidePopup } = usePopup();
     const { user, setUser } = useAppState();
-    console.info('Opening user settings with data:', { user });
+    console.info('Opening user settings with data:', { user }, 'icon index: ', icons.indexOf(user!.icon!) + 1);
     const [username, setUsername] = useState<string>(user?.name ?? '');
     const [icon, setIcon] = useState<number>(user?.icon ? (icons.indexOf(user.icon) + 1) : 0);
+    const [errors, setErrors] = useState<{ name?: string, icon?: string }>({});
+
+    function verifyUsername(username: string) {
+        const pattern = new RegExp(/^[a-zA-Z-0-9_\-.!#$%^&*]*$/);
+
+        if(username.length < 1) {
+            setErrors(old => ({...old, name: 'Your name must be at least 1 character long.'}));
+            return false;
+        }
+
+        if(username.length > 80) {
+            setErrors(old => ({...old, name: 'Your name must be max 80 characters long.'}));
+            return false;
+        }
+
+        if(!pattern.test(username)) {
+            setErrors(old => ({...old, name: 'Don\'t use spaces between characters.\n Use alphanumerics and basic symbols.'}));
+            return false;
+        }
+
+        setErrors(old => ({...old, name: undefined}));
+        return true;
+    }
+
+    function verifyIcon(icon: number) {
+        if(icon === 0) {
+            setErrors(old => ({...old, icon: 'You need to select an icon'}));
+            return false;
+        }
+
+        setErrors(old => ({...old, icon: undefined}));
+        return true
+    }
 
     function onUsernameUpdateCallback(event: React.KeyboardEvent<HTMLInputElement>) {
         const data = event?.currentTarget.value ?? '';
+        if(!verifyUsername(data)) return;
+
         setUsername(() => data);
     }
 
     async function onConfirmCallback() {
         console.info('Attempting to update user setting with: ', {username, icon});
+        if(!verifyUsername(username) || !verifyIcon(icon)) return;
+
         const result = await Network.post<User>({ url: route('profile.store'), body: { name: username, icon } });
         let newUser = user ?? result!;
         if(user) {
             newUser.name = username;
-            newUser.icon = '/portraits/' + icons[icon - 1];
+            newUser.icon = icons[icon - 1];
         }
 
         if(result) setUser(newUser);
@@ -180,7 +217,7 @@ function PopupUserSettings() {
             <div className="max-w-[600px] pl-10 pr-6 pt-2 pb-4">
                 <div className="pb-6 flex flex-col gap-1">
                     <label className="pb-1 text-custom-pink-50">Your Username</label>
-                    <TextInput maxWidth='100%' placeholder="best_cubus_player" onUpdate={onUsernameUpdateCallback} defaultValue={username} />
+                    <TextInput maxWidth='100%' placeholder="best_cubus_player" onUpdate={onUsernameUpdateCallback} defaultValue={username} error={errors.name} />
                 </div>
 
                 <div className="pb-6 flex flex-col gap-1">
@@ -188,10 +225,17 @@ function PopupUserSettings() {
                     <div className="grid grid-cols-3 gap-4">
                         {
                             icons.map((icon, index) => (
-                                <button key={icon} onClick={() => setIcon(index + 1)}><Portrait url={'/portraits/' + icon} /></button>
+                                <button key={icon} onClick={() => setIcon(index + 1)}><Portrait url={icon} /></button>
                             ))
                         }
                     </div>
+
+                    { errors.icon && (
+                    <div className="flex items-center gap-4 rounded-full border border-red-400 bg-red-950 px-4 py-1">
+                        <SVG icon={Icon.infoCircle} fill="fill-red-400" />
+                        <p className="text-red-400 whitespace-pre-line">{errors.icon}</p>
+                    </div>
+                    )}
                 </div>
             </div>
 
