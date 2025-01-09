@@ -5,17 +5,19 @@ import {
 } from '@/Constants/materials';
 import {useBoardState} from '@/Store/board_state';
 import {PieceCode, Vector2} from '@/types/piece';
-import {useEffect, useRef} from 'react';
+import {useEffect, useMemo, useRef, useState} from 'react';
 import * as THREE from 'three';
 import vertexShader from '../../../../shaders/piece/vertex.glsl';
 import fragmentShader from '../../../../shaders/piece/fragment.glsl';
-import {extend} from '@react-three/fiber';
-import {shaderMaterial} from '@react-three/drei';
+import {extend, useFrame} from '@react-three/fiber';
+import {Float, shaderMaterial} from '@react-three/drei';
 import {COLORS} from '@/Constants/colors';
+import {lerp} from 'three/src/math/MathUtils.js';
 
 const PieceMaterial = shaderMaterial(
     {
         uColor: new THREE.Color(0xff0000),
+        uGlow: 1,
     },
     vertexShader,
     fragmentShader,
@@ -29,6 +31,7 @@ type Props = {
     pieceCode: PieceCode;
     isDragging: boolean;
     positionY: number;
+    isHovering: boolean;
 };
 
 export const PieceModel = ({
@@ -37,12 +40,13 @@ export const PieceModel = ({
     pieceCode,
     isDragging,
     positionY,
+    isHovering,
 }: Props) => {
     const blockRef = useRef<THREE.Mesh[]>([]);
+
     const playerIdentifier = useBoardState(
         state => state.playerState?.session_color,
     );
-
     const latestMove = useBoardState(state => state.move);
 
     useEffect(() => {
@@ -73,6 +77,7 @@ export const PieceModel = ({
                             ]}
                             geometry={PIECE_GEOMETRY['block']}>
                             <PieceMaterialComponent
+                                enableGlow={isHovering || isDragging}
                                 color={COLORS[playerIdentifier]}
                             />
                         </mesh>
@@ -84,13 +89,24 @@ export const PieceModel = ({
 
 type PieceMaterialProps = {
     color: number;
+    enableGlow: boolean;
 };
-const PieceMaterialComponent = ({color}: PieceMaterialProps) => {
+const PieceMaterialComponent = ({color, enableGlow}: PieceMaterialProps) => {
     const ref = useRef<THREE.ShaderMaterial>(null);
     useEffect(() => {
         if (ref.current) {
             ref.current.uniforms.uColor.value = new THREE.Color(color);
         }
-    }, [color]);
+    }, [color, ref]);
+    useEffect(() => {
+        if (!ref.current) return;
+
+        if (enableGlow) {
+            ref.current.uniforms.uGlow.value = 2.65;
+        } else {
+            ref.current.uniforms.uGlow.value = 1;
+        }
+    }, [enableGlow, ref]);
+
     return <pieceMaterial ref={ref} />;
 };
