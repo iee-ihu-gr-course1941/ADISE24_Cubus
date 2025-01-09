@@ -73,8 +73,13 @@ export default {
                 'asteroid-hover': 'AsteroidHover 20s ease infinite',
                 'noise': 'Noise 3s infinite',
                 'noise-alt': 'NoiseAlt 6s infinite',
+                'show': 'Show 3s ease 1s both',
             },
             keyframes: {
+                Show: {
+                    '0%': { opacity: '0%' },
+                    '100%': { opacity: '100%' },
+                },
                 Noise: {
                     '0%, 100%': { transform: 'translate(0, 0) scale(1.05)', opacity: '11%' },
                     '20%': { transform: 'translate(2px, -2px) scale(1.05)', opacity: '9%' },
