@@ -77,7 +77,7 @@ export const PieceModel = ({
                             ]}
                             geometry={PIECE_GEOMETRY['block']}>
                             <PieceMaterialComponent
-                                enableGlow={isHovering || isDragging}
+                                enableGlow={isHovering}
                                 color={COLORS[playerIdentifier]}
                             />
                         </mesh>

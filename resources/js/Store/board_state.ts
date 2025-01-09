@@ -31,6 +31,7 @@ type Actions = {
     getPoints: () => number;
     getHasFinished: () => boolean;
     isGameOnGoing: () => boolean;
+    isPlayerAlive: (color: PlayerColor) => boolean;
 };
 
 export type BoardState = State & Actions;
@@ -198,6 +199,13 @@ export const useBoardState = create<BoardState>()((set, get, _) => ({
                     return gameState.player_red_has_finished;
                 return gameState.player_yellow_has_finished;
             })() ?? false
+        );
+    },
+    isPlayerAlive: (color: PlayerColor) => {
+        const {gameState} = get();
+        return (
+            !gameState[`player_${color}_has_finished`] &&
+            !!gameState[`player_${color}`]
         );
     },
 }));
