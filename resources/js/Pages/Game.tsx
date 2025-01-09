@@ -14,6 +14,7 @@ import {GameResponse} from '@/types/game';
 import {GameSession} from '@/types/models/tables/Session';
 import {User} from '@/types/models/tables/User';
 import {PropsWithChildren, useEffect} from 'react';
+import Base from './Base';
 
 type GameProps = PageProps<{
     user: User;
@@ -79,7 +80,7 @@ function Lobby({
     }, []);
 
     return (
-        <div className="w-screen h-screen bg-backdrop relative text-custom-gray-400 font-bold flex flex-col">
+        <Base className="flex flex-col">
             <PopupContainer />
             <section className="pt-8 px-8 flex gap-8 grow items-start">
                 <LobbiesControls games={availableSessions} />
@@ -117,7 +118,7 @@ function Lobby({
                     </span>
                 </p>
             </footer>
-        </div>
+        </Base>
     );
 }
 
