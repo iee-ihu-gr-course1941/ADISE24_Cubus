@@ -74,6 +74,10 @@ export default {
                 'noise': 'Noise 3s infinite',
                 'noise-alt': 'NoiseAlt 6s infinite',
                 'show': 'Show 3s ease 1s both',
+
+                'pulse-slow': 'pulse 6s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                'pulse-fast': 'pulse 1s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                'pulse-slower': 'pulse 8s cubic-bezier(0.4, 0, 0.6, 1) infinite',
             },
             keyframes: {
                 Show: {
