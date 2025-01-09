@@ -224,8 +224,8 @@ function PopupUserSettings() {
                     <label className="pb-1 text-custom-pink-50">Your Icon</label>
                     <div className="grid grid-cols-3 gap-4">
                         {
-                            icons.map((icon, index) => (
-                                <button key={icon} onClick={() => setIcon(index + 1)}><Portrait url={icon} /></button>
+                            icons.map((curIcon, index) => (
+                                <button key={curIcon} className={`rounded-[25px] ${index + 1 !== icon ? 'shadow-portrait' : 'shadow-portrait-hover'} hover:shadow-portrait-hover`} onClick={() => setIcon(index + 1)}><Portrait url={curIcon} /></button>
                             ))
                         }
                     </div>

@@ -63,6 +63,8 @@ export default {
                 'button-landing': '0 0 8px 0 #8960F945, 0 0 0 0 #8960F976, 0 0 0 0 #8960F976',
                 'button-landing-hover': '0 0 0 8px #8960F945, 0 0 500px 250px #8960F930, 0 0 136px 58px #BC88FFA7',
                 'button-landing-edge-glow': '0 0 10px 20px #fff',
+                'portrait': '0 0 8px 0 #EB5AF645',
+                'portrait-hover': '0 0 16px 4px #EB5AF6A0',
             },
             animation: {
                 'landing-glow': 'LandingGlow 3s linear infinite',
