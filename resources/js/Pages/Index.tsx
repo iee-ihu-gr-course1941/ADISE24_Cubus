@@ -47,7 +47,7 @@ export default function Index({ user, flash }: PageProps<{ user: User }>) {
 
                 <List
                     title="Connect With"
-                    className={`relative z-20 ${!visibleLoginOptions ? 'opacity-0' : 'opacity-100'} transition-all ease duration-500`}
+                    className={`relative z-20 ${!visibleLoginOptions ? 'pointer-events-none opacity-0' : 'opacity-100'} transition-all ease duration-500`}
                     onClick={handleLoginCallback}>
                     <ListElement value="ihu">
                         <div className={`
