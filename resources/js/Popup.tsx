@@ -192,7 +192,7 @@ function PopupUserSettings() {
 
     function onUsernameUpdateCallback(event: React.KeyboardEvent<HTMLInputElement>) {
         const data = event?.currentTarget.value ?? '';
-        if(!verifyUsername(data)) return;
+        verifyUsername(data);
 
         setUsername(() => data);
     }
@@ -250,10 +250,36 @@ function PopupLobbySettings() {
     const [lobbyName, setLobbyName] = useState<string>('');
     const [playerCount, setPlayerCount] = useState<number>(2);
     const { setCurrentSession } = useAppState();
+    const [errors, setErrors] = useState<{name?: string}>({});
     const { hidePopup } = usePopup();
+
+    function verifyName(name: string) {
+        const pattern = new RegExp(/^[ a-zA-Z-0-9_\-.!#$%^&*]*$/);
+
+        if(name.length < 1) {
+            setErrors(old => ({...old, name: 'Your name must be at least 1 character long.'}));
+            return false;
+        }
+
+        if(name.length > 80) {
+            setErrors(old => ({...old, name: 'Your name must be max 80 characters long.'}));
+            return false;
+        }
+
+        if(!pattern.test(name)) {
+            setErrors(old => ({...old, name: 'Use alphanumerics, basic symbols and spaces only.'}));
+            return false;
+        }
+
+        console.log('Verify ', name, 'is ok');
+
+        setErrors(old => ({...old, name: undefined}));
+        return true;
+    }
 
     function onLobbyNameChangeCallback(event: React.KeyboardEvent<HTMLInputElement>) {
         const data = event?.currentTarget?.value ?? '';
+        verifyName(data);
         setLobbyName(data);
     }
 
@@ -264,6 +290,7 @@ function PopupLobbySettings() {
 
     async function onConfirmCallback() {
         console.info('Attempting to create lobby with:', {lobbyName, playerCount});
+        if(!verifyName(lobbyName)) return;
         const result = await Network.post<GameSession>({ url: route('lobby.store'), body: { 'name': lobbyName, 'player_count': playerCount } });
 
         if(!result) {
@@ -280,7 +307,7 @@ function PopupLobbySettings() {
             <div className="w-[550px] pl-10 pr-6 pt-2 pb-4">
                 <div className="pb-6 flex flex-col gap-1">
                     <label className="pb-1 text-custom-pink-50">Lobby's Name</label>
-                    <TextInput maxWidth='100%' placeholder="Friends only" onUpdate={onLobbyNameChangeCallback} />
+                    <TextInput maxWidth='100%' placeholder="Friends only" onUpdate={onLobbyNameChangeCallback} error={errors.name} />
                 </div>
 
                 <div className="pb-6 flex flex-col gap-2">
