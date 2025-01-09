@@ -1,7 +1,7 @@
 import {PiecePositions, Piece as PieceData} from '@/Constants/Piece';
 import {useGameDimensions} from '@/Store/game_dimensions';
 import {MoveType, PieceCode, PieceRotation} from '@/types/piece';
-import {DragControls} from '@react-three/drei';
+import {DragControls, Float} from '@react-three/drei';
 import {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import * as THREE from 'three';
 import gsap from 'gsap';
@@ -66,6 +66,7 @@ export const Piece = ({
     const [boardState, setBoardState] = useState<BoardState>();
     const {action, setAction} = useInterfaceState();
     const pieceAnimationState = useRef<AnimateState>(null);
+    const [isHovering, setIsHovering] = useState(false);
 
     const canMovePiece = useMemo(() => {
         return (
@@ -753,8 +754,11 @@ export const Piece = ({
                 <group
                     onDoubleClick={() => setAction('flip')}
                     onContextMenu={() => setAction('rotate_pos')}
+                    onPointerOver={() => setIsHovering(true)}
+                    onPointerOut={() => setIsHovering(false)}
                     ref={ref}>
                     <PieceModel
+                        isHovering={isHovering}
                         isDragging={isDragging}
                         pieceCode={pieceCode}
                         block_positions={block_positions}
