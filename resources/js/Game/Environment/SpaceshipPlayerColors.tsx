@@ -6,6 +6,7 @@ import fragmentShader from '../../../shaders/spaceship/noise_lights/pattern_2/fr
 import {Fragment, memo, useEffect, useMemo, useRef} from 'react';
 import {PlayerColor} from '@/types/game';
 import {COLORS} from '@/Constants/colors';
+import {usePlayerPositions} from '@/Store/player_positions';
 
 const planeGeometry = new THREE.PlaneGeometry(1, 1, 32, 32);
 planeGeometry.rotateX(Math.PI * 0.5);
@@ -31,6 +32,10 @@ const POSITIONS: {
         left: [7.8, 0.7, -3.7],
         right: [7.8, 0.7, 3.5],
     },
+    3: {
+        left: [-3.6, 0.7, 7.9],
+        right: [3.6, 0.7, 7.9],
+    },
 };
 
 const LightNoiseMaterial = shaderMaterial(
@@ -52,7 +57,14 @@ type Props = {
     playerColor?: PlayerColor;
 };
 export const SpaceshipPlayerColors = memo(({playerColor}: Props) => {
+    const setPlayerPosition = usePlayerPositions(s => s.setPlayerPosition);
     if (!playerColor) return null;
+    useEffect(() => {
+        setPlayerPosition(playerColor, {
+            x: (POSITIONS[3].left[0] + POSITIONS[3].right[0]) * 0.5,
+            y: (POSITIONS[3].left[2] + POSITIONS[3].right[2]) * 0.5,
+        });
+    }, [playerColor]);
     return (
         <>
             <LightObject
@@ -68,6 +80,16 @@ export const SpaceshipPlayerColors = memo(({playerColor}: Props) => {
             {Object.keys(COLORS)
                 .filter(color => color !== playerColor)
                 .map((_color, index) => {
+                    setPlayerPosition(_color as PlayerColor, {
+                        x:
+                            (POSITIONS[index].left[0] +
+                                POSITIONS[index].right[0]) *
+                            0.5,
+                        y:
+                            (POSITIONS[index].left[2] +
+                                POSITIONS[index].right[2]) *
+                            0.5,
+                    });
                     const color = _color as keyof typeof COLORS;
                     return (
                         <Fragment key={index}>
