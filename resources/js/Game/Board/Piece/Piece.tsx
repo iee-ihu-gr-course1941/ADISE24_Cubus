@@ -15,7 +15,9 @@ import {MovePayload} from '@/types/game';
 import {validateMove} from '@/network/session_network';
 import {formatMoveOrigin} from '@/libs/move';
 
-type Props = MovePayload & {};
+type Props = MovePayload & {
+    positionY: number;
+};
 
 const rotationToIndex = (rotation: number) => {
     const normalizedRotation = (rotation + 2 * Math.PI) % (2 * Math.PI);
@@ -28,6 +30,7 @@ export const Piece = ({
     code: pieceCode = 0,
     origin_x,
     origin_y,
+    positionY,
     rotation,
     flip,
 }: Props) => {
@@ -76,10 +79,6 @@ export const Piece = ({
         boardState?.boardPieces,
         ref.current,
     ]);
-
-    const positionY = useMemo(() => {
-        return Math.random() * 5 + blockSize * 0.5 + 0.01 + 2;
-    }, []);
 
     const {dragHeight, animationDuration} = useControls({
         dragHeight: {

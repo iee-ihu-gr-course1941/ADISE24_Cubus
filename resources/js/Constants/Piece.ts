@@ -1,7 +1,119 @@
-import {PieceData, PieceCode, Vector2} from '@/types/piece';
+import {PieceData, PieceCode, Vector2, Vector3} from '@/types/piece';
 import pieces from '../../../public/pieces.json';
 
 export const PiecePositions: {[key in PieceCode]: Vector2[]} = pieces;
+
+const firstX = -12;
+const startZ = 11;
+const y = 1;
+
+export const PieceWorldPositions: {[key in PieceCode]: Vector3} = {
+    1: {
+        x: firstX / 2,
+        y: y,
+        z: startZ,
+    },
+    2: {
+        x: firstX / 2 - 2,
+        y: y,
+        z: startZ,
+    },
+    3: {
+        x: firstX / 2 - 3,
+        y: y,
+        z: startZ - 0.5,
+    },
+    4: {
+        x: firstX / 2 - 5.5,
+        y: y,
+        z: startZ - 1,
+    },
+    5: {
+        x: firstX + 1.5,
+        y: y,
+        z: startZ - 3,
+    },
+    6: {
+        x: firstX + 1,
+        y: y,
+        z: startZ - 4.5,
+    },
+    7: {
+        x: firstX + 1,
+        y: y,
+        z: startZ - 6,
+    },
+    8: {
+        x: firstX + 1.5,
+        y: y,
+        z: startZ - 8,
+    },
+    9: {
+        x: firstX - 0.5,
+        y: y,
+        z: startZ - 9,
+    },
+    10: {
+        x: firstX + 1.5,
+        y: y,
+        z: startZ - 11.5,
+    },
+    11: {
+        x: firstX + 1.5,
+        y: y,
+        z: startZ - 14,
+    },
+    12: {
+        x: -firstX / 2 + 0.5,
+        y: y,
+        z: startZ,
+    },
+    13: {
+        x: -firstX / 2 + 2.5,
+        y: y,
+        z: startZ,
+    },
+    14: {
+        x: -firstX / 2 + 4,
+        y: y,
+        z: startZ,
+    },
+    15: {
+        x: -firstX / 2 + 5,
+        y: y,
+        z: startZ - 2,
+    },
+    16: {
+        x: -firstX / 2 + 5,
+        y: y,
+        z: startZ - 4,
+    },
+    17: {
+        x: -firstX / 2 + 5.5,
+        y: y,
+        z: startZ - 5.5,
+    },
+    18: {
+        x: -firstX / 2 + 5.5,
+        y: y,
+        z: startZ - 7.5,
+    },
+    19: {
+        x: -firstX / 2 + 5.5,
+        y: y,
+        z: startZ - 9.5,
+    },
+    20: {
+        x: -firstX / 2 + 5.5,
+        y: y,
+        z: startZ - 11.5,
+    },
+    0: {
+        x: 0.5,
+        y: y,
+        z: startZ,
+    },
+};
 
 export const Piece: Readonly<Record<PieceCode, PieceData>> = Object.freeze({
     0: {
