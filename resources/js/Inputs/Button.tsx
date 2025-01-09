@@ -5,20 +5,25 @@ type ButtonProps = {
     color?: 'default' | 'red';
     icon?: Icon;
     isLeft?: boolean;
+
+    blocked?: boolean;
+
     onClick?: () => void;
 };
 
-export function Button({text = '', color = 'default', icon, isLeft = false, onClick}: ButtonProps) {
-    let colors = `bg-light-default-bottom hover:bg-bright-default-bottom
-        shadow-button-default hover:shadow-button-default-hover
-        border-t-custom-gray-700 border-b-custom-gray-800 hover:border-t-white hover:border-b-custom-purple-600`;
+export function Button({text = '', color = 'default', icon, isLeft = false, blocked = false, onClick}: ButtonProps) {
+    let colors = `bg-light-default-bottom shadow-button-default
+        ${blocked ? '' : 'hover:bg-bright-default-bottom hover:shadow-button-default-hover'}
+        border-t-custom-gray-700 border-b-custom-gray-800
+        ${blocked ? '' : 'hover:border-t-white hover:border-b-custom-purple-600'}`;
     if(color === 'red') {
-        colors = `bg-light-red-bottom hover:bg-bright-red-bottom
-            shadow-button-red hover:shadow-button-red-hover
-            border-t-custom-gray-700 border-b-custom-gray-800 hover:border-t-white hover:border-b-custom-brown-600`;
+        colors = `bg-light-red-bottom shadow-button-red
+            ${blocked ? '' : 'hover:bg-bright-red-bottom hover:shadow-button-red-hover' }
+            border-t-custom-gray-700 border-b-custom-gray-800
+            ${blocked ? '' : 'hover:border-t-white hover:border-b-custom-brown-600' }`;
     }
 
-    const Icon = () => icon != null ? <SVG icon={icon} fill="fill-custom-gray-400 group-hover:fill-custom-pink-50" /> : <></>;
+    const Icon = () => icon != null ? <SVG icon={icon} fill={`fill-custom-gray-400 ${blocked ? '' : 'group-hover:fill-custom-pink-50'}`} /> : <></>;
     return (
         <button
             className={`
@@ -29,9 +34,11 @@ export function Button({text = '', color = 'default', icon, isLeft = false, onCl
                 text-custom-gray-400 font-bold
                 rounded-full border-t border-b-2
 
-                hover:text-custom-pink-50
+                ${blocked ? '' : 'hover:text-custom-pink-50'}
 
                 transition-colors duration-200
+
+                ${blocked ? 'cursor-not-allowed' : 'cursor-pointer'}
 
                 ${colors}
             `}

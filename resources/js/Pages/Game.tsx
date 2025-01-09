@@ -127,9 +127,11 @@ type LobbiesControlsProps = {
 
 function LobbiesControls({games}: LobbiesControlsProps) {
     const {showPopup} = usePopup();
-    const {setCurrentSession} = useAppState();
+    const {currentSession, setCurrentSession} = useAppState();
 
     async function joinRandomGameCallback() {
+        if(currentSession != null) return;
+
         let response = await Network.get<GameSession>({
             url: route('lobby.match'),
         });
@@ -138,6 +140,8 @@ function LobbiesControls({games}: LobbiesControlsProps) {
     }
 
     async function joinGameCallback(gameId: string) {
+        if(currentSession != null) return;
+
         let response = await Network.get<GameSession>({
             url: route('lobby.join', gameId),
         });
@@ -161,6 +165,7 @@ function LobbiesControls({games}: LobbiesControlsProps) {
                 <Button
                     text="Join Random"
                     icon={Icon.random}
+                    blocked
                     onClick={joinRandomGameCallback}
                 />
             </header>
