@@ -26,11 +26,16 @@ const INITIAL_CAMERA_PROPS = {
 
 export const Experience = memo(() => {
     const ui_state = useBoardState(state => state.gameState.ui_state);
+    const isGameOnGoing = useBoardState(state => state.isGameOnGoing);
     return (
         <>
             <Canvas
+                gl={{
+                    antialias: true,
+                    toneMapping: THREE.ACESFilmicToneMapping,
+                    pixelRatio: Math.min(2, window.devicePixelRatio),
+                }}
                 onCreated={({camera, gl}) => {
-                    gl.toneMapping = THREE.ACESFilmicToneMapping;
                     if (ui_state === 'Ready') {
                         camera.position.set(
                             ORIGIN_CAMERA_POSITION.x,
@@ -42,11 +47,7 @@ export const Experience = memo(() => {
                             ORIGIN_CAMERA_LOOK_AT.y,
                             ORIGIN_CAMERA_LOOK_AT.z,
                         );
-                    } else if (
-                        ui_state === 'OpponentTurn' ||
-                        ui_state === 'OwnTurnPlaying' ||
-                        ui_state === 'OwnTurnLocked'
-                    ) {
+                    } else if (isGameOnGoing()) {
                         camera.position.set(
                             DESTINATION_CAMERA_POSITION.x,
                             DESTINATION_CAMERA_POSITION.y,
