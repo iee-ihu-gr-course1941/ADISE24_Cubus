@@ -7,6 +7,7 @@ import { PopupContainer, usePopup } from "@/Popup";
 import { PageProps } from "@/types";
 import { User } from "@/types/models/tables/User";
 import { useState } from "react";
+import Base from "./Base";
 
 export default function Index({ user, flash }: PageProps<{ user: User }>) {
     const [visibleLoginOptions, setVisibleLoginOptions] = useState<boolean>(false);
@@ -39,75 +40,55 @@ export default function Index({ user, flash }: PageProps<{ user: User }>) {
     }
 
     return (
-        <div className="w-screen h-screen bg-backdrop relative overflow-hidden animate-show">
-            <div className="absolute z-50 w-screen h-screen pointer-events-none bg-[url('/ui-backdrop/noise.jpg')] opacity-[11%] scale-105 animate-noise"></div>
-            <div className="absolute z-50 w-screen h-screen pointer-events-none bg-[url('/ui-backdrop/noise.jpg')] opacity-[5%] scale-105 animate-noise-alt"></div>
-            <div className="relative z-10 w-screen h-screen flex flex-col text-custom-gray-400 font-bold">
-                <PopupContainer />
-                <section className="pt-[10%] flex flex-col gap-12 items-center grow">
-                    <p className="relative z-20 text-custom-pink-50 text-9xl">CUBUS</p>
-                    <LandingButton text="Play Now" onClick={showLoginOptionsCallback} />
+        <Base className="flex flex-col">
+            <PopupContainer />
+            <section className="pt-[10%] flex flex-col gap-12 items-center grow">
+                <p className="relative z-20 text-custom-pink-50 text-9xl">CUBUS</p>
+                <LandingButton text="Play Now" onClick={showLoginOptionsCallback} />
 
-                    <List
-                        title="Connect With"
-                        className={`relative z-20 w-[250px] ${!visibleLoginOptions ? 'pointer-events-none opacity-0' : 'opacity-100'} transition-all ease duration-500`}
-                        onClick={handleLoginCallback}>
-                        <ListElement value="ihu">
-                            <div className={`
-                                    w-full px-8 ${!visibleLoginOptions ? 'h-0 py-0' : 'h-[52px] py-3.5'}
-                                    flex gap-2 items-center
+                <List
+                    title="Connect With"
+                    className={`relative z-20 w-[250px] ${!visibleLoginOptions ? 'pointer-events-none opacity-0' : 'opacity-100'} transition-all ease duration-500`}
+                    onClick={handleLoginCallback}>
+                    <ListElement value="ihu">
+                        <div className={`
+                                w-full px-8 ${!visibleLoginOptions ? 'h-0 py-0' : 'h-[52px] py-3.5'}
+                                flex gap-2 items-center
 
-                                    hover:bg-custom-purple-400 hover:text-custom-pink-50
-                                    ${!visibleLoginOptions ? 'h-0 opacity-0' : 'h-[100px] opacity-100'}
-                                    list-item-transition
-                                `}>
-                                <SVG icon={Icon.ieeIhu} />IEE IHU Account
+                                hover:bg-custom-purple-400 hover:text-custom-pink-50
+                                ${!visibleLoginOptions ? 'h-0 opacity-0' : 'h-[100px] opacity-100'}
+                                list-item-transition
+                            `}>
+                            <SVG icon={Icon.ieeIhu} />IEE IHU Account
+                        </div>
+                    </ListElement>
+                    <ListElement value="mock">
+                        <div className={`
+                                group
+                                w-full px-8 ${!visibleLoginOptions ? 'h-0 py-0' : 'h-[52px] py-3.5'}
+                                flex gap-2 items-center
+
+                                hover:bg-custom-purple-400 hover:text-custom-pink-50
+                                ${!visibleLoginOptions ? 'h-0 opacity-0' : 'h-[100px] opacity-100'}
+                                list-item-transition
+                            `}>
+                                <SVG icon={Icon.wrench} fill="fill-custom-gray-400 group-hover:fill-custom-pink-50" />Mock Account
                             </div>
                         </ListElement>
-                        <ListElement value="mock">
-                            <div className={`
-                                    group
-                                    w-full px-8 ${!visibleLoginOptions ? 'h-0 py-0' : 'h-[52px] py-3.5'}
-                                    flex gap-2 items-center
+                </List>
+            </section>
 
-                                    hover:bg-custom-purple-400 hover:text-custom-pink-50
-                                    ${!visibleLoginOptions ? 'h-0 opacity-0' : 'h-[100px] opacity-100'}
-                                    list-item-transition
-                                `}>
-                                    <SVG icon={Icon.wrench} fill="fill-custom-gray-400 group-hover:fill-custom-pink-50" />Mock Account
-                                </div>
-                            </ListElement>
-                    </List>
-                </section>
+            <footer className="flex items-center gap-2 p-8">
+                <Button icon={Icon.cogs} />
+                <Button icon={Icon.info} onClick={() => showPopup('credits', { title: 'Credits', showExit: true })} />
+                <Button text="Give us a Star" icon={Icon.github} isLeft={true} onClick={() => window.open('https://github.com/iee-ihu-gr-course1941/ADISE24_Cubus', '_blank')}/>
 
-                <footer className="flex items-center gap-2 p-8">
-                    <Button icon={Icon.cogs} />
-                    <Button icon={Icon.info} onClick={() => showPopup('credits', { title: 'Credits', showExit: true })} />
-                    <Button text="Give us a Star" icon={Icon.github} isLeft={true} onClick={() => window.open('https://github.com/iee-ihu-gr-course1941/ADISE24_Cubus', '_blank')}/>
-
-                    <p className="ml-auto">Server Status: &nbsp;
-                        <span className={`${connectionState === 'connected' ? 'text-green-400' : 'text-custom-brown-500' }`}>
-                            {connectionState}
-                        </span>
-                    </p>
-                </footer>
-            </div>
-
-            <div className="fixed inset-0">
-                <div>
-                    <div className="absolute top-[10%] left-[20%] w-[2px] h-[2px] rounded-full bg-white animate-pulse-slow"></div>
-                    <div className="absolute top-[25%] left-[10%] w-[3px] h-[3px] rounded-full bg-white animate-pulse"></div>
-                    <div className="absolute top-[30%] left-[40%] w-[2px] h-[2px] rounded-full bg-white animate-pulse-fast"></div>
-                    <div className="absolute top-[32%] left-[41%] w-[2px] h-[2px] rounded-full bg-white animate-pulse-slow"></div>
-                    <div className="absolute top-[5%] right-[30%] w-[4px] h-[4px] rounded-full bg-white animate-pulse"></div>
-                    <div className="absolute top-[15%] right-[15%] w-[1px] h-[1px] rounded-full bg-white animate-pulse-slower"></div>
-                </div>
-
-                <img src="/ui-backdrop/nebula.svg" className="absolute w-[4000px] -bottom-[22%] -left-[10%]" />
-                <img src="/ui-backdrop/nebula-side.svg" className="absolute w-2/3 bottom-[22%] -right-[20%]" />
-                <img src="/ui-backdrop/rock-formation.svg" className="absolute w-1/2 bottom-0 -right-[30px] animate-ground-hover" />
-                <img src="/ui-backdrop/asteroid.svg" className="absolute w-[200px] bottom-[60%] right-[10%] animate-asteroid-hover" />
-            </div>
-        </div>
+                <p className="ml-auto">Server Status: &nbsp;
+                    <span className={`${connectionState === 'connected' ? 'text-green-400' : 'text-custom-brown-500' }`}>
+                        {connectionState}
+                    </span>
+                </p>
+            </footer>
+        </Base>
     );
 }

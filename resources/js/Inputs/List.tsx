@@ -11,7 +11,7 @@ type ListProps = PropsWithChildren<{
 export function List({title = '', emptyText = '', maxListHeight, className, children, onClick}: ListProps) {
     return (
         <div className={`
-            w-fit min-w-[200px]
+            min-w-[200px]
             rounded-[20px]
             text-bold text-custom-gray-400
 
