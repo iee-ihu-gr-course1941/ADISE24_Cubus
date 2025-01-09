@@ -22,6 +22,7 @@ const rotationToIndex = (rotation: number) => {
     return (Math.round(normalizedRotation / (Math.PI / 2)) %
         4) as PieceRotation;
 };
+type AnimateState = 'lowering' | 'increasing' | null;
 
 export const Piece = ({
     code: pieceCode = 0,
@@ -61,6 +62,7 @@ export const Piece = ({
     const onDragAnimationEnd = useRef<() => void>();
     const [boardState, setBoardState] = useState<BoardState>();
     const {action, setAction} = useInterfaceState();
+    const pieceAnimationState = useRef<AnimateState>(null);
 
     const canMovePiece = useMemo(() => {
         return (
@@ -75,10 +77,14 @@ export const Piece = ({
         ref.current,
     ]);
 
+    const positionY = useMemo(() => {
+        return Math.random() * 5 + blockSize * 0.5 + 0.01 + 2;
+    }, []);
+
     const {dragHeight, animationDuration} = useControls({
         dragHeight: {
             label: 'Drag Height',
-            value: 1.5,
+            value: 3.5,
             min: 0.0,
             max: 3,
             step: 0.25,
@@ -135,7 +141,7 @@ export const Piece = ({
     const onLockIn = (onComplete = true) => {
         if (ref.current) {
             gsap.to(ref.current.position, {
-                y: blockSize * 0.5,
+                y: pieceCode === boardState?.move?.code ? 0.2 : positionY,
                 duration: animationDuration,
                 onComplete: onComplete ? onDragAnimationEnd.current : undefined,
             });
@@ -190,6 +196,7 @@ export const Piece = ({
                 );
                 console.log('move response:', moveResponse);
                 isValid = moveResponse?.valid ?? false;
+                // isValid = true;
             }
             if (
                 (!isPiecePositionValid() ||
@@ -227,7 +234,7 @@ export const Piece = ({
             //* Convert Origin's position to Piece's position
             const piecePosition = new THREE.Vector3(
                 position.x,
-                blockSize * 0.5 + 0.01,
+                positionY,
                 position.y,
             ).sub(getOriginToCenterOffset());
 
@@ -239,8 +246,14 @@ export const Piece = ({
                 piecePosition.z,
             );
 
+            const pMatrixNoHeight = new THREE.Matrix4().makeTranslation(
+                piecePosition.x,
+                0,
+                piecePosition.z,
+            );
+
             ref.current.applyMatrix4(pMatrix);
-            shadowRef.current?.applyMatrix4(pMatrix);
+            shadowRef.current?.applyMatrix4(pMatrixNoHeight);
             shadowRef.current?.updateWorldMatrix(true, true);
             ref.current.updateWorldMatrix(true, true);
 
@@ -257,11 +270,15 @@ export const Piece = ({
                 if (child instanceof THREE.Mesh) {
                     //* Move child based on position matrix
                     child.applyMatrix4(pMatrix);
-                    shadowRef.current?.children[i].applyMatrix4(pMatrix);
+                    shadowRef.current?.children[i].applyMatrix4(
+                        pMatrixNoHeight,
+                    );
 
                     //* Move child to center
                     child.position.sub(center);
-                    shadowRef.current?.children[i].position.sub(center);
+                    shadowRef.current?.children[i].position.sub(
+                        new THREE.Vector3(center.x, 0, center.z),
+                    );
                     child.updateWorldMatrix(true, true);
                     shadowRef.current?.children[i].updateWorldMatrix(
                         true,
@@ -435,7 +452,7 @@ export const Piece = ({
                 new THREE.Vector3();
             const translation = new THREE.Vector3(
                 _prePosition.x - currentPosition.x,
-                0,
+                _prePosition.y - currentPosition.y,
                 _prePosition.z - currentPosition.z,
             );
             if (translation.length() === 0) return;
@@ -443,7 +460,7 @@ export const Piece = ({
             ref.current.applyMatrix4(
                 new THREE.Matrix4().makeTranslation(
                     translation.x,
-                    -0.5,
+                    translation.y,
                     translation.z,
                 ),
             );
@@ -489,6 +506,7 @@ export const Piece = ({
     };
 
     const onMoveReject = () => {
+        boardState?.setMove(null);
         if (preMoveQuaternion) {
             rejectRotation('lock');
             setPreMoveQuaternion(null);
@@ -520,7 +538,6 @@ export const Piece = ({
 
     const onDragStart = () => {
         setIsDragging(true);
-        addDragAnimation();
         setHasMoved(true);
         setPrePosition(getPiecePosition());
     };
@@ -671,18 +688,41 @@ export const Piece = ({
         return false;
     };
 
-    const addDragAnimation = () => {
-        if (ref.current) {
+    const lowerPieceHeight = () => {
+        if (ref.current && pieceAnimationState.current !== 'lowering') {
+            pieceAnimationState.current = 'lowering';
             gsap.to(ref.current.position, {
                 y: dragHeight * blockSize,
-                duration: animationDuration * 2,
+                duration: animationDuration,
                 ease: 'power1.inOut',
+                onComplete: () => {
+                    pieceAnimationState.current = null;
+                },
+            });
+        }
+    };
+
+    const increasePieceHeight = () => {
+        if (ref.current && pieceAnimationState.current !== 'increasing') {
+            pieceAnimationState.current = 'increasing';
+            gsap.to(ref.current.position, {
+                y: positionY,
+                duration: animationDuration,
+                ease: 'power1.inOut',
+                onComplete: () => {
+                    pieceAnimationState.current = null;
+                },
             });
         }
     };
 
     const onDrag = () => {
         //* Snap the shadow to the grid
+        if (isPieceTouchingBoard()) {
+            lowerPieceHeight();
+        } else {
+            increasePieceHeight();
+        }
 
         //Handle rotation
         const rotation = getRotationFromQuaternion();
@@ -699,7 +739,7 @@ export const Piece = ({
         const snapX = Math.round(position.x / blockSize) * blockSize;
         const snapZ = Math.round(position.z / blockSize) * blockSize;
 
-        const snapPosition = new THREE.Vector3(snapX, 0.05, snapZ).add(offset);
+        const snapPosition = new THREE.Vector3(snapX, 0, snapZ).add(offset);
         setShadowPosition(snapPosition);
     };
 
@@ -720,6 +760,7 @@ export const Piece = ({
                         pieceCode={pieceCode}
                         block_positions={block_positions}
                         blockSize={blockSize}
+                        positionY={positionY}
                     />
                 </group>
             </DragControls>

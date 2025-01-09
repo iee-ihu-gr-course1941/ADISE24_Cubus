@@ -28,6 +28,7 @@ type Props = {
     blockSize: number;
     pieceCode: PieceCode;
     isDragging: boolean;
+    positionY: number;
 };
 
 export const PieceModel = ({
@@ -35,6 +36,7 @@ export const PieceModel = ({
     block_positions,
     pieceCode,
     isDragging,
+    positionY,
 }: Props) => {
     const blockRef = useRef<THREE.Mesh[]>([]);
     const playerIdentifier = useBoardState(
@@ -66,7 +68,7 @@ export const PieceModel = ({
                             key={index}
                             position={[
                                 position.x * blockSize,
-                                0,
+                                positionY,
                                 position.y * blockSize,
                             ]}
                             geometry={PIECE_GEOMETRY['block']}>
