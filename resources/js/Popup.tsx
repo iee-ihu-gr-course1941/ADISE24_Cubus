@@ -42,7 +42,7 @@ export function PopupContainer() {
 
     if(popup == null) return;
     return (
-        <div className="fixed inset-0 bg-black/75 pt-[128px]" onClick={onCancelCallbackStrict}>
+        <div className="fixed z-50 inset-0 bg-black/75 pt-[128px]" onClick={onCancelCallbackStrict}>
             <div className="
                 relative left-1/2 -translate-x-1/2
 
