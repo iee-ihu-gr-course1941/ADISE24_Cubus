@@ -127,7 +127,7 @@ export const useLoadedModels = () => {
     return models;
 };
 
-const DUCK_NAMES = [
+export const DUCK_NAMES = [
     'character_duck',
     'character_duckArmLeft',
     'character_duckArmRight',

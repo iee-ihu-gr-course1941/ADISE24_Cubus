@@ -13,6 +13,7 @@ declare global {
         airModuleMaterial: ShaderMaterialProps;
         engineMaterial: ShaderMaterialProps;
         pieceMaterial: ShaderMaterialProps;
+        hologramMaterial: ShaderMaterialProps;
         // * New extend types go here !
     }
     namespace JSX {
