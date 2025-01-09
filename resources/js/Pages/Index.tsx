@@ -45,21 +45,36 @@ export default function Index({ user, flash }: PageProps<{ user: User }>) {
                 <p className="relative z-20 text-custom-pink-50 text-9xl">CUBUS</p>
                 <LandingButton text="Play Now" onClick={showLoginOptionsCallback} />
 
-                {
-                    visibleLoginOptions &&
-                    <List title="Connect With" className="relative z-20" onClick={handleLoginCallback}>
-                        <ListElement value="ihu">
-                                <div className="w-full px-8 py-3.5 flex gap-2 items-center hover:bg-custom-purple-400 hover:text-custom-pink-50">
-                                    <SVG icon={Icon.ieeIhu} />IEE IHU Account
-                                </div>
-                            </ListElement>
-                        <ListElement value="mock">
-                                <div className="group w-full px-8 py-3.5 flex gap-2 items-center hover:bg-custom-purple-400 hover:text-custom-pink-50">
-                                    <SVG icon={Icon.wrench} fill="fill-custom-gray-400 group-hover:fill-custom-pink-50" />Mock Account
-                                </div>
-                            </ListElement>
-                    </List>
-                }
+                <List
+                    title="Connect With"
+                    className={`relative z-20 ${!visibleLoginOptions ? 'opacity-0' : 'opacity-100'} transition-all ease duration-500`}
+                    onClick={handleLoginCallback}>
+                    <ListElement value="ihu">
+                        <div className={`
+                                w-full px-8 ${!visibleLoginOptions ? 'h-0 py-0' : 'h-[52px] py-3.5'}
+                                flex gap-2 items-center
+
+                                hover:bg-custom-purple-400 hover:text-custom-pink-50
+                                ${!visibleLoginOptions ? 'h-0 opacity-0' : 'h-[100px] opacity-100'}
+                                list-item-transition
+                            `}>
+                            <SVG icon={Icon.ieeIhu} />IEE IHU Account
+                        </div>
+                    </ListElement>
+                    <ListElement value="mock">
+                        <div className={`
+                                group
+                                w-full px-8 ${!visibleLoginOptions ? 'h-0 py-0' : 'h-[52px] py-3.5'}
+                                flex gap-2 items-center
+
+                                hover:bg-custom-purple-400 hover:text-custom-pink-50
+                                ${!visibleLoginOptions ? 'h-0 opacity-0' : 'h-[100px] opacity-100'}
+                                list-item-transition
+                            `}>
+                                <SVG icon={Icon.wrench} fill="fill-custom-gray-400 group-hover:fill-custom-pink-50" />Mock Account
+                            </div>
+                        </ListElement>
+                </List>
             </section>
 
             <footer className="flex items-center gap-2 p-8">
