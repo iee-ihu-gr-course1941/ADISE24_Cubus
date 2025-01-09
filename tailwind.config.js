@@ -69,8 +69,21 @@ export default {
                 'landing-star-big': 'LandingStarBig 3s linear 1s infinite',
                 'landing-star-medium': 'LandingStarMedium 3s linear 1s infinite',
                 'landing-star-small': 'LandingStarSmall 3s ease 1s infinite',
+                'ground-hover': 'GroundHover 50s ease infinite',
+                'asteroid-hover': 'AsteroidHover 20s ease infinite',
             },
             keyframes: {
+                GroundHover: {
+                    '0%, 100%': { transform: 'translate(0, 0) rotate(0)' },
+                    '35%': { transform: 'translate(2px, 10px) rotate(1deg)' },
+                    '60%': { transform: 'translate(8px, 2px) rotate(1deg)' },
+                    '90%': { transform: 'translate(6px, 0px) rotate(-2deg)' },
+                },
+                AsteroidHover: {
+                    '0%, 100%': { transform: 'translate(0, 0) rotate(0)' },
+                    '23%': { transform: 'translate(10px, -25px) rotate(-5deg)' },
+                    '85%': { transform: 'translate(2px, 25px) rotate(10deg)' },
+                },
                 LandingGlow: {
                     '0%, 100%': { transform: 'translate(-30px, -82px)' },
                     '23%': { transform: 'translate(270px, -82px)' },
