@@ -8,7 +8,7 @@ import {Object3D} from 'three';
 export const PlayerModels = memo(() => {
     const models = useLoadedModels();
     const positions = usePlayerPositions();
-    const modelHeight = 2.25;
+    const modelHeight = 2.3;
     const isPlayerAlive = useBoardState(state => state.isPlayerAlive);
     const isGameOnGoing = useBoardState(state => state.isGameOnGoing);
     const ui_state = useBoardState(state => state.gameState.ui_state);
@@ -86,10 +86,12 @@ const PlayerModel = ({model, position}: Props) => {
             });
         }
     };
+    const scale = 0.85;
     if (model) {
         return (
             <>
                 <primitive
+                    scale={[scale, scale, scale]}
                     ref={ref}
                     onClick={handleClick}
                     object={model}
