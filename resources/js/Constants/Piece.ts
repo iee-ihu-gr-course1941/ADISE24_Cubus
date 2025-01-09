@@ -9,59 +9,59 @@ const y = 1;
 
 export const PieceWorldPositions: {[key in PieceCode]: Vector3} = {
     1: {
-        x: firstX / 2,
+        x: firstX / 2 - 1.5,
         y: y,
         z: startZ,
     },
     2: {
-        x: firstX / 2 - 2,
+        x: firstX / 2 - 3.5,
         y: y,
         z: startZ,
     },
     3: {
-        x: firstX / 2 - 3,
+        x: firstX / 2 - 4.5,
         y: y,
         z: startZ - 0.5,
     },
     4: {
         x: firstX / 2 - 5.5,
         y: y,
-        z: startZ - 1,
+        z: startZ - 1.5,
     },
     5: {
         x: firstX + 1.5,
         y: y,
-        z: startZ - 3,
+        z: startZ - 3.5,
     },
     6: {
         x: firstX + 1,
         y: y,
-        z: startZ - 4.5,
+        z: startZ - 5,
     },
     7: {
         x: firstX + 1,
         y: y,
-        z: startZ - 6,
+        z: startZ - 6.6,
     },
     8: {
         x: firstX + 1.5,
         y: y,
-        z: startZ - 8,
+        z: startZ - 8.5,
     },
     9: {
         x: firstX - 0.5,
         y: y,
-        z: startZ - 9,
+        z: startZ - 9.5,
     },
     10: {
         x: firstX + 1.5,
         y: y,
-        z: startZ - 11.5,
+        z: startZ - 12,
     },
     11: {
         x: firstX + 1.5,
         y: y,
-        z: startZ - 14,
+        z: startZ - 14.5,
     },
     12: {
         x: -firstX / 2 + 0.5,
@@ -109,7 +109,7 @@ export const PieceWorldPositions: {[key in PieceCode]: Vector3} = {
         z: startZ - 11.5,
     },
     0: {
-        x: 0.5,
+        x: firstX / 2,
         y: y,
         z: startZ,
     },
