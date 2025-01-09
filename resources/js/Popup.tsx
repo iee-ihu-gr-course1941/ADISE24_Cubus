@@ -250,7 +250,7 @@ function PopupLobbySettings() {
     const [lobbyName, setLobbyName] = useState<string>('');
     const [playerCount, setPlayerCount] = useState<number>(2);
     const { setCurrentSession } = useAppState();
-    const [errors, setErrors] = useState<{name?: string}>({});
+    const [errors, setErrors] = useState<{general?: string; name?: string}>({});
     const { hidePopup } = usePopup();
 
     function verifyName(name: string) {
@@ -271,8 +271,6 @@ function PopupLobbySettings() {
             return false;
         }
 
-        console.log('Verify ', name, 'is ok');
-
         setErrors(old => ({...old, name: undefined}));
         return true;
     }
@@ -291,11 +289,18 @@ function PopupLobbySettings() {
     async function onConfirmCallback() {
         console.info('Attempting to create lobby with:', {lobbyName, playerCount});
         if(!verifyName(lobbyName)) return;
-        const result = await Network.post<GameSession>({ url: route('lobby.store'), body: { 'name': lobbyName, 'player_count': playerCount } });
+        const result = await Network.post<GameSession & { message?: string }>({ url: route('lobby.store'), body: { 'name': lobbyName, 'player_count': playerCount } });
 
         if(!result) {
             hidePopup();
             return;
+        }
+
+        if(result?.message != null) {
+            setErrors(old => ({...old, general: result.message }));
+            return;
+        } else {
+            setErrors(old => ({...old, general: undefined }));
         }
 
         setCurrentSession(result);
@@ -305,6 +310,13 @@ function PopupLobbySettings() {
     return (
         <>
             <div className="w-[550px] pl-10 pr-6 pt-2 pb-4">
+                { errors.general && (
+                <div className="flex items-center gap-4 rounded-full border border-red-400 bg-red-950 px-4 py-1 mb-4">
+                    <SVG icon={Icon.infoCircle} fill="fill-red-400" />
+                    <p className="text-red-400 whitespace-pre-line">{errors.general}</p>
+                </div>
+                )}
+
                 <div className="pb-6 flex flex-col gap-1">
                     <label className="pb-1 text-custom-pink-50">Lobby's Name</label>
                     <TextInput maxWidth='100%' placeholder="Friends only" onUpdate={onLobbyNameChangeCallback} error={errors.name} />
