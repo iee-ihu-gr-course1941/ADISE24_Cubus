@@ -71,13 +71,25 @@ export default {
                 'landing-star-small': 'LandingStarSmall 3s ease 1s infinite',
                 'ground-hover': 'GroundHover 50s ease infinite',
                 'asteroid-hover': 'AsteroidHover 20s ease infinite',
+                'noise': 'Noise 3s infinite',
+                'noise-alt': 'NoiseAlt 6s infinite',
             },
             keyframes: {
-                GroundHover: {
-                    '0%, 100%': { transform: 'translate(0, 0) rotate(0)' },
-                    '35%': { transform: 'translate(2px, 10px) rotate(1deg)' },
-                    '60%': { transform: 'translate(8px, 2px) rotate(1deg)' },
-                    '90%': { transform: 'translate(6px, 0px) rotate(-2deg)' },
+                Noise: {
+                    '0%, 100%': { transform: 'translate(0, 0) scale(1.05)', opacity: '11%' },
+                    '20%': { transform: 'translate(2px, -2px) scale(1.05)', opacity: '9%' },
+                    '40%': { transform: 'translate(1px, 2px) scale(1.05)', opacity: '10%' },
+                    '40%': { transform: 'translate(-1px, 2px) scale(1.05)', opacity: '11%' },
+                    '60%': { transform: 'translate(1px, 2px) scale(1.05)' , opacity: '9%' },
+                    '80%': { transform: 'translate(0, 2px) scale(1.05)', opacity: '9%' },
+                },
+                NoiseAlt: {
+                    '0%, 100%': { transform: 'translate(0, 0) scale(1.05)' },
+                    '20%': { transform: 'translate(-1px, 2px) scale(1.05)' },
+                    '40%': { transform: 'translate(1px, 1px) scale(1.05)' },
+                    '40%': { transform: 'translate(1px, 2px) scale(1.05)' },
+                    '60%': { transform: 'translate(-1px, 0) scale(1.05)' },
+                    '80%': { transform: 'translate(2px, 0) scale(1.05)' },
                 },
                 AsteroidHover: {
                     '0%, 100%': { transform: 'translate(0, 0) rotate(0)' },

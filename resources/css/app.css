@@ -2,6 +2,10 @@
 @tailwind components;
 @tailwind utilities;
 
+html {
+    background: black;
+}
+
 .list-item-transition{
     transition: opacity 500ms ease, width 500ms ease, height 500ms ease, background-color 200ms ease, color 800ms ease;
 }
