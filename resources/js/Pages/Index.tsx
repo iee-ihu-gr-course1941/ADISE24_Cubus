@@ -1,6 +1,7 @@
 import useUserEvents from "@/Connection/useUserEvents";
 import { Icon, SVG } from "@/Icons/SVG";
 import { Button } from "@/Inputs/Button";
+import { LandingButton } from "@/Inputs/LandingButton";
 import { List, ListElement } from "@/Inputs/List";
 import { PopupContainer, usePopup } from "@/Popup";
 import { PageProps } from "@/types";
@@ -41,12 +42,12 @@ export default function Index({ user, flash }: PageProps<{ user: User }>) {
         <div className="w-screen h-screen bg-backdrop relative text-custom-gray-400 font-bold flex flex-col">
             <PopupContainer />
             <section className="pt-[10%] flex flex-col gap-12 items-center grow">
-                <p className="text-custom-pink-50 text-9xl">CUBUS</p>
-                <Button text="Play Now" icon={Icon.largeStars} isLeft={true} onClick={showLoginOptionsCallback} />
+                <p className="relative z-20 text-custom-pink-50 text-9xl">CUBUS</p>
+                <LandingButton text="Play Now" onClick={showLoginOptionsCallback} />
 
                 {
                     visibleLoginOptions &&
-                    <List title="Connect With" onClick={handleLoginCallback}>
+                    <List title="Connect With" className="relative z-20" onClick={handleLoginCallback}>
                         <ListElement value="ihu">
                                 <div className="w-full px-8 py-3.5 flex gap-2 items-center hover:bg-custom-purple-400 hover:text-custom-pink-50">
                                     <SVG icon={Icon.ieeIhu} />IEE IHU Account
