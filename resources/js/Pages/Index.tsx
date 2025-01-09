@@ -94,6 +94,8 @@ export default function Index({ user, flash }: PageProps<{ user: User }>) {
             </div>
 
             <div className="fixed inset-0">
+                <img src="/ui-backdrop/nebula.svg" className="absolute w-[4000px] -bottom-[22%] -left-[10%]" />
+                <img src="/ui-backdrop/nebula-side.svg" className="absolute w-2/3 bottom-[22%] -right-[20%]" />
                 <img src="/ui-backdrop/rock-formation.svg" className="absolute w-1/2 bottom-0 -right-[30px] animate-ground-hover" />
                 <img src="/ui-backdrop/asteroid.svg" className="absolute w-[200px] bottom-[60%] right-[10%] animate-asteroid-hover" />
             </div>
