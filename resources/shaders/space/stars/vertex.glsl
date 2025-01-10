@@ -9,8 +9,6 @@ varying vec3 vColor;
 varying float vRandom;
 varying float vGlowIntensity;
 
-#include ../../includes/random2D.glsl
-
 void main(){
     vec4 modelPositon = modelMatrix * vec4(position, 1.0);
 

@@ -7,6 +7,7 @@ export type LoadedModels = {
     duck: {
         [key in PlayerColor]?: THREE.Object3D;
     };
+    spaceshipMini?: THREE.Object3D;
 };
 
 type State = {

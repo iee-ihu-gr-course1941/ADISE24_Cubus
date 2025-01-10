@@ -13,7 +13,7 @@ import {ConnectionState} from '@/types/connection';
 import {GameResponse} from '@/types/game';
 import {GameSession} from '@/types/models/tables/Session';
 import {User} from '@/types/models/tables/User';
-import {PropsWithChildren, useEffect} from 'react';
+import {PropsWithChildren, useEffect, useState} from 'react';
 import Base from './Base';
 import {useUserEventsStore} from '@/Store/user_events_store';
 
@@ -126,18 +126,32 @@ function Lobby({
     }, []);
 
     return (
-        <Base className="flex flex-col" initializeMusic={serverMessage !== 'user_new'}>
+        <Base
+            className="flex flex-col"
+            initializeMusic={serverMessage !== 'user_new'}>
             <PopupContainer />
             <section className="pt-8 px-8 flex gap-8 grow items-start">
                 <LobbiesControls games={availableSessions} />
-                <div className='flex gap-4 flex-col'>
-                    <PlayerDetails username={user.name ?? ''} icon='/portraits/white-wizard.jpg' points={3} />
+                <div className="flex gap-4 flex-col">
+                    <PlayerDetails
+                        username={user.name ?? ''}
+                        icon="/portraits/white-wizard.jpg"
+                        points={3}
+                    />
                     <CurrentSessionDetails />
                 </div>
             </section>
 
             <footer className="flex items-center gap-2 p-8">
-                <Button icon={Icon.cogs} onClick={() => showPopup('settings', { title: 'Settings', showExit: true })} />
+                <Button
+                    icon={Icon.cogs}
+                    onClick={() =>
+                        showPopup('settings', {
+                            title: 'Settings',
+                            showExit: true,
+                        })
+                    }
+                />
                 <Button
                     icon={Icon.info}
                     onClick={() =>
@@ -312,30 +326,43 @@ function PlayerDetails({}: PlayerDetailsProps) {
 }
 
 function CurrentSessionDetails() {
-    const { currentSession } = useAppState();
+    const {currentSession} = useAppState();
 
-    if(!currentSession) return;
+    if (!currentSession) return;
 
     return (
-        <div className="
+        <div
+            className="
             px-8 py-4
 
             rounded-[30px]
             border-t border-b-2
             bg-light-default-bottom border-t-custom-gray-700 border-b-custom-gray-800
             ">
-            <p className="text-custom-pink-50 pb-4">Waiting for the game to begin</p>
+            <p className="text-custom-pink-50 pb-4">
+                Waiting for the game to begin
+            </p>
             <div className="flex justify-between">
                 <p>{currentSession.name}</p>
-                <div className="flex gap-2 items-center"><SVG icon={Icon.users} fill="fill-custom-gray-400 group-hover:fill-custom-pink-50" /><p>
-                    {currentSession.current_player_count} of {currentSession.player_count}
-                </p></div>
+                <div className="flex gap-2 items-center">
+                    <SVG
+                        icon={Icon.users}
+                        fill="fill-custom-gray-400 group-hover:fill-custom-pink-50"
+                    />
+                    <p>
+                        {currentSession.current_player_count} of{' '}
+                        {currentSession.player_count}
+                    </p>
+                </div>
             </div>
         </div>
     );
 }
 
-function TextTile({className, children}: PropsWithChildren<{className?: string}>) {
+function TextTile({
+    className,
+    children,
+}: PropsWithChildren<{className?: string}>) {
     return (
         <div
             className={`
