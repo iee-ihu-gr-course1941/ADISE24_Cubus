@@ -15,6 +15,12 @@ export type Vector2 = {
     y: number;
 }
 
+export type Vector3 = {
+    x: number;
+    y: number;
+    z: number;
+}
+
 export type MoveType = 'move' | 'rotate' | 'flip';
 
 export type PlayerIdentifier = 'green' | 'red' | 'blue' | 'yellow';

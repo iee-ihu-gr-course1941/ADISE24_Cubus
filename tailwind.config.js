@@ -1,6 +1,5 @@
 import defaultTheme from 'tailwindcss/defaultTheme';
 import forms from '@tailwindcss/forms';
-import { transform } from 'framer-motion';
 
 /** @type {import('tailwindcss').Config} */
 export default {
@@ -15,6 +14,7 @@ export default {
         extend: {
             fontFamily: {
                 sans: ['"Space Grotesk"', ...defaultTheme.fontFamily.sans],
+                sansTitle: ['"Hanken Grotesk"', ...defaultTheme.fontFamily.sans],
             },
             colors: {
                 'custom-gray': {
@@ -73,6 +73,7 @@ export default {
                 'landing-star-small': 'LandingStarSmall 3s ease 1s infinite',
                 'ground-hover': 'GroundHover 50s ease infinite',
                 'asteroid-hover': 'AsteroidHover 20s ease infinite',
+                'asteroid-hover': 'AsteroidHover2 20s ease 1s infinite',
                 'noise': 'Noise 3s infinite',
                 'noise-alt': 'NoiseAlt 6s infinite',
                 'show': 'Show 3s ease 1s both',
@@ -112,6 +113,11 @@ export default {
                     '0%, 100%': { transform: 'translate(0, 0) rotate(0)' },
                     '23%': { transform: 'translate(10px, -25px) rotate(-5deg)' },
                     '85%': { transform: 'translate(2px, 25px) rotate(10deg)' },
+                },
+                AsteroidHover2: {
+                    '0%, 100%': { transform: 'translate(0, 0) rotate(-10)' },
+                    '23%': { transform: 'translate(-30px, -10) rotate(-8deg)' },
+                    '85%': { transform: 'translate(20px, 25px) rotate(3eg)' },
                 },
                 LandingGlow: {
                     '0%, 100%': { transform: 'translate(-30px, -82px)' },

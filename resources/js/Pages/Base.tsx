@@ -1,8 +1,12 @@
+import { Head } from "@inertiajs/react";
 import { PropsWithChildren } from "react";
 
 export default function Base({ className, children }: PropsWithChildren<{ className?: string }>) {
     return (
         <div className="w-screen h-screen bg-backdrop relative overflow-hidden animate-show">
+            <Head>
+                <link rel="icon" type="image/x-icon" href="/favicon.svg"/>
+            </Head>
             <div className="absolute z-50 w-screen h-screen pointer-events-none bg-[url('/ui-backdrop/noise.jpg')] opacity-[4%] scale-105 animate-noise"></div>
             <div className="absolute z-50 w-screen h-screen pointer-events-none bg-[url('/ui-backdrop/noise.jpg')] opacity-[5%] scale-105 animate-noise-alt"></div>
             <div className={`relative z-10 w-screen h-screen text-custom-gray-400 font-bold ${className}`}>
@@ -23,6 +27,9 @@ export default function Base({ className, children }: PropsWithChildren<{ classN
                 <img src="/ui-backdrop/nebula-side.svg" className="absolute w-2/3 bottom-[22%] -right-[20%]" />
                 <img src="/ui-backdrop/rock-formation.svg" className="absolute w-1/2 bottom-0 -right-[30px] animate-ground-hover" />
                 <img src="/ui-backdrop/asteroid.svg" className="absolute w-[200px] bottom-[60%] right-[10%] animate-asteroid-hover" />
+                <img src="/ui-backdrop/asteroid.svg" className="absolute w-[50px] opacity-80 bottom-[60%] left-[10%] animate-asteroid-hover2" />
+
+                <img src="/ui-backdrop/asteroid.svg" className="absolute w-[10px] opacity-40 top-[25%] left-[20%] animate-asteroid-hover2" />
             </div>
         </div>
     );
