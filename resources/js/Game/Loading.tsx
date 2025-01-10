@@ -1,4 +1,3 @@
-import {loadModels} from '@/Hooks/loadModels';
 import {useBoardState} from '@/Store/board_state';
 import {useLoadedModels} from '@/Store/models_state';
 import {useProgress} from '@react-three/drei';
@@ -10,19 +9,18 @@ export const Loading = memo(() => {
     /*
      * Load Models
      */
-    loadModels();
     console.log('rendering loading', hasLoaded);
     useEffect(() => {
         if (hasLoaded) {
             setTimeout(() => {
                 startGame();
-            }, 250);
+            }, 500);
         }
     }, [hasLoaded]);
     if (!hasLoaded) {
         return <LoadingIndicator />;
     } else {
-        return null;
+        return <></>;
     }
 });
 

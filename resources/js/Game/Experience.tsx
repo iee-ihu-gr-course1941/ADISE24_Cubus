@@ -18,6 +18,7 @@ import {GameState} from '@/types/game';
 import {Loading} from './Loading';
 import {Perf} from 'r3f-perf';
 import {Space} from './Environment/Space/Space';
+import {loadModels} from '@/Hooks/loadModels';
 
 const INITIAL_CAMERA_PROPS = {
     fov: 85,
@@ -42,15 +43,21 @@ export const Experience = memo(() => {
                 }}
                 camera={INITIAL_CAMERA_PROPS}>
                 <color attach={'background'} args={['#000000']} />
-                <Perf position="top-left" />
+                {/* <Perf position="top-left" /> */}
                 <BoardControls />
                 {haveModelsLoaded && <GameMap />}
                 <Space />
+                <InitExperience />
             </Canvas>
             <Interface />
             <Loading />
         </>
     );
+});
+
+const InitExperience = memo(() => {
+    loadModels();
+    return <></>;
 });
 
 const updateCamera = (
