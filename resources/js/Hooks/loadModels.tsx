@@ -7,6 +7,7 @@ import {useLoadedModels} from '@/Store/models_state';
 export const loadModels = () => {
     const spaceshipScene = useGLTF('/models/environment/board.glb');
     const duckScene = useGLTF('/models/environment/duck.gltf');
+    const spaceshipMiniScene = useGLTF('/models/environment/spaceship.gltf');
     console.log('boardScene:', spaceshipScene);
     console.log('duckScene:', duckScene);
 
@@ -14,7 +15,12 @@ export const loadModels = () => {
     const addDuckModel = useLoadedModels(s => s.addDuckModel);
 
     useEffect(() => {
-        console.log('adding spaceshio', spaceshipScene);
+        console.log('adding spaceship mini', spaceshipMiniScene);
+        addModel('spaceshipMini', spaceshipMiniScene.scene);
+    }, [spaceshipMiniScene]);
+
+    useEffect(() => {
+        console.log('adding spaceship', spaceshipScene);
         spaceshipScene.scene.traverse(child => {
             if (child.name === 'spaceship' && child instanceof THREE.Mesh) {
                 console.log('found board');
