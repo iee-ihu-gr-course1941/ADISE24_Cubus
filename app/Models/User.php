@@ -18,6 +18,7 @@ class User extends Authenticatable {
         'name',
         'icon',
         'public_id',
+        'points',
     ];
 
     function getPublic() {

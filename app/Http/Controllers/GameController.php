@@ -157,6 +157,11 @@ class GameController extends Controller {
 
             if(count($current_session->getPlayingPlayerColors()) === 0) {
                 $current_session['session_state'] = GameSessionState::Complete;
+
+                $player['points'] = $player['points'] + $current_session['player_'.$player_color.'_points'];
+                $player->save();
+
+
             } else {
                 $current_session['current_round'] = $current_session['current_round'] + 1;
             }

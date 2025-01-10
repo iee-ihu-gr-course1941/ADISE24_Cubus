@@ -20,6 +20,7 @@ return new class extends Migration
         Schema::create('users', function (Blueprint $table) {
             $table->id();
             $table->timestamps();
+            $table->unsignedInteger('points')->default(0);
 
             $table->uuid('private_id');
             $table->uuid('public_id');
