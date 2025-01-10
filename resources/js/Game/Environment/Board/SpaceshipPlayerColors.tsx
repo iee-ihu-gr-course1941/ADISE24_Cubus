@@ -21,20 +21,20 @@ const POSITIONS: {
     };
 } = {
     0: {
-        left: [-3.6, 0.7, -7.9],
-        right: [3.6, 0.7, -7.9],
+        left: [-3.6, 0.7, 7.9],
+        right: [3.6, 0.7, 7.9],
     },
     1: {
-        left: [-7.8, 0.7, -3.7],
-        right: [-7.8, 0.7, 3.6],
-    },
-    2: {
         left: [7.8, 0.7, -3.7],
         right: [7.8, 0.7, 3.5],
     },
+    2: {
+        left: [-3.6, 0.7, -7.9],
+        right: [3.6, 0.7, -7.9],
+    },
     3: {
-        left: [-3.6, 0.7, 7.9],
-        right: [3.6, 0.7, 7.9],
+        left: [-7.8, 0.7, -3.7],
+        right: [-7.8, 0.7, 3.6],
     },
 };
 
@@ -58,13 +58,24 @@ type Props = {
 };
 export const SpaceshipPlayerColors = memo(({playerColor}: Props) => {
     const setPlayerPosition = usePlayerPositions(s => s.setPlayerPosition);
-    if (!playerColor) return null;
     useEffect(() => {
+        if (!playerColor) return;
         setPlayerPosition(playerColor, {
-            x: (POSITIONS[3].left[0] + POSITIONS[3].right[0]) * 0.5,
-            y: (POSITIONS[3].left[2] + POSITIONS[3].right[2]) * 0.5,
+            x: (POSITIONS[0].left[0] + POSITIONS[0].right[0]) * 0.5,
+            y: (POSITIONS[0].left[2] + POSITIONS[0].right[2]) * 0.5,
         });
     }, [playerColor]);
+    if (!playerColor) return null;
+
+    const playerIndex = Object.keys(COLORS).indexOf(playerColor);
+
+
+    const allColors = Object.keys(COLORS);
+    let nextColors = [];
+    for(let i = 1; i < allColors.length; i++) {
+        nextColors.push(allColors[(i + playerIndex) % allColors.length]);
+    }
+
     return (
         <>
             <LightObject
@@ -77,29 +88,30 @@ export const SpaceshipPlayerColors = memo(({playerColor}: Props) => {
                 color={COLORS[playerColor]}
                 position={[3.6, 0.7, 7.9]}
             />
-            {Object.keys(COLORS)
-                .filter(color => color !== playerColor)
-                .map((_color, index) => {
+            {
+                nextColors.map((_color, index) => {
+                    const indexMapping = index + 1;
+
                     setPlayerPosition(_color as PlayerColor, {
                         x:
-                            (POSITIONS[index].left[0] +
-                                POSITIONS[index].right[0]) *
+                            (POSITIONS[indexMapping].left[0] +
+                                POSITIONS[indexMapping].right[0]) *
                             0.5,
                         y:
-                            (POSITIONS[index].left[2] +
-                                POSITIONS[index].right[2]) *
+                            (POSITIONS[indexMapping].left[2] +
+                                POSITIONS[indexMapping].right[2]) *
                             0.5,
                     });
                     const color = _color as keyof typeof COLORS;
                     return (
-                        <Fragment key={index}>
+                        <Fragment key={indexMapping}>
                             <LightObject
                                 color={COLORS[color]}
-                                position={POSITIONS[index].left}
+                                position={POSITIONS[indexMapping].left}
                             />
                             <LightObject
                                 color={COLORS[color]}
-                                position={POSITIONS[index].right}
+                                position={POSITIONS[indexMapping].right}
                             />
                         </Fragment>
                     );
