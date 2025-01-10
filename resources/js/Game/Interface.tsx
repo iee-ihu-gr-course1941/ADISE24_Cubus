@@ -31,7 +31,7 @@ export const Interface = () => {
     // }, 100);
 
     return (
-        <div className="absolute inset-0 pointer-events-none flex flex-col">
+        <div className="absolute inset-0 pointer-events-none flex flex-col overflow-hidden">
             <PopupContainer className="pointer-events-auto" />
             <PlayersHUD />
             <div className="grow flex items-end">
