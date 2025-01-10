@@ -6,6 +6,7 @@ import {Grid} from '@react-three/drei';
 import {OpponentsHand} from './OpponentsPiece/OpponentsHand';
 import {BoardPlacedPieces} from './OpponentsPiece/BoardPlacedPieces';
 import {BOARD_MATERIALS} from '@/Constants/materials';
+import {useGameSettings} from '@/Store/game_settings';
 
 export const Board = memo(() => {
     const blockSize = useGameDimensions(state => state.blockSize);
@@ -19,13 +20,13 @@ export const Board = memo(() => {
         return getGridSize(parseInt(playerCount));
     }, [playerCount, blockSize]);
 
-    let showGridHelper = false;
+    const gridHelper = useGameSettings(s => s.gridHelper);
 
     return (
         <>
             {gridSize && (
                 <>
-                    {showGridHelper && (
+                    {gridHelper && (
                         <Grid
                             args={[gridSize, gridSize, 1]}
                             position-y={0.06}
