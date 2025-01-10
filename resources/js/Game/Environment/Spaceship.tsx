@@ -1,4 +1,3 @@
-import {useLoadedModels} from '@/Hooks/useLoadedModels';
 import {memo} from 'react';
 import {SpaceshipPlayerColors} from './SpaceshipPlayerColors';
 import {SpaceshipAirModules} from './SpaceshipAirModules';
@@ -6,6 +5,7 @@ import {SpaceshipEngines} from './SpaceshipEngines';
 import {Float} from '@react-three/drei';
 import {useBoardState} from '@/Store/board_state';
 import {PlayerModels} from './PlayerModels';
+import {useLoadedModels} from '@/Store/models_state';
 
 export const Spaceship = memo(() => {
     const playerColor = useBoardState(s => s.playerState?.session_color);
@@ -22,7 +22,7 @@ export const Spaceship = memo(() => {
 });
 
 const SpaceshipModel = memo(() => {
-    const models = useLoadedModels();
-    if (!models.board) return null;
-    else return <primitive object={models.board} />;
+    const spaceship = useLoadedModels(s => s.models.spaceship);
+    if (!spaceship) return null;
+    else return <primitive object={spaceship} />;
 });

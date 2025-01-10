@@ -1,5 +1,4 @@
 import {COLORS} from '@/Constants/colors';
-import {LoadedModels, useLoadedModels} from '@/Hooks/useLoadedModels';
 import {useBoardState} from '@/Store/board_state';
 import {usePlayerPositions} from '@/Store/player_positions';
 import gsap from 'gsap';
@@ -9,9 +8,10 @@ import vertexShader from '../../../shaders/model/hologramVertex.glsl';
 import fragmentShader from '../../../shaders/model/hologramFragment.glsl';
 import {extend, useFrame} from '@react-three/fiber';
 import {shaderMaterial} from '@react-three/drei';
+import {useLoadedModels} from '@/Store/models_state';
 
 export const PlayerModels = memo(() => {
-    const models = useLoadedModels();
+    const models = useLoadedModels(s => s.models);
     const positions = usePlayerPositions();
     const modelHeight = 2.3;
     const isPlayerAlive = useBoardState(state => state.isPlayerAlive);
