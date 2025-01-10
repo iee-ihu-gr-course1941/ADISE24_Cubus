@@ -23,28 +23,24 @@ const GameMap = () => {
     );
     const ui_state = useBoardState(state => state.gameState.ui_state);
     const isGameOnGoing = useBoardState(state => state.isGameOnGoing);
-    const skyTextureRef = useRef<THREE.CubeTexture>();
 
     const {time} = useTimerStore();
     const timeRef = useRef(0);
 
-    const {scene} = useThree();
-
     useEffect(() => {
-        const skyLoader = new THREE.CubeTextureLoader();
-        const skyTexture = skyLoader.load([
-            '/sky/px.png',
-            '/sky/nx.png',
-            '/sky/py.png',
-            '/sky/ny.png',
-            '/sky/pz.png',
-            '/sky/nz.png',
-        ]);
-        skyTextureRef.current = skyTexture;
-        skyTexture.anisotropy = 8;
-        scene.backgroundRotation = new THREE.Euler(3.14, 0, -3.14);
-        scene.background = skyTexture;
-        scene.backgroundBlurriness = 0;
+        // const skyLoader = new THREE.CubeTextureLoader();
+        // const skyTexture = skyLoader.load([
+        //     '/sky/px.png',
+        //     '/sky/nx.png',
+        //     '/sky/py.png',
+        //     '/sky/ny.png',
+        //     '/sky/pz.png',
+        //     '/sky/nz.png',
+        // ]);
+        // skyTexture.anisotropy = 8;
+        // scene.backgroundRotation = new THREE.Euler(3.14, 0, -3.14);
+        // scene.background = skyTexture;
+        // scene.backgroundBlurriness = 0;
     }, []);
 
     useFrame(({camera}, delta) => {
