@@ -1,16 +1,41 @@
+import { AudioManager, Sounds } from "@/AudioManager";
+import { PopupContainer, usePopup } from "@/Popup";
+import { useAppState } from "@/Store/app_state";
 import { Head } from "@inertiajs/react";
-import { PropsWithChildren } from "react";
+import { PropsWithChildren, useEffect, useState } from "react";
 
-export default function Base({ className, children }: PropsWithChildren<{ className?: string }>) {
+AudioManager.getInstance();
+
+export default function Base({ className, children, initializeMusic }: PropsWithChildren<{ className?: string; initializeMusic?: boolean }>) {
+    const [hasInterracted, setHasInterracted] = useState<boolean>(false);
+    const { currentSession } = useAppState();
+    const AudioInterface = AudioManager.getInstance();
+    const { showPopup } = usePopup();
+
+    useEffect(() => {
+        if(!initializeMusic) return;
+        if(!hasInterracted) showPopup('prompt-audio', { title: 'Do you want audio?', showExit: false, denyExit: true }, () => { setHasInterracted(true) });
+
+        if(hasInterracted) {
+            let soundtrack: Sounds = 'soundtrack-lobby';
+            if(currentSession != null && currentSession.session_state === 'playing') soundtrack = 'soundtrack-gameplay';
+            AudioInterface.play(soundtrack, true);
+        }
+    }, [hasInterracted]);
+
     return (
         <div className="w-screen h-screen bg-backdrop relative overflow-hidden animate-show">
             <Head>
-                <link rel="icon" type="image/x-icon" href="/favicon.svg"/>
+                <link rel="prefetch" as="image" href="/ui-backdrop/noise.jpg"/>
+                <link rel="prefetch" href="/audio/play.wav"/>
             </Head>
+
+            <PopupContainer />
+
             <div className="absolute z-50 w-screen h-screen pointer-events-none bg-[url('/ui-backdrop/noise.jpg')] opacity-[4%] scale-105 animate-noise"></div>
             <div className="absolute z-50 w-screen h-screen pointer-events-none bg-[url('/ui-backdrop/noise.jpg')] opacity-[5%] scale-105 animate-noise-alt"></div>
             <div className={`relative z-10 w-screen h-screen text-custom-gray-400 font-bold ${className}`}>
-                {children}
+                { hasInterracted || !initializeMusic ? children : '' }
             </div>
 
             <div className="fixed inset-0">

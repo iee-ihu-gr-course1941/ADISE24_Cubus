@@ -9,9 +9,8 @@
 import {useEffect, useState} from 'react';
 import useServerEvents from './useServerEvents';
 import {BoardUpdateEvent, LoginEvent} from '@/types/connection';
-import {getGame} from '@/network/session_network';
-import {GameResponse} from '@/types/game';
 import { useAppState } from '@/Store/app_state';
+import { AudioManager } from '@/AudioManager';
 
 export default function useUserEvents() {
     let {connectionState, listen, stopListening} = useServerEvents();
@@ -64,7 +63,9 @@ function loginEventCallback(event: LoginEvent, publicUserToken?: string) {
     }
 
     if (!event.success) return;
-    setTimeout(() => window.open('/game', '_self'), 50);
+    AudioManager.getInstance().play('chimes-success', false, () => {
+        setTimeout(() => window.open('/game', '_self'), 50);
+    });
 }
 
 function parseCookies(): Map<string, string> {

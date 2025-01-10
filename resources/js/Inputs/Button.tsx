@@ -1,3 +1,4 @@
+import { AudioManager } from "@/AudioManager";
 import { Icon, SVG } from "@/Icons/SVG";
 
 type ButtonProps = {
@@ -13,6 +14,17 @@ type ButtonProps = {
 };
 
 export function Button({text = '', color = 'default', icon, isLeft = false, blocked = false, className, onClick}: ButtonProps) {
+    const AudioInterface = AudioManager.getInstance();
+
+    function onMouseEnter() {
+        AudioInterface.play('hover', false);
+    }
+
+    function onMouseClick() {
+        AudioInterface.play('click', false);
+        if(onClick) onClick();
+    }
+
     let colors = `bg-light-default-bottom shadow-button-default
         ${blocked ? '' : 'hover:bg-bright-default-bottom hover:shadow-button-default-hover'}
         border-t-custom-gray-700 border-b-custom-purple-500
@@ -49,7 +61,8 @@ export function Button({text = '', color = 'default', icon, isLeft = false, bloc
 
                 ${className}
             `}
-            onClick={onClick}>
+            onMouseEnter={onMouseEnter}
+            onClick={onMouseClick}>
             { isLeft && <Icon /> }
             { text }
             { !isLeft && <Icon /> }

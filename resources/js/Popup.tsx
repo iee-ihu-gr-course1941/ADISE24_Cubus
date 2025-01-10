@@ -9,6 +9,7 @@ import { useAppState } from "./Store/app_state";
 import Network from "./network";
 import { User } from "./types/models/tables/User";
 import { GameSession } from "./types/models/tables/Session";
+import { AudioManager } from "./AudioManager";
 
 type PopupDetails = PropsWithChildren<{
     title?: string;
@@ -16,20 +17,24 @@ type PopupDetails = PropsWithChildren<{
     denyExit?: boolean;
 }>;
 
-type PopupType = 'mock-login' | 'credits' | 'user-settings' | 'lobby-settings' | 'settings';
+type PopupType = 'mock-login' | 'credits' | 'user-settings' | 'lobby-settings' | 'settings' | 'prompt-audio';
 
 type PopupState = {
     popup?: PopupType;
     popupDetails?: PopupDetails;
-    showPopup: (title: PopupType, details: PopupDetails) => void;
+    popupCallback?: () => void;
+
+    showPopup: (title: PopupType, details: PopupDetails, popupCallback?: () => void) => void;
     hidePopup: () => void;
 }
 
 export const usePopup = create<PopupState>((set) => ({
     popup: undefined,
     popupDetails: { showExit: true },
-    showPopup: (popup, details) => set({popup, popupDetails: details}),
-    hidePopup: () =>  set({popup: undefined, }),
+    popupCallback: undefined,
+
+    showPopup: (popup, details, popupCallback) => set({popup, popupDetails: details, popupCallback}),
+    hidePopup: () =>  set({popup: undefined, popupCallback: undefined }),
 }));
 
 export function PopupContainer({ className }: { className?: string }) {
@@ -73,6 +78,7 @@ export function PopupContainer({ className }: { className?: string }) {
                     { popup === 'user-settings' && <PopupUserSettings /> }
                     { popup === 'lobby-settings' && <PopupLobbySettings /> }
                     { popup === 'settings' && <PopupSettings /> }
+                    { popup === 'prompt-audio' && <PopupAudioPrompt /> }
 
             </div>
         </div>
@@ -158,6 +164,7 @@ function PopupUserSettings() {
     const [username, setUsername] = useState<string>(user?.name ?? '');
     const [icon, setIcon] = useState<number>(user?.icon ? (icons.indexOf(user.icon) + 1) : 0);
     const [errors, setErrors] = useState<{ name?: string, icon?: string }>({});
+    const AudioInterface = AudioManager.getInstance();
 
     function verifyUsername(username: string) {
         const pattern = new RegExp(/^[a-zA-Z-0-9_\-.!#$%^&*]*$/);
@@ -213,6 +220,11 @@ function PopupUserSettings() {
         hidePopup();
     }
 
+    function onPortraitSelectCallback(index: number) {
+        AudioInterface.play('click', false);
+        setIcon(index + 1);
+    }
+
     return (
         <>
             <div className="max-w-[600px] pl-10 pr-6 pt-2 pb-4">
@@ -226,7 +238,13 @@ function PopupUserSettings() {
                     <div className="grid grid-cols-3 gap-4">
                         {
                             icons.map((curIcon, index) => (
-                                <button key={curIcon} className={`rounded-[25px] ${index + 1 !== icon ? 'shadow-portrait' : 'shadow-portrait-hover'} hover:shadow-portrait-hover`} onClick={() => setIcon(index + 1)}><Portrait url={curIcon} /></button>
+                                <button
+                                    key={curIcon}
+                                    className={`rounded-[25px] ${index + 1 !== icon ? 'shadow-portrait' : 'shadow-portrait-hover'} hover:shadow-portrait-hover`}
+                                    onMouseEnter={() => AudioInterface.play('hover', false)}
+                                    onClick={() => onPortraitSelectCallback(index)}>
+                                    <Portrait url={curIcon} />
+                                </button>
                             ))
                         }
                     </div>
@@ -347,6 +365,27 @@ function PopupSettings() {
     return (
         <div className="w-[540px] pl-10 pr-6 pt-2 pb-4">
             <Button text="Logout" color="red" onClick={onLogoutCallback} />
+        </div>
+    );
+}
+
+function PopupAudioPrompt() {
+    const { hidePopup, popupCallback } = usePopup();
+    const AudioInterface = AudioManager.getInstance();
+
+    function onExitPopup() {
+        if(popupCallback) popupCallback();
+        hidePopup();
+    }
+
+    return (
+        <div className="w-[540px] pl-10 pr-6 pt-2 pb-4 font-bold">
+            <p className="pb-8">This game contains audio. Would you like to enable music?</p>
+
+            <div className="flex items-center justify-end gap-4">
+                <Button text="No" color="red" onClick={() => { AudioInterface.setVolume(0); onExitPopup(); }} />
+                <Button text="Yes" onClick={onExitPopup} />
+            </div>
         </div>
     );
 }

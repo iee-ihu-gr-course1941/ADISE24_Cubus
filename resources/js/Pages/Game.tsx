@@ -42,6 +42,7 @@ function GameContent({ user, availableSessions, userSession, connectionState, fl
         setUser(user);
 
         if(userSession == null) return;
+
         setCurrentSession(userSession.session);
         setState({...userSession.session}, userSession.player);
     }, [])
@@ -80,7 +81,7 @@ function Lobby({
     }, []);
 
     return (
-        <Base className="flex flex-col">
+        <Base className="flex flex-col" initializeMusic={true}>
             <PopupContainer />
             <section className="pt-8 px-8 flex gap-8 grow items-start">
                 <LobbiesControls games={availableSessions} />

@@ -1,3 +1,4 @@
+import { AudioManager } from "@/AudioManager";
 import React, { Fragment, PropsWithChildren } from "react";
 
 type ListProps = PropsWithChildren<{
@@ -40,7 +41,7 @@ export function List({title = '', emptyText = '', maxListHeight, className, chil
 
 type ListElementProps = PropsWithChildren<{ value?: string }>;
 
-export function ListElement({ value, children }: ListElementProps) {
+export function ListElement({ children }: ListElementProps) {
     return <Fragment>{children}</Fragment>;
 }
 
@@ -50,11 +51,19 @@ type ListRowProps = {
 };
 
 function ListRow({onClick, child}: ListRowProps) {
+    const AudioInterface = AudioManager.getInstance();
+
+    function onMouseClick() {
+        AudioInterface.play('click', false);
+        if(onClick && child && (child as React.ReactElement).props != null) onClick((child as React.ReactElement).props.value || '');
+    }
+
     if(!React.isValidElement(child) || !onClick) return child;
     return (
         <button
             className="flex cursor-pointer border-b border-b-custom-gray-700 last:border-b-0"
-            onClick={() => onClick(child.props?.value || '')}>
+            onMouseEnter={() => AudioInterface.play('hover', false)}
+            onClick={onMouseClick}>
             {child}
         </button>
     );

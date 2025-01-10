@@ -7,7 +7,8 @@
         <title inertia>Cubus</title>
 
         <link rel="icon" type="image/x-icon" href="/images/favicon.svg">
-        <link rel="preload" as="image" href="/ui-background/noise.jpg">
+        <link rel="preload" as="image" href="/ui-backdrop/noise.jpg">
+        <link rel="prefetch" href="/audio/play.wav"/>
 
         <!-- Fonts -->
         <link rel="preconnect" href="https://fonts.googleapis.com">

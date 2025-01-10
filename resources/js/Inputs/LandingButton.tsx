@@ -1,3 +1,4 @@
+import { AudioManager } from "@/AudioManager";
 import { Icon, SVG } from "@/Icons/SVG";
 import { useRef } from "react";
 
@@ -7,9 +8,15 @@ type ButtonProps = {
 };
 
 export function LandingButton({text = '', onClick}: ButtonProps) {
+    const AudioInterface = AudioManager.getInstance();
     let refButtonContainer = useRef<HTMLDivElement>(null);
 
+    function onMouseEnter() {
+        AudioInterface.play('hover', false);
+    }
+
     function onClickCallback() {
+        AudioInterface.play('click', false);
         if(refButtonContainer.current != null) {
             refButtonContainer.current.setAttribute('data-stick', 'stick');
         }
@@ -62,6 +69,7 @@ export function LandingButton({text = '', onClick}: ButtonProps) {
                     transition-all duration-200
                     cursor-pointer
                 `}
+                onMouseEnter={onMouseEnter}
                 onClick={onClickCallback}>
                 <div className="relative w-8 h-8 group-hover:w-10 group-hover:h-10 group-data-[stick='stick']:w-10 group-data-[stick='stick']:h-10">
                     <SVG icon={Icon.star} className="
