@@ -49,6 +49,8 @@ function GameContent({ user, availableSessions, userSession, connectionState, fl
         setState({...userSession.session}, userSession.player);
     }, []);
 
+    return <Experience />
+
     if (session == null || session.session_state === 'waiting') {
         return (
             <Lobby

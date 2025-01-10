@@ -151,7 +151,7 @@ function PlayersHUD() {
     if (!currentSession) return;
 
     return (
-        <div className="p-4 flex gap-4">
+        <div className="p-4 flex flex-col gap-2">
             {['blue', 'red', 'green', 'yellow'].map((color, i) => {
                 const currentPlayer = currentSession[
                     ('player_' + color) as keyof GameSession
@@ -211,7 +211,7 @@ function PlayerDetails({user, playerPoints, color}: PlayerDetails) {
                 <TextTile className={textColor}>{user.name}</TextTile>
                 <TextTile>
                     {playerPoints}{' '}
-                    <SVG icon={Icon.points} fill="fill-custom-gray-400" />
+                    <SVG icon={Icon.points} size={14} fill="fill-custom-gray-400" />
                 </TextTile>
             </section>
         </div>
@@ -225,7 +225,7 @@ function TextTile({
     return (
         <div
             className={`
-            py-2 px-6 text-gray-400 font-bold
+            py-1 px-4 text-gray-400 font-bold text-xs
             flex gap-1 items-center w-fit
             border-t border-b-2 rounded-[20px]
             bg-light-default-bottom border-t-custom-gray-700 border-b-custom-gray-800
@@ -238,13 +238,14 @@ function TextTile({
 }
 
 function ControlsHUD() {
+    const lockTurn = useBoardState(s => s.lockTurn);
     const {setAction, action} = useInterfaceState();
-    const {showPopup} = usePopup();
+    const showPopup = usePopup(s => s.showPopup);
 
     const areActionsBlocked = action !== 'none';
 
     return (
-        <div className="grow flex align-center justify-between p-4">
+        <div className="grow flex items-end justify-between p-4">
             <div>
                 <Button
                     icon={Icon.cogs}
@@ -258,25 +259,29 @@ function ControlsHUD() {
                 />
             </div>
 
-            <div className="flex gap-4">
-                <Button
-                    icon={Icon.rotateLeft}
-                    className="pointer-events-auto"
-                    blocked={areActionsBlocked}
-                    onClick={() => setAction('rotate_neg')}
-                />
-                <Button
-                    icon={Icon.mirror}
-                    className="pointer-events-auto"
-                    blocked={areActionsBlocked}
-                    onClick={() => setAction('flip')}
-                />
-                <Button
-                    icon={Icon.rotateRight}
-                    className="pointer-events-auto"
-                    blocked={areActionsBlocked}
-                    onClick={() => setAction('rotate_pos')}
-                />
+            <div className="flex flex-col gap-4 justify-end items-center">
+                <div className="flex gap-4">
+                    <Button
+                        icon={Icon.rotateLeft}
+                        className="pointer-events-auto"
+                        blocked={areActionsBlocked}
+                        onClick={() => setAction('rotate_neg')}
+                    />
+                    <Button
+                        icon={Icon.mirror}
+                        className="pointer-events-auto"
+                        blocked={areActionsBlocked}
+                        onClick={() => setAction('flip')}
+                    />
+                    <Button
+                        icon={Icon.rotateRight}
+                        className="pointer-events-auto"
+                        blocked={areActionsBlocked}
+                        onClick={() => setAction('rotate_pos')}
+                    />
+                </div>
+
+                <Button text="End Turn" className="w-full justify-center" onClick={() => lockTurn()} />
             </div>
 
             <div></div>

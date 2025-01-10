@@ -5,7 +5,7 @@ type PortraitProps = {
 };
 
 export function Portrait({url, isTiny, outlineColor }: PortraitProps) {
-    const imgSize = !isTiny ? 'w-[128px] h-[128px]' : 'w-[72px] h-[72px]';
+    const imgSize = !isTiny ? 'w-[128px] h-[128px]' : 'w-[32px] h-[32px]';
 
     let borderTopColor = 'to-custom-magenta-400';
     switch(outlineColor) {
@@ -25,7 +25,7 @@ export function Portrait({url, isTiny, outlineColor }: PortraitProps) {
 
     return (
         <div className={`
-            rounded-[25px] w-fit p-2.5
+            rounded-[25px] w-fit ${ !isTiny ? 'p-2.5' : 'p-1'}
 
             border-t border-b-2 border-t-custom-gray-700 border-b-custom-gray-800
             bg-light-default-bottom
