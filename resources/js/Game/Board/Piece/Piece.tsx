@@ -718,11 +718,11 @@ export const Piece = ({
 
     const onDrag = () => {
         //* Snap the shadow to the grid
-        if (isPieceTouchingBoard()) {
-            lowerPieceHeight();
-        } else {
-            increasePieceHeight();
-        }
+        // if (isPieceTouchingBoard()) {
+        // lowerPieceHeight();
+        // } else {
+        // increasePieceHeight();
+        // }
 
         //Handle rotation
         const rotation = getRotationFromQuaternion();
