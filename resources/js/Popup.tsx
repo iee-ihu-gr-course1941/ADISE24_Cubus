@@ -16,7 +16,7 @@ type PopupDetails = PropsWithChildren<{
     denyExit?: boolean;
 }>;
 
-type PopupType = 'mock-login' | 'credits' | 'user-settings' | 'lobby-settings';
+type PopupType = 'mock-login' | 'credits' | 'user-settings' | 'lobby-settings' | 'settings';
 
 type PopupState = {
     popup?: PopupType;
@@ -32,7 +32,7 @@ export const usePopup = create<PopupState>((set) => ({
     hidePopup: () =>  set({popup: undefined, }),
 }));
 
-export function PopupContainer() {
+export function PopupContainer({ className }: { className?: string }) {
     const { popup, popupDetails, hidePopup } = usePopup();
 
     function onCancelCallbackStrict(event: React.MouseEvent) {
@@ -42,7 +42,7 @@ export function PopupContainer() {
 
     if(popup == null) return;
     return (
-        <div className="fixed z-50 inset-0 bg-black/75 pt-[128px]" onClick={onCancelCallbackStrict}>
+        <div className={`fixed z-50 inset-0 bg-black/75 pt-[128px] ${className}`} onClick={onCancelCallbackStrict}>
             <div className="
                 relative left-1/2 -translate-x-1/2
 
@@ -72,6 +72,7 @@ export function PopupContainer() {
                     { popup === 'credits' && <PopupCredits /> }
                     { popup === 'user-settings' && <PopupUserSettings /> }
                     { popup === 'lobby-settings' && <PopupLobbySettings /> }
+                    { popup === 'settings' && <PopupSettings /> }
 
             </div>
         </div>
@@ -335,5 +336,17 @@ function PopupLobbySettings() {
                 <Button icon={Icon.check} text="Confirm" onClick={onConfirmCallback} />
             </footer>
         </>
+    );
+}
+
+function PopupSettings() {
+    function onLogoutCallback() {
+        window.open(route('logout'), '_self');
+    }
+
+    return (
+        <div className="w-[540px] pl-10 pr-6 pt-2 pb-4">
+            <Button text="Logout" color="red" onClick={onLogoutCallback} />
+        </div>
     );
 }

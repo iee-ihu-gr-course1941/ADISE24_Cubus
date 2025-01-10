@@ -91,7 +91,7 @@ function Lobby({
             </section>
 
             <footer className="flex items-center gap-2 p-8">
-                <Button icon={Icon.cogs} />
+                <Button icon={Icon.cogs} onClick={() => showPopup('settings', { title: 'Settings', showExit: true })} />
                 <Button
                     icon={Icon.info}
                     onClick={() =>

@@ -3,6 +3,7 @@ import {FlipIcon } from '@/Icons/InterfaceIcons';
 import { Portrait } from '@/Icons/Portrait';
 import { Icon, SVG } from '@/Icons/SVG';
 import { Button } from '@/Inputs/Button';
+import { PopupContainer, usePopup } from '@/Popup';
 import { useAppState } from '@/Store/app_state';
 import {useBoardState} from '@/Store/board_state';
 import {useInterfaceState} from '@/Store/interface_state';
@@ -41,6 +42,7 @@ export const Interface = () => {
 
     return (
         <div className="absolute inset-0 pointer-events-none flex flex-col">
+            <PopupContainer className='pointer-events-auto' />
             <PlayersHUD />
             <div className="grow flex items-end"><ControlsHUD /></div>
             { gameHasFinished && <GameEndScreen isWin={true} /> }
@@ -205,13 +207,14 @@ function TextTile({className, children}: PropsWithChildren<{className?: string}>
 
 function ControlsHUD() {
     const {setAction, action} = useInterfaceState();
+    const {showPopup} = usePopup();
 
     const areActionsBlocked = action !== 'none';
 
     return (
         <div className="grow flex align-center justify-between p-4">
             <div>
-                <Button icon={Icon.cogs} className="pointer-events-auto" />
+                <Button icon={Icon.cogs} className="pointer-events-auto" onClick={() => showPopup('settings', { title: 'Settings', showExit: true })} />
             </div>
 
             <div className="flex gap-4">
