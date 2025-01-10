@@ -93,12 +93,12 @@ export default {
                     '100%': { opacity: '100%' },
                 },
                 Noise: {
-                    '0%, 100%': { transform: 'translate(0, 0) scale(1.05)', opacity: '11%' },
-                    '20%': { transform: 'translate(2px, -2px) scale(1.05)', opacity: '9%' },
-                    '40%': { transform: 'translate(1px, 2px) scale(1.05)', opacity: '10%' },
-                    '40%': { transform: 'translate(-1px, 2px) scale(1.05)', opacity: '11%' },
-                    '60%': { transform: 'translate(1px, 2px) scale(1.05)' , opacity: '9%' },
-                    '80%': { transform: 'translate(0, 2px) scale(1.05)', opacity: '9%' },
+                    '0%, 100%': { transform: 'translate(0, 0) scale(1.05)', opacity: '5%' },
+                    '20%': { transform: 'translate(2px, -2px) scale(1.05)', opacity: '4%' },
+                    '40%': { transform: 'translate(1px, 2px) scale(1.05)', opacity: '6%' },
+                    '40%': { transform: 'translate(-1px, 2px) scale(1.05)', opacity: '6%' },
+                    '60%': { transform: 'translate(1px, 2px) scale(1.05)' , opacity: '4%' },
+                    '80%': { transform: 'translate(0, 2px) scale(1.05)', opacity: '5%' },
                 },
                 NoiseAlt: {
                     '0%, 100%': { transform: 'translate(0, 0) scale(1.05)' },
