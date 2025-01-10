@@ -13,6 +13,7 @@ import {extend, useFrame} from '@react-three/fiber';
 import {Float, shaderMaterial} from '@react-three/drei';
 import {COLORS} from '@/Constants/colors';
 import {lerp} from 'three/src/math/MathUtils.js';
+import {PlayerColor} from '@/types/game';
 
 const PieceMaterial = shaderMaterial(
     {
@@ -77,8 +78,11 @@ export const PieceModel = ({
                             ]}
                             geometry={PIECE_GEOMETRY['block']}>
                             <PieceMaterialComponent
-                                enableGlow={isHovering}
+                                enableGlow={
+                                    isHovering || latestMove?.code === pieceCode
+                                }
                                 color={COLORS[playerIdentifier]}
+                                playerColor={playerIdentifier}
                             />
                         </mesh>
                     );
@@ -90,10 +94,12 @@ export const PieceModel = ({
 type PieceMaterialProps = {
     color: number;
     enableGlow: boolean;
+    playerColor: PlayerColor;
 };
 export const PieceMaterialComponent = ({
     color,
     enableGlow,
+    playerColor,
 }: PieceMaterialProps) => {
     const ref = useRef<THREE.ShaderMaterial>(null);
     useEffect(() => {
@@ -105,7 +111,8 @@ export const PieceMaterialComponent = ({
         if (!ref.current) return;
 
         if (enableGlow) {
-            ref.current.uniforms.uGlow.value = 2.65;
+            ref.current.uniforms.uGlow.value =
+                playerColor === 'red' ? 3.1 : 2.65;
         } else {
             ref.current.uniforms.uGlow.value = 1;
         }
