@@ -38,9 +38,7 @@ const LoadingIndicator = () => {
                 We are getting everything ready...
             </p>
             <div className="w-[40%] h-[2px]">
-                <div
-                    ref={loadingRef}
-                    className="w-0 h-full bg-white transition-all duration-500"></div>
+                <div ref={loadingRef} className="w-0 h-full bg-white"></div>
             </div>
         </div>
     );
