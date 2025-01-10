@@ -91,7 +91,10 @@ type PieceMaterialProps = {
     color: number;
     enableGlow: boolean;
 };
-const PieceMaterialComponent = ({color, enableGlow}: PieceMaterialProps) => {
+export const PieceMaterialComponent = ({
+    color,
+    enableGlow,
+}: PieceMaterialProps) => {
     const ref = useRef<THREE.ShaderMaterial>(null);
     useEffect(() => {
         if (ref.current) {

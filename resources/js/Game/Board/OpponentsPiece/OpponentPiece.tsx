@@ -6,6 +6,8 @@ import {OpponentMove} from '@/types/game';
 import gsap from 'gsap';
 import {memo, useEffect, useRef, useState} from 'react';
 import * as THREE from 'three';
+import {PieceMaterialComponent} from '../Piece/PieceModel';
+import {COLORS} from '@/Constants/colors';
 
 type Props = OpponentMove['move'];
 
@@ -80,9 +82,12 @@ export const OpponentPiece = memo((move: Props) => {
                                 0,
                                 position.y * blockSize,
                             ]}
-                            geometry={PIECE_GEOMETRY['block']}
-                            material={BOARD_PLACED_MATERIALS[player_color]}
-                        />
+                            geometry={PIECE_GEOMETRY['block']}>
+                            <PieceMaterialComponent
+                                enableGlow={false}
+                                color={COLORS[player_color]}
+                            />
+                        </mesh>
                     );
                 })}
             </group>
