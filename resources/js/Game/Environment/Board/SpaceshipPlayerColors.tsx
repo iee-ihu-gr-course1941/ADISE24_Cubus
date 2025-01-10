@@ -43,7 +43,7 @@ const LightNoiseMaterial = shaderMaterial(
         uColor: new THREE.Color(0xeab308),
         uTime: 0,
         uSpeed: 0.05,
-        uAmplitude: 0.2,
+        uAmplitude: 0,
         uLightColor: new THREE.Color(0xffffff),
         uEndColor: new THREE.Color(0x7dd3fc),
         uRandomFactor: 0,
@@ -69,10 +69,9 @@ export const SpaceshipPlayerColors = memo(({playerColor}: Props) => {
 
     const playerIndex = Object.keys(COLORS).indexOf(playerColor);
 
-
     const allColors = Object.keys(COLORS);
     let nextColors = [];
-    for(let i = 1; i < allColors.length; i++) {
+    for (let i = 1; i < allColors.length; i++) {
         nextColors.push(allColors[(i + playerIndex) % allColors.length]);
     }
 
@@ -88,34 +87,33 @@ export const SpaceshipPlayerColors = memo(({playerColor}: Props) => {
                 color={COLORS[playerColor]}
                 position={[3.6, 0.7, 7.9]}
             />
-            {
-                nextColors.map((_color, index) => {
-                    const indexMapping = index + 1;
+            {nextColors.map((_color, index) => {
+                const indexMapping = index + 1;
 
-                    setPlayerPosition(_color as PlayerColor, {
-                        x:
-                            (POSITIONS[indexMapping].left[0] +
-                                POSITIONS[indexMapping].right[0]) *
-                            0.5,
-                        y:
-                            (POSITIONS[indexMapping].left[2] +
-                                POSITIONS[indexMapping].right[2]) *
-                            0.5,
-                    });
-                    const color = _color as keyof typeof COLORS;
-                    return (
-                        <Fragment key={indexMapping}>
-                            <LightObject
-                                color={COLORS[color]}
-                                position={POSITIONS[indexMapping].left}
-                            />
-                            <LightObject
-                                color={COLORS[color]}
-                                position={POSITIONS[indexMapping].right}
-                            />
-                        </Fragment>
-                    );
-                })}
+                setPlayerPosition(_color as PlayerColor, {
+                    x:
+                        (POSITIONS[indexMapping].left[0] +
+                            POSITIONS[indexMapping].right[0]) *
+                        0.5,
+                    y:
+                        (POSITIONS[indexMapping].left[2] +
+                            POSITIONS[indexMapping].right[2]) *
+                        0.5,
+                });
+                const color = _color as keyof typeof COLORS;
+                return (
+                    <Fragment key={indexMapping}>
+                        <LightObject
+                            color={COLORS[color]}
+                            position={POSITIONS[indexMapping].left}
+                        />
+                        <LightObject
+                            color={COLORS[color]}
+                            position={POSITIONS[indexMapping].right}
+                        />
+                    </Fragment>
+                );
+            })}
         </>
     );
 });
@@ -126,39 +124,24 @@ type LightProps = {
     isPlayer?: boolean;
 };
 
-const LightObject = ({color, position, isPlayer = false}: LightProps) => {
+const LightObject = memo(({color, position, isPlayer = false}: LightProps) => {
     const ref = useRef<THREE.ShaderMaterial>(null);
     const lightRef = useRef<THREE.PointLight>(null);
-    useFrame(({camera}) => {
-        if (lightRef.current) {
-            const cameraDistance = camera.position.distanceTo(
-                new THREE.Vector3(position[0], position[1], position[2]),
-            );
-            const maxIntensity = 4;
-            const minIntensity = 1;
-            const maxDistance = 1.5;
-            const minDistance = 0.8;
-            const distanceOffset = 16;
-            lightRef.current.distance = Math.min(
-                maxDistance,
-                Math.max(minDistance, distanceOffset - cameraDistance),
-            );
-            lightRef.current.intensity = Math.min(
-                maxIntensity,
-                Math.max(minIntensity, distanceOffset - cameraDistance) * 2.5,
-            );
-        }
-    });
+
     useFrame((_, delta) => {
         if (ref.current) {
             ref.current.uniforms.uTime.value += delta;
+        }
+    });
+
+    useEffect(() => {
+        if (ref.current) {
             ref.current.uniforms.uSpeed.value = 0.15;
             ref.current.uniforms.uColor.value = new THREE.Color(color);
             ref.current.uniforms.uEndColor.value = new THREE.Color(0xffffff);
-            ref.current.uniforms.uAmplitude.value =
-                0.1 + Math.sin(delta * 0.5) * 2.5;
+            ref.current.uniforms.uAmplitude.value = Math.random() * 0.1 + 0.05;
         }
-    });
+    }, [ref, color]);
 
     useEffect(() => {
         if (ref.current) {
@@ -198,8 +181,10 @@ const LightObject = ({color, position, isPlayer = false}: LightProps) => {
                 position={position}
                 position-y={position[1] * 2}
                 color={color}
+                intensity={4}
+                distance={1.5}
                 decay={0}
             />
         </>
     );
-};
+});
