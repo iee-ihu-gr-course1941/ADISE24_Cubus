@@ -5,6 +5,8 @@ import {useGameDimensions} from '@/Store/game_dimensions';
 import {ValorizedVector2} from '@/types/game';
 import {useEffect, useRef, useState} from 'react';
 import * as THREE from 'three';
+import {PieceMaterialComponent} from '../Piece/PieceModel';
+import {COLORS} from '@/Constants/colors';
 
 export const BoardPlacedPieces = () => {
     const [hasPlaced, setHasPlaced] = useState(false);
@@ -37,9 +39,12 @@ export const BoardPlacedPieces = () => {
                                 blockSize * 0.5,
                                 (position.y - blockSize) / 2 - 3,
                             ]}
-                            geometry={PIECE_GEOMETRY['block']}
-                            material={BOARD_PLACED_MATERIALS[position.data]}
-                        />
+                            geometry={PIECE_GEOMETRY['block']}>
+                            <PieceMaterialComponent
+                                enableGlow={false}
+                                color={COLORS[position.data]}
+                            />
+                        </mesh>
                     </group>
                 );
             })}
