@@ -14,7 +14,7 @@ export const Loading = memo(() => {
         if (hasLoaded) {
             setTimeout(() => {
                 startGame();
-            }, 500);
+            }, 1500);
         }
     }, [hasLoaded]);
     if (!hasLoaded) {

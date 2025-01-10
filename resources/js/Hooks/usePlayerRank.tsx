@@ -29,7 +29,7 @@ export const usePlayerRank = () => {
         rank: position,
         isWin: position === 1,
         label:
-            position === 0
+            position === 1
                 ? '1st'
                 : position === 2
                   ? '2nd'
