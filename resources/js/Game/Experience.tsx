@@ -15,13 +15,14 @@ import {
 import {useBoardState} from '@/Store/board_state';
 import {useLoadedModels} from '@/Store/models_state';
 import {GameState} from '@/types/game';
-import {Stars} from './Environment/Space/Stars';
 import {Loading} from './Loading';
+import {Perf} from 'r3f-perf';
+import {Space} from './Environment/Space/Space';
 
 const INITIAL_CAMERA_PROPS = {
     fov: 85,
     near: 0.1,
-    far: 200,
+    far: 100,
 };
 
 export const Experience = memo(() => {
@@ -41,10 +42,10 @@ export const Experience = memo(() => {
                 }}
                 camera={INITIAL_CAMERA_PROPS}>
                 <color attach={'background'} args={['#000000']} />
-                {/* <Perf position="top-left" /> */}
+                <Perf position="top-left" />
                 <BoardControls />
                 {haveModelsLoaded && <GameMap />}
-                <Stars />
+                <Space />
             </Canvas>
             <Interface />
             <Loading />
