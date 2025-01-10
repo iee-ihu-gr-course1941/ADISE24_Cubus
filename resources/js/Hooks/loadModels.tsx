@@ -1,9 +1,6 @@
 import {useGLTF} from '@react-three/drei';
 import {memo, useEffect, useState} from 'react';
 import * as THREE from 'three';
-import {useLoadedMaterials} from './useLoadedMaterials';
-import {useThree} from '@react-three/fiber';
-import {PlayerColor} from '@/types/game';
 import {COLORS} from '@/Constants/colors';
 import {useLoadedModels} from '@/Store/models_state';
 
