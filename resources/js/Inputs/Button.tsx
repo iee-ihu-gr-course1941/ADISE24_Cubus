@@ -29,6 +29,7 @@ export function Button({text = '', color = 'default', icon, isLeft = false, bloc
         <button
             className={`
                 group
+                relative
                 flex gap-1.5 items-center
                 w-fit ${ text.length === 0 ? 'px-[1.125rem]' : 'px-6'} ${ text.length === 0 ? 'py-4' : 'py-2.5' }
 
@@ -42,6 +43,10 @@ export function Button({text = '', color = 'default', icon, isLeft = false, bloc
                 ${blocked ? 'cursor-not-allowed' : 'cursor-pointer'}
 
                 ${colors}
+
+                after:contents-['']
+                after:absolute after:inset-0 after:pointer-events-auto
+
                 ${className}
             `}
             onClick={onClick}>
