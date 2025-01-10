@@ -24,7 +24,6 @@ export const Interface = () => {
         state => state.gameState.ui_state === 'Finished',
     );
     const playerHasFinished = useBoardState(s => s.getHasFinished);
-    const {time} = useTimerStore();
 
     return (
         <div className="absolute inset-0 pointer-events-none flex flex-col overflow-hidden">
@@ -64,8 +63,9 @@ const StartingTimer = () => {
 
 const GameStateFeedback = () => {
     const ui_state = useBoardState(s => s.gameState.ui_state);
+    const {label} = usePlayerRank();
     return (
-        <div className="p-4">
+        <div className="p-4 flex flex-col gap-y-2">
             <TextTile className="">
                 <p className="text-base">
                     {ui_state === 'OwnTurnPlaying'
@@ -80,6 +80,10 @@ const GameStateFeedback = () => {
                                 ? 'Starting...'
                                 : 'Finished'}
                 </p>
+            </TextTile>
+            <TextTile className="text-custom-gray-400">
+                <SVG icon={Icon.crown} size={14} fill="fill-custom-gray-400" />
+                {label}
             </TextTile>
         </div>
     );
