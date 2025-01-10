@@ -36,7 +36,7 @@ export const BoardPlacedPieces = () => {
                             key={index}
                             position={[
                                 (position.x - blockSize) / 2 - 3,
-                                blockSize * 0.5,
+                                0.2,
                                 (position.y - blockSize) / 2 - 3,
                             ]}
                             geometry={PIECE_GEOMETRY['block']}>

@@ -79,7 +79,7 @@ export const OpponentPiece = memo((move: Props) => {
                             key={index}
                             position={[
                                 position.x * blockSize,
-                                0,
+                                -0.05,
                                 position.y * blockSize,
                             ]}
                             geometry={PIECE_GEOMETRY['block']}>

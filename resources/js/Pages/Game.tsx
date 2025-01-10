@@ -25,9 +25,9 @@ type GameProps = PageProps<{
 
 export default function Game(props: GameProps) {
     let {connectionState, latestMove} = useUserEvents();
+    const updateGameState = useBoardState(s => s.updateGameState);
 
     const setLatestMove = useUserEventsStore(s => s.setLatestMove);
-    const updateGameState = useBoardState(s => s.updateGameState);
 
     useEffect(() => {
         if (latestMove) {
@@ -41,13 +41,24 @@ export default function Game(props: GameProps) {
 
 type GameContentProps = GameProps & {
     connectionState: ConnectionState;
-}
+};
 
-function GameContent({ user, availableSessions, userSession, connectionState, flash }: GameContentProps) {
-    const { currentSession, setUser, setCurrentSession } = useAppState();
+function GameContent({
+    user,
+    availableSessions,
+    userSession,
+    connectionState,
+    flash,
+}: GameContentProps) {
+    const {currentSession, setUser, setCurrentSession} = useAppState();
     const session = currentSession ?? userSession?.session;
-    const {setState} = useBoardState();
-    console.info('Initial server data:', {user, userSession, availableSessions});
+    const setState = useBoardState(s => s.setState);
+    const updatePlayerState = useBoardState(s => s.updatePlayerState);
+    console.info('Initial server data:', {
+        user,
+        userSession,
+        availableSessions,
+    });
 
     useEffect(() => {
         setUser(user);
@@ -55,10 +66,20 @@ function GameContent({ user, availableSessions, userSession, connectionState, fl
         if (userSession == null) return;
 
         setCurrentSession(userSession.session);
-        setState({...userSession.session}, userSession.player);
     }, []);
 
-    return <Experience />
+    useEffect(() => {
+        if (userSession) {
+            console.log('updating session player state');
+            updatePlayerState(userSession.player);
+        }
+    }, [userSession]);
+
+    useEffect(() => {
+        if (session && userSession) {
+            setState(session, userSession.player);
+        }
+    }, []);
 
     if (session == null || session.session_state === 'waiting') {
         return (

@@ -67,7 +67,7 @@ const GameMap = () => {
             ),
             lerp(
                 ORIGIN_CAMERA_LOOK_AT.y,
-                -DESTINATION_CAMERA_LOOK_AT.z * 2,
+                -DESTINATION_CAMERA_LOOK_AT.z,
                 strength,
             ),
             lerp(

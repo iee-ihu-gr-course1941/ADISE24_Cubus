@@ -36,6 +36,13 @@ export const Stars = memo(() => {
         }
     }, [materialRef, size]);
 
+    useEffect(() => {
+        if (materialRef.current) {
+            materialRef.current.blending = THREE.AdditiveBlending;
+            materialRef.current.transparent = true;
+        }
+    }, [materialRef]);
+
     const geometry = useMemo(() => {
         const parameters = {
             count: count,
