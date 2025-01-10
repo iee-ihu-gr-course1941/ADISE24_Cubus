@@ -15,7 +15,7 @@ import {
 import {useBoardState} from '@/Store/board_state';
 import {useLoadedModels} from '@/Store/models_state';
 import {GameState} from '@/types/game';
-import {Space} from './Environment/Space/Space';
+import {Stars} from './Environment/Space/Stars';
 import {Loading} from './Loading';
 
 const INITIAL_CAMERA_PROPS = {
@@ -44,7 +44,7 @@ export const Experience = memo(() => {
                 {/* <Perf position="top-left" /> */}
                 <BoardControls />
                 {haveModelsLoaded && <GameMap />}
-                <Space />
+                <Stars />
             </Canvas>
             <Interface />
             <Loading />
