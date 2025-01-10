@@ -172,12 +172,14 @@ type LobbiesControlsProps = {
     games?: GameSession[];
 };
 
-function LobbiesControls({games}: LobbiesControlsProps) {
+function LobbiesControls({games: _games}: LobbiesControlsProps) {
     const {showPopup} = usePopup();
     const {currentSession, setCurrentSession} = useAppState();
+    const [games, setGames] = useState<GameSession[]>(_games ?? []);
+    const [loading, setLoading] = useState(false);
 
     async function joinRandomGameCallback() {
-        if(currentSession != null) return;
+        if (currentSession != null) return;
 
         let response = await Network.get<GameSession>({
             url: route('lobby.match'),
@@ -187,7 +189,7 @@ function LobbiesControls({games}: LobbiesControlsProps) {
     }
 
     async function joinGameCallback(gameId: string) {
-        if(currentSession != null) return;
+        if (currentSession != null) return;
 
         let response = await Network.get<GameSession>({
             url: route('lobby.join', gameId),
@@ -195,6 +197,18 @@ function LobbiesControls({games}: LobbiesControlsProps) {
         if (!response) return;
         setCurrentSession(response);
     }
+
+    const fetchLobbiesCallback = async () => {
+        if (loading) return;
+        setLoading(true);
+        let response = await Network.get<{sessions: GameSession[]}>({
+            url: route('lobby.index'),
+        });
+        setLoading(false);
+        if (response) {
+            setGames(response.sessions);
+        }
+    };
 
     return (
         <section className="flex flex-col gap-4 grow h-full">
@@ -215,21 +229,48 @@ function LobbiesControls({games}: LobbiesControlsProps) {
                     blocked
                     onClick={joinRandomGameCallback}
                 />
+                <Button
+                    text="Refresh"
+                    icon={Icon.refresh}
+                    blocked={loading}
+                    onClick={fetchLobbiesCallback}
+                />
             </header>
 
-            <List title="Available Games" emptyText="No Games Available" maxListHeight='70vh' className="w-full max-w-[980px] h-full" onClick={joinGameCallback}>
-                {
-                    games && games.length > 0 ?
-                        games.map(game => (
-                            <ListElement key={game?.id} value={game?.id?.toString() ?? ''}>
-                                <div className="group px-8 py-4 flex items-center gap-4 w-full hover:bg-custom-purple-400 hover:text-custom-pink-50">
-                                    <p className="grow text-start">{game.name}</p>
-                                    <div className="flex gap-2 items-center"><SVG icon={Icon.crown} fill="fill-custom-gray-400 group-hover:fill-custom-pink-50" /><p>by {game.player_host?.name}</p></div>
-                                    <div className="flex gap-2 items-center"><SVG icon={Icon.users} fill="fill-custom-gray-400 group-hover:fill-custom-pink-50" /><p>{game.current_player_count} of {game.player_count}</p></div>
-                                </div>
-                            </ListElement>
-                        )) : null
-                }
+            <List
+                title="Available Games"
+                emptyText="No Games Available"
+                maxListHeight="70vh"
+                className="w-full max-w-[980px] h-full"
+                onClick={joinGameCallback}>
+                {games && games.length > 0
+                    ? games.map(game => (
+                          <ListElement
+                              key={game?.id}
+                              value={game?.id?.toString() ?? ''}>
+                              <div className="group px-8 py-4 flex items-center gap-4 w-full hover:bg-custom-purple-400 hover:text-custom-pink-50">
+                                  <p className="grow text-start">{game.name}</p>
+                                  <div className="flex gap-2 items-center">
+                                      <SVG
+                                          icon={Icon.crown}
+                                          fill="fill-custom-gray-400 group-hover:fill-custom-pink-50"
+                                      />
+                                      <p>by {game.player_host?.name}</p>
+                                  </div>
+                                  <div className="flex gap-2 items-center">
+                                      <SVG
+                                          icon={Icon.users}
+                                          fill="fill-custom-gray-400 group-hover:fill-custom-pink-50"
+                                      />
+                                      <p>
+                                          {game.current_player_count} of{' '}
+                                          {game.player_count}
+                                      </p>
+                                  </div>
+                              </div>
+                          </ListElement>
+                      ))
+                    : null}
             </List>
         </section>
     );
