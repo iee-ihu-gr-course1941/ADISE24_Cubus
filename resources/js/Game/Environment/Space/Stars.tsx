@@ -2,7 +2,7 @@ import {memo, useEffect, useMemo, useRef} from 'react';
 import vertexShader from '../../../../shaders/space/stars/vertex.glsl';
 import fragmentShader from '../../../../shaders/space/stars/fragment.glsl';
 import * as THREE from 'three';
-import {extend, useFrame} from '@react-three/fiber';
+import {extend, useFrame, useThree} from '@react-three/fiber';
 import {shaderMaterial} from '@react-three/drei';
 import {useControls} from 'leva';
 
@@ -88,6 +88,10 @@ export const Stars = memo(() => {
                     z < 0
                         ? z - excludedRadius + Math.random() * addedRadius
                         : z + excludedRadius - Math.random() * addedRadius;
+            }
+
+            if (z < 10 && z > -30 && Math.abs(x) < 10) {
+                z -= 40;
             }
 
             positions[i3 + 0] = x;
