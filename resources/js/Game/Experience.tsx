@@ -65,7 +65,7 @@ const updateCamera = (
     ui_state: GameState['ui_state'],
     isGameOnGoing: () => boolean,
 ) => {
-    if (ui_state === 'Ready') {
+    if (ui_state === 'Ready' || ui_state === 'Finished') {
         camera.position.set(
             ORIGIN_CAMERA_POSITION.x,
             ORIGIN_CAMERA_POSITION.y,
@@ -86,17 +86,6 @@ const updateCamera = (
             DESTINATION_CAMERA_LOOK_AT.x,
             DESTINATION_CAMERA_LOOK_AT.y,
             DESTINATION_CAMERA_LOOK_AT.z,
-        );
-    } else if (ui_state === 'Finished') {
-        camera.position.set(
-            FINISHED_CAMERA_POSITION.x,
-            FINISHED_CAMERA_POSITION.y,
-            FINISHED_CAMERA_POSITION.z,
-        );
-        camera.lookAt(
-            FINISHED_CAMERA_LOOK_AT.x,
-            FINISHED_CAMERA_LOOK_AT.y,
-            FINISHED_CAMERA_LOOK_AT.z,
         );
     }
 };
