@@ -6,7 +6,6 @@ import {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import * as THREE from 'three';
 import gsap from 'gsap';
 import {ThreeEvent} from '@react-three/fiber';
-import {useControls} from 'leva';
 import {BoardState, useBoardState} from '@/Store/board_state';
 import {PieceModel} from './PieceModel';
 import {PieceShadow} from './PieceShadow';
@@ -25,6 +24,8 @@ const rotationToIndex = (rotation: number) => {
         4) as PieceRotation;
 };
 type AnimateState = 'lowering' | 'increasing' | null;
+
+const animationDuration = 0.2;
 
 export const Piece = ({
     code: pieceCode = 0,
@@ -80,23 +81,6 @@ export const Piece = ({
         boardState?.boardPieces,
         ref.current,
     ]);
-
-    const {dragHeight, animationDuration} = useControls({
-        dragHeight: {
-            label: 'Drag Height',
-            value: 3.5,
-            min: 0.0,
-            max: 3,
-            step: 0.25,
-        },
-        animationDuration: {
-            label: 'Animation Duration',
-            value: 0.25,
-            min: 0.0,
-            max: 2,
-            step: 0.1,
-        },
-    });
 
     const {block_positions, center_offset, origin_center_distance} =
         PieceData[pieceCode];
@@ -373,7 +357,7 @@ export const Piece = ({
                 !pieceTouchingBoard
             ) {
                 // //* Reject the move if the piece is not on the board
-                rejectPosition('lock', dragHeight);
+                rejectPosition('lock');
                 if (pieceCode === boardState?.move?.code) {
                     //! Deprecated feature
                     // boardState?.rejectMove();
@@ -444,7 +428,7 @@ export const Piece = ({
         }
     };
 
-    const rejectPosition = (type: 'lock' | 'change', y = 0) => {
+    const rejectPosition = (type: 'lock' | 'change') => {
         if (ref.current) {
             const currentPosition = getPiecePosition();
             const _prePosition =
@@ -692,7 +676,7 @@ export const Piece = ({
         if (ref.current && pieceAnimationState.current !== 'lowering') {
             pieceAnimationState.current = 'lowering';
             gsap.to(ref.current.position, {
-                y: dragHeight * blockSize,
+                y: positionY,
                 duration: animationDuration,
                 ease: 'power1.inOut',
                 onComplete: () => {
@@ -706,7 +690,7 @@ export const Piece = ({
         if (ref.current && pieceAnimationState.current !== 'increasing') {
             pieceAnimationState.current = 'increasing';
             gsap.to(ref.current.position, {
-                y: positionY,
+                y: positionY + 2,
                 duration: animationDuration,
                 ease: 'power1.inOut',
                 onComplete: () => {

@@ -4,7 +4,6 @@ import fragmentShader from '../../../../shaders/space/stars/fragment.glsl';
 import * as THREE from 'three';
 import {extend, useFrame, useThree} from '@react-three/fiber';
 import {shaderMaterial} from '@react-three/drei';
-import {useControls} from 'leva';
 
 const SpaceStarsMaterial = shaderMaterial(
     {
@@ -21,19 +20,9 @@ extend({SpaceStarsMaterial});
 
 export const Stars = memo(() => {
     const materialRef = useRef<THREE.ShaderMaterial>(null);
-    const {size, count} = useControls({
-        size: {
-            value: 18,
-            min: 0,
-            max: 100,
-        },
-        count: {
-            value: 4000,
-            min: 0,
-            max: 100000,
-            step: 50,
-        },
-    });
+
+    const size = 18;
+    const count = 4000;
 
     useFrame((_, delta) => {
         if (materialRef.current) {

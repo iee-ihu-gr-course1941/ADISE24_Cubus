@@ -4,18 +4,10 @@ import {useBoardState} from '@/Store/board_state';
 import {memo, useMemo} from 'react';
 import {Grid} from '@react-three/drei';
 import {OpponentsHand} from './OpponentsPiece/OpponentsHand';
-import {useControls} from 'leva';
 import {BoardPlacedPieces} from './OpponentsPiece/BoardPlacedPieces';
 import {BOARD_MATERIALS} from '@/Constants/materials';
 
 export const Board = memo(() => {
-    const {showGridHelper} = useControls({
-        showGridHelper: {
-            label: 'Show Grid Helper',
-            value: false,
-        },
-    });
-
     const blockSize = useGameDimensions(state => state.blockSize);
     const getGridSize = useGameDimensions(state => state.getGridSize);
 
@@ -27,11 +19,13 @@ export const Board = memo(() => {
         return getGridSize(parseInt(playerCount));
     }, [playerCount, blockSize]);
 
+    let showGridHelper = false;
+
     return (
         <>
             {gridSize && (
                 <>
-                    {showGridHelper  && (
+                    {showGridHelper && (
                         <Grid
                             args={[gridSize, gridSize, 1]}
                             position-y={0.06}

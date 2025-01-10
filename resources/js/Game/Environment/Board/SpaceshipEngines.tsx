@@ -3,7 +3,6 @@ import * as THREE from 'three';
 import vertexShader from '../../../../shaders/spaceship/engines/pattern_1/vertex.glsl';
 import fragmentShader from '../../../../shaders/spaceship/engines/pattern_1/fragment.glsl';
 import {extend} from '@react-three/fiber';
-import {useControls} from 'leva';
 import {memo, useEffect, useMemo, useRef} from 'react';
 import {useBoardState} from '@/Store/board_state';
 

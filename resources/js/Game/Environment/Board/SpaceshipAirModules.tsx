@@ -4,7 +4,6 @@ import {memo, useEffect, useMemo, useRef} from 'react';
 import * as THREE from 'three';
 import vertexShader from '../../../../shaders/spaceship/air_modules/pattern_1/vertex.glsl';
 import fragmentShader from '../../../../shaders/spaceship/air_modules/pattern_1/fragment.glsl';
-import {useControls} from 'leva';
 import {useBoardState} from '@/Store/board_state';
 
 const geometry = new THREE.PlaneGeometry(1, 1, 48, 48);
@@ -32,15 +31,9 @@ extend({AirModuleMaterial});
 export const SpaceshipAirModules = memo(() => {
     const isGameOnGoing = useBoardState(s => s.isGameOnGoing);
     const ui_state = useBoardState(s => s.gameState.ui_state);
-    const {depth, colorStart} = useControls({
-        depth: {
-            value: 0.6,
-            step: 0.01,
-            min: 0,
-            max: 2,
-        },
-        colorStart: '#1f1131',
-    });
+
+    const depth = 0.6;
+    const colorStart = '#1f1131';
     const speed = useMemo(() => {
         if (isGameOnGoing()) {
             return 0.15;
