@@ -43,9 +43,10 @@ export const Planets = () => {
             <Planet
                 position={[60, 5, -50]}
                 rotation={[-Math.PI * 0.2, 0, 0]}
-                colorHigh={0xfcd34d}
-                colorLow={0xea580c}
+                colorHigh={new THREE.Color(0.988, 0.827, 0.302)}
+                colorLow={new THREE.Color(10.918, 2.345, 1.047)}
                 lightPosition={[3, 0, 0]}
+                lightIntensity={0}
                 texture="stripesTexture"
                 size={1}
             />
@@ -55,8 +56,8 @@ export const Planets = () => {
 
 type PlanetProps = {
     position: [number, number, number];
-    colorHigh: number;
-    colorLow: number;
+    colorHigh: THREE.ColorRepresentation;
+    colorLow: THREE.ColorRepresentation;
     rotation?: [number, number, number];
     lightPosition: [number, number, number];
     size?: number;
