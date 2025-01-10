@@ -15,6 +15,7 @@ import {
 import {useBoardState} from '@/Store/board_state';
 import {useLoadedModels} from '@/Store/models_state';
 import {GameState} from '@/types/game';
+import {Space} from './Environment/Space/Space';
 
 const INITIAL_CAMERA_PROPS = {
     fov: 85,
@@ -38,12 +39,12 @@ export const Experience = memo(() => {
                     updateCamera(camera, ui_state, isGameOnGoing);
                 }}
                 camera={INITIAL_CAMERA_PROPS}>
-                <color attach={'background'} args={['#535353']} />
+                <color attach={'background'} args={['#000000']} />
                 {/* <Perf position="top-left" /> */}
                 <BoardControls />
                 {haveModelsLoaded && <GameMap />}
+                <Space />
             </Canvas>
-            <Interface />
         </>
     );
 });

@@ -1,8 +1,8 @@
 import {shaderMaterial} from '@react-three/drei';
 import {extend, useFrame, useThree} from '@react-three/fiber';
 import * as THREE from 'three';
-import vertexShader from '../../../shaders/spaceship/noise_lights/pattern_2/vertex.glsl';
-import fragmentShader from '../../../shaders/spaceship/noise_lights/pattern_2/fragment.glsl';
+import vertexShader from '../../../../shaders/spaceship/noise_lights/pattern_2/vertex.glsl';
+import fragmentShader from '../../../../shaders/spaceship/noise_lights/pattern_2/fragment.glsl';
 import {Fragment, memo, useEffect, useMemo, useRef} from 'react';
 import {PlayerColor} from '@/types/game';
 import {COLORS} from '@/Constants/colors';

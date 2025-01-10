@@ -1,12 +1,11 @@
-import {useLoadedModels} from '@/Hooks/useLoadedModels';
 import {shaderMaterial} from '@react-three/drei';
 import {extend, useFrame} from '@react-three/fiber';
 import {memo, useEffect, useMemo, useRef} from 'react';
 import * as THREE from 'three';
-import vertexShader from '../../../shaders/spaceship/air_modules/pattern_1/vertex.glsl';
-import fragmentShader from '../../../shaders/spaceship/air_modules/pattern_1/fragment.glsl';
+import vertexShader from '../../../../shaders/spaceship/air_modules/pattern_1/vertex.glsl';
+import fragmentShader from '../../../../shaders/spaceship/air_modules/pattern_1/fragment.glsl';
 import {useControls} from 'leva';
-import { useBoardState } from '@/Store/board_state';
+import {useBoardState} from '@/Store/board_state';
 
 const geometry = new THREE.PlaneGeometry(1, 1, 48, 48);
 geometry.rotateX(-Math.PI / 2);
@@ -43,12 +42,12 @@ export const SpaceshipAirModules = memo(() => {
         colorStart: '#1f1131',
     });
     const speed = useMemo(() => {
-        if(isGameOnGoing()){
+        if (isGameOnGoing()) {
             return 0.15;
-        }else{
+        } else {
             return 0.3;
         }
-    }, [isGameOnGoing, ui_state])
+    }, [isGameOnGoing, ui_state]);
     const height = 0.85 - depth;
     return (
         <>
@@ -98,7 +97,6 @@ const AirModule = ({
     const lightRef = useRef<THREE.PointLight>(null);
     const materialRef = useRef<THREE.ShaderMaterial>(null);
 
-
     useFrame((_, delta) => {
         if (materialRef.current) {
             materialRef.current.uniforms.uTime.value += delta;
@@ -122,12 +120,10 @@ const AirModule = ({
     }, [materialRef]);
 
     useEffect(() => {
-
-        if(materialRef.current){
+        if (materialRef.current) {
             materialRef.current.uniforms.uSpeed.value = speed;
         }
-
-    }, [speed, materialRef])
+    }, [speed, materialRef]);
 
     useEffect(() => {
         if (materialRef.current) {

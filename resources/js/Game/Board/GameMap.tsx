@@ -14,7 +14,7 @@ import {
     ORIGIN_CAMERA_LOOK_AT,
     ORIGIN_CAMERA_POSITION,
 } from '@/Constants/camera';
-import {Spaceship} from '../Environment/Spaceship';
+import {Spaceship} from '../Environment/Board/Spaceship';
 import {Float} from '@react-three/drei';
 
 const GameMap = () => {

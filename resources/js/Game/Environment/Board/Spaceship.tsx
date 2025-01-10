@@ -24,5 +24,7 @@ export const Spaceship = memo(() => {
 const SpaceshipModel = memo(() => {
     const spaceship = useLoadedModels(s => s.models.spaceship);
     if (!spaceship) return null;
-    else return <primitive object={spaceship} />;
+    else {
+        return <primitive object={spaceship} />;
+    }
 });

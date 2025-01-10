@@ -15,6 +15,8 @@ import {GameSession} from '@/types/models/tables/Session';
 import {User} from '@/types/models/tables/User';
 import {PropsWithChildren, useEffect} from 'react';
 import Base from './Base';
+import {Interface} from '@/Game/Interface';
+import {Loading} from '@/Game/Loading';
 
 type GameProps = PageProps<{
     user: User;
@@ -41,16 +43,29 @@ function GameContent({ user, availableSessions, userSession, connectionState, fl
     useEffect(() => {
         setUser(user);
 
-        if(userSession == null) return;
+        if (userSession == null) return;
 
         setCurrentSession(userSession.session);
         setState({...userSession.session}, userSession.player);
-    }, [])
+    }, []);
 
-    if(session == null || session.session_state === 'waiting') {
-        return <Lobby user={user} availableSessions={availableSessions} connectionState={connectionState} serverMessage={flash} />;
+    if (session == null || session.session_state === 'waiting') {
+        return (
+            <Lobby
+                user={user}
+                availableSessions={availableSessions}
+                connectionState={connectionState}
+                serverMessage={flash}
+            />
+        );
     }
-    return <Experience/>;
+    return (
+        <>
+            <Interface />
+            <Experience />
+            <Loading />
+        </>
+    );
 }
 
 type LobbyProps = {

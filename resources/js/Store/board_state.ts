@@ -86,27 +86,30 @@ export const useBoardState = create<BoardState>()((set, get, _) => ({
         );
     },
     startGame: () => {
-        const timer = useTimerStore.getState();
-        timer.start(100);
-        set({gameState: {...get().gameState, ui_state: 'Starting'}});
-        setTimeout(() => {
-            const {gameState, playerState} = get();
-            timer.stop();
-            console.log('getting player state:', get());
-            if (playerState) {
-                set(prev => ({
-                    gameState: {
-                        ...prev.gameState,
-                        ui_state:
-                            playerState.session_color ===
-                            gameState.current_playing
-                                ? 'OwnTurnPlaying'
-                                : 'OpponentTurn',
-                        startTime: Date.now(),
-                    },
-                }));
-            }
-        }, CAMERA_ANIMATION_DURATION + 250);
+        const state = get();
+        if (state.gameState.ui_state === 'Ready') {
+            const timer = useTimerStore.getState();
+            timer.start(100);
+            set({gameState: {...state.gameState, ui_state: 'Starting'}});
+            setTimeout(() => {
+                const {gameState, playerState} = get();
+                timer.stop();
+                console.log('getting player state:', get());
+                if (playerState) {
+                    set(prev => ({
+                        gameState: {
+                            ...prev.gameState,
+                            ui_state:
+                                playerState.session_color ===
+                                gameState.current_playing
+                                    ? 'OwnTurnPlaying'
+                                    : 'OpponentTurn',
+                            startTime: Date.now(),
+                        },
+                    }));
+                }
+            }, CAMERA_ANIMATION_DURATION + 250);
+        }
     },
     lockTurn: () => {
         set({gameState: {...get().gameState, ui_state: 'OwnTurnLocked'}});

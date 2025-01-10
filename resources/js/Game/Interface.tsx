@@ -39,7 +39,6 @@ export const Interface = () => {
             </div>
             {gameHasFinished && <GameEndScreen isWin={true} />}
             <StartingTimer />
-            <Loading />
         </div>
     );
 
