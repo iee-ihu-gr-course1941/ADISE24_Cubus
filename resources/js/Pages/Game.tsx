@@ -15,8 +15,7 @@ import {GameSession} from '@/types/models/tables/Session';
 import {User} from '@/types/models/tables/User';
 import {PropsWithChildren, useEffect} from 'react';
 import Base from './Base';
-import {Interface} from '@/Game/Interface';
-import {Loading} from '@/Game/Loading';
+import {useUserEventsStore} from '@/Store/user_events_store';
 
 type GameProps = PageProps<{
     user: User;
@@ -25,9 +24,15 @@ type GameProps = PageProps<{
 }>;
 
 export default function Game(props: GameProps) {
-    let { connectionState } = useUserEvents();
+    let {connectionState, latestMove} = useUserEvents();
 
-    return <GameContent {...props } connectionState={connectionState} />
+    const setLatestMove = useUserEventsStore(s => s.setLatestMove);
+
+    useEffect(() => {
+        setLatestMove(latestMove);
+    }, [latestMove]);
+
+    return <GameContent {...props} connectionState={connectionState} />;
 }
 
 type GameContentProps = GameProps & {
