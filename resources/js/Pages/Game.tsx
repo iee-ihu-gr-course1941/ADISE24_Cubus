@@ -61,9 +61,7 @@ function GameContent({ user, availableSessions, userSession, connectionState, fl
     }
     return (
         <>
-            <Interface />
             <Experience />
-            <Loading />
         </>
     );
 }

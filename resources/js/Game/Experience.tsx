@@ -16,6 +16,7 @@ import {useBoardState} from '@/Store/board_state';
 import {useLoadedModels} from '@/Store/models_state';
 import {GameState} from '@/types/game';
 import {Space} from './Environment/Space/Space';
+import {Loading} from './Loading';
 
 const INITIAL_CAMERA_PROPS = {
     fov: 85,
@@ -45,6 +46,8 @@ export const Experience = memo(() => {
                 {haveModelsLoaded && <GameMap />}
                 <Space />
             </Canvas>
+            <Interface />
+            <Loading />
         </>
     );
 });
