@@ -358,13 +358,43 @@ function PopupLobbySettings() {
 }
 
 function PopupSettings() {
+    const hidePopup = usePopup(s => s.hidePopup);
+    const {setGridHelper, gridHelper, enableLights, setEnableLights} =
+        useGameSettings();
     function onLogoutCallback() {
         window.open(route('logout'), '_self');
     }
 
     return (
-        <div className="w-[540px] pl-10 pr-6 pt-2 pb-4">
-            <Button text="Logout" color="red" onClick={onLogoutCallback} />
+        <div className="w-[540px] pl-10 pr-6 pt-2 pb-4 flex flex-col gap-y-10">
+            <div className="flex flex-col gap-y-4">
+                <Checkbox
+                    name="Lights"
+                    value="lights"
+                    label="Lights on"
+                    checked={enableLights}
+                    onClick={() => {
+                        setEnableLights(!enableLights);
+                    }}
+                />
+                <Checkbox
+                    name="Grid Helper"
+                    value="grid"
+                    label="Enable Grid Helper"
+                    checked={gridHelper}
+                    onClick={() => {
+                        setGridHelper(!gridHelper);
+                    }}
+                />
+            </div>
+            <div className="flex justify-between">
+                <Button text="Logout" color="red" onClick={onLogoutCallback} />
+                <Button
+                    text="Apply & Close"
+                    color="default"
+                    onClick={hidePopup}
+                />
+            </div>
         </div>
     );
 }
