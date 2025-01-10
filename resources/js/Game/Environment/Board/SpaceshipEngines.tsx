@@ -20,7 +20,7 @@ const EngineMaterial = shaderMaterial(
     fragmentShader,
 );
 extend({EngineMaterial});
-export const SpaceshipEngines = memo(() => {
+export const SpaceshipEngines = () => {
     const isGameOnGoing = useBoardState(s => s.isGameOnGoing);
     const ui_state = useBoardState(s => s.gameState.ui_state);
 
@@ -53,7 +53,7 @@ export const SpaceshipEngines = memo(() => {
             />
         </>
     );
-});
+};
 
 type EngineMaterialProps = {
     uOpacity: number;

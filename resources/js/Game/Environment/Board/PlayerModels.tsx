@@ -10,7 +10,7 @@ import {extend, useFrame} from '@react-three/fiber';
 import {shaderMaterial} from '@react-three/drei';
 import {useLoadedModels} from '@/Store/models_state';
 
-export const PlayerModels = memo(() => {
+export const PlayerModels = () => {
     const models = useLoadedModels(s => s.models);
     const positions = usePlayerPositions();
     const modelHeight = 2.3;
@@ -51,6 +51,7 @@ export const PlayerModels = memo(() => {
                         positions.playerPositions.blue?.y ?? 0,
                     ]}
                     isPlayerAlive={isPlayerAlive('blue')}
+                    // isPlayerAlive={false}
                 />
                 <PlayerModel
                     model={models.duck?.yellow}
@@ -69,7 +70,7 @@ export const PlayerModels = memo(() => {
     } else {
         return null;
     }
-});
+};
 
 type Props = {
     model?: THREE.Object3D | null;

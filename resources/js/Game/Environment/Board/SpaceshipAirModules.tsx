@@ -29,7 +29,7 @@ const AirModuleMaterial = shaderMaterial(
 
 extend({AirModuleMaterial});
 
-export const SpaceshipAirModules = memo(() => {
+export const SpaceshipAirModules = () => {
     const isGameOnGoing = useBoardState(s => s.isGameOnGoing);
     const ui_state = useBoardState(s => s.gameState.ui_state);
 
@@ -73,7 +73,7 @@ export const SpaceshipAirModules = memo(() => {
             />
         </>
     );
-});
+};
 type AirModuleProps = {
     position: [number, number, number];
     isClose?: boolean;

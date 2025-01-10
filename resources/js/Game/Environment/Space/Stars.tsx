@@ -29,7 +29,7 @@ export const Stars = memo(() => {
 
     useEffect(() => {
         if (materialRef.current) {
-            materialRef.current.uniforms.uSize.value = 18;
+            materialRef.current.uniforms.uSize.value = 14;
         }
     }, [materialRef]);
 
@@ -43,7 +43,7 @@ export const Stars = memo(() => {
 
     const geometry = useMemo(() => {
         const parameters = {
-            count: 5000,
+            count: 4000,
             insideColor: 0x0d0221,
             outsideColor: 0xd8bfd8,
             radius: 160,
