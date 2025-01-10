@@ -94,7 +94,7 @@ function Lobby({
     }, []);
 
     return (
-        <Base className="flex flex-col" initializeMusic={true}>
+        <Base className="flex flex-col" initializeMusic={serverMessage !== 'user_new'}>
             <PopupContainer />
             <section className="pt-8 px-8 flex gap-8 grow items-start">
                 <LobbiesControls games={availableSessions} />
