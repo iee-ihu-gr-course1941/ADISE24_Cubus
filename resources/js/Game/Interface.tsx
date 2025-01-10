@@ -28,7 +28,8 @@ export const Interface = () => {
         <div className="absolute inset-0 pointer-events-none flex flex-col overflow-hidden">
             <PopupContainer className="pointer-events-auto" />
             <PlayersHUD />
-            <div className="grow flex items-end">
+            <GameStateFeedback />
+            <div className="flex items-end grow">
                 <ControlsHUD />
             </div>
             {gameHasFinished ? (
@@ -56,6 +57,29 @@ const StartingTimer = () => {
                 </div>
             )}
         </>
+    );
+};
+
+const GameStateFeedback = () => {
+    const ui_state = useBoardState(s => s.gameState.ui_state);
+    return (
+        <div className="p-4">
+            <TextTile className="">
+                <p className="text-base">
+                    {ui_state === 'OwnTurnPlaying'
+                        ? 'Your Turn'
+                        : ui_state === 'OwnTurnLocked'
+                          ? 'Checking move...'
+                          : ui_state === 'OpponentTurn'
+                            ? 'Opponent Turn'
+                            : ui_state === 'Ready'
+                              ? 'Waiting...'
+                              : ui_state === 'Starting'
+                                ? 'Starting...'
+                                : 'Finished'}
+                </p>
+            </TextTile>
+        </div>
     );
 };
 
