@@ -21,9 +21,6 @@ extend({SpaceStarsMaterial});
 export const Stars = memo(() => {
     const materialRef = useRef<THREE.ShaderMaterial>(null);
 
-    const size = 18;
-    const count = 4000;
-
     useFrame((_, delta) => {
         if (materialRef.current) {
             materialRef.current.uniforms.uTime.value += delta;
@@ -32,20 +29,21 @@ export const Stars = memo(() => {
 
     useEffect(() => {
         if (materialRef.current) {
-            materialRef.current.uniforms.uSize.value = size;
+            materialRef.current.uniforms.uSize.value = 18;
         }
-    }, [materialRef, size]);
+    }, [materialRef]);
 
     useEffect(() => {
         if (materialRef.current) {
             materialRef.current.blending = THREE.AdditiveBlending;
             materialRef.current.transparent = true;
+            materialRef.current.depthWrite = false;
         }
     }, [materialRef]);
 
     const geometry = useMemo(() => {
         const parameters = {
-            count: count,
+            count: 5000,
             insideColor: 0x0d0221,
             outsideColor: 0xd8bfd8,
             radius: 160,
@@ -101,7 +99,7 @@ export const Stars = memo(() => {
             colors[i3 + 1] = mixedColor.g;
             colors[i3 + 2] = mixedColor.b;
 
-            randoms[i] = Math.random() * 4 + 4;
+            randoms[i] = Math.random() * 6 + 2;
             glow[i] = Math.random() < 0.95 ? 0 : 1;
         }
 
@@ -117,7 +115,7 @@ export const Stars = memo(() => {
         );
 
         return geometry;
-    }, [count]);
+    }, []);
 
     return (
         <>

@@ -37,6 +37,7 @@ export const Experience = memo(() => {
                     antialias: true,
                     toneMapping: THREE.ACESFilmicToneMapping,
                     pixelRatio: Math.min(2, window.devicePixelRatio),
+                    outputColorSpace: THREE.SRGBColorSpace,
                 }}
                 onCreated={({camera}) => {
                     updateCamera(camera, ui_state, isGameOnGoing);

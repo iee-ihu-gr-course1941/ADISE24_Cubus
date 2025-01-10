@@ -21,7 +21,7 @@ void main(){
     // strength = 1.0 - strength;
     // strength = pow(strength, 10.0);
 
-    vec3 finalColor = mix(vec3(0.0), vColor, strength);
+    vec3 finalColor = mix(vColor*0.25, vColor, strength);
     float glow = sin(uTime * vRandom * 0.05)*vGlowIntensity;
 
 
