@@ -296,7 +296,7 @@ function GameFinishedMessage() {
 }
 
 function GameEndScreen() {
-    const {rank, isWin} = usePlayerRank();
+    const {label, isWin, rank} = usePlayerRank();
     return (
         <div className="fixed z-50 inset-0 left-1/2 top-1/2">
             <div
@@ -326,8 +326,7 @@ function GameEndScreen() {
                             You placed{' '}
                             <span
                                 className={`${rank === 2 ? 'text-[#C0C0C0]' : rank === 3 ? 'text-[#CD7F32]' : 'text-[#D3D3D3]'}`}>
-                                {rank +
-                                    `${rank === 2 ? 'nd' : rank === 3 ? 'rd' : 'th'}`}
+                                {label}
                             </span>
                         </>
                     )}

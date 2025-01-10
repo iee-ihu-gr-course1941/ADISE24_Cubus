@@ -25,5 +25,16 @@ export const usePlayerRank = () => {
         });
         return playerPosition;
     }, [session, playerState]);
-    return {rank: position, isWin: position === 1};
+    return {
+        rank: position,
+        isWin: position === 1,
+        label:
+            position === 0
+                ? '1st'
+                : position === 2
+                  ? '2nd'
+                  : position === 3
+                    ? '3rd'
+                    : '4th',
+    };
 };
