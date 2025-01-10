@@ -14,6 +14,7 @@ declare global {
         engineMaterial: ShaderMaterialProps;
         pieceMaterial: ShaderMaterialProps;
         hologramMaterial: ShaderMaterialProps;
+        spaceStarsMaterial: ShaderMaterialProps;
         // * New extend types go here !
     }
     namespace JSX {
