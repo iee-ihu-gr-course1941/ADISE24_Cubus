@@ -16,6 +16,7 @@ type State = {
 type Actions = {
     setState: (game: GameSession, player: PlayerState) => void;
     updateGameState: (game: GameSession) => void;
+    updatePlayerState: (player: PlayerState) => void;
     setBoardRef: (boardRef: THREE.Mesh | null) => void;
     addBoardPiece: (piece: THREE.Group) => void;
     setMove: (move: MovePayload | null) => void;
@@ -61,6 +62,11 @@ export const useBoardState = create<BoardState>()((set, get, _) => ({
                 },
             };
         });
+    },
+    updatePlayerState: player => {
+        set(prev => ({
+            playerState: {...prev.playerState, ...player},
+        }));
     },
     setState: (game, player) => {
         set(prev => {
@@ -112,7 +118,10 @@ export const useBoardState = create<BoardState>()((set, get, _) => ({
         }
     },
     lockTurn: () => {
-        set({gameState: {...get().gameState, ui_state: 'OwnTurnLocked'}});
+        const state = get();
+        if (state.gameState.ui_state === 'OwnTurnPlaying') {
+            set({gameState: {...state.gameState, ui_state: 'OwnTurnLocked'}});
+        }
     },
     beginTurn: () => {
         set(({gameState}) => {
