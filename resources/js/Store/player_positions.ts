@@ -10,7 +10,7 @@ type Actions = {
     setPlayerPosition: (playerColor: PlayerColor, position: Vector2) => void;
 };
 
-export const usePlayerPositions = create<State & Actions>()(set => ({
+export const usePlayerPositions = create<State & Actions>()((set, get) => ({
     playerPositions: {
         green: null,
         red: null,
@@ -18,17 +18,14 @@ export const usePlayerPositions = create<State & Actions>()(set => ({
         yellow: null,
     },
     setPlayerPosition: (playerColor, position) => {
-        console.log('setting');
-        set(state => {
-            if (state.playerPositions[playerColor]) {
-                return {};
-            }
-            return {
+        const state = get();
+        if (!state.playerPositions[playerColor]) {
+            set(state => ({
                 playerPositions: {
                     ...state.playerPositions,
                     [playerColor]: position,
                 },
-            };
-        });
+            }));
+        }
     },
 }));
