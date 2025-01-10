@@ -7,6 +7,7 @@ import {Fragment, memo, useEffect, useMemo, useRef} from 'react';
 import {PlayerColor} from '@/types/game';
 import {COLORS} from '@/Constants/colors';
 import {usePlayerPositions} from '@/Store/player_positions';
+import {useGameSettings} from '@/Store/game_settings';
 
 const planeGeometry = new THREE.PlaneGeometry(1, 1, 32, 32);
 planeGeometry.rotateX(Math.PI * 0.5);
@@ -127,6 +128,7 @@ type LightProps = {
 const LightObject = memo(({color, position, isPlayer = false}: LightProps) => {
     const ref = useRef<THREE.ShaderMaterial>(null);
     const lightRef = useRef<THREE.PointLight>(null);
+    const enableLights = useGameSettings(s => s.enableLights);
 
     useFrame((_, delta) => {
         if (ref.current) {
@@ -176,15 +178,17 @@ const LightObject = memo(({color, position, isPlayer = false}: LightProps) => {
     return (
         <>
             {Mesh}
-            <pointLight
-                ref={lightRef}
-                position={position}
-                position-y={position[1] * 2}
-                color={color}
-                intensity={4}
-                distance={1.5}
-                decay={0}
-            />
+            {enableLights && (
+                <pointLight
+                    ref={lightRef}
+                    position={position}
+                    position-y={position[1] * 2}
+                    color={color}
+                    intensity={4}
+                    distance={1.5}
+                    decay={0}
+                />
+            )}
         </>
     );
 });

@@ -5,6 +5,7 @@ import * as THREE from 'three';
 import vertexShader from '../../../../shaders/spaceship/air_modules/pattern_1/vertex.glsl';
 import fragmentShader from '../../../../shaders/spaceship/air_modules/pattern_1/fragment.glsl';
 import {useBoardState} from '@/Store/board_state';
+import {useGameSettings} from '@/Store/game_settings';
 
 const geometry = new THREE.PlaneGeometry(1, 1, 48, 48);
 geometry.rotateX(-Math.PI / 2);
@@ -89,6 +90,7 @@ const AirModule = ({
 }: AirModuleProps) => {
     const lightRef = useRef<THREE.PointLight>(null);
     const materialRef = useRef<THREE.ShaderMaterial>(null);
+    const enableLights = useGameSettings(s => s.enableLights);
 
     useFrame((_, delta) => {
         if (materialRef.current) {
@@ -137,7 +139,7 @@ const AirModule = ({
                 geometry={isClose ? closeGeometry : geometry}>
                 <airModuleMaterial wireframe={false} ref={materialRef} />
             </mesh>
-            {isClose && (
+            {isClose && enableLights && (
                 <pointLight
                     ref={lightRef}
                     position={position}

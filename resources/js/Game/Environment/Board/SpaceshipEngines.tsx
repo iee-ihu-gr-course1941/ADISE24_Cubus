@@ -5,6 +5,7 @@ import fragmentShader from '../../../../shaders/spaceship/engines/pattern_1/frag
 import {extend} from '@react-three/fiber';
 import {memo, useEffect, useMemo, useRef} from 'react';
 import {useBoardState} from '@/Store/board_state';
+import {useGameSettings} from '@/Store/game_settings';
 
 const geometry = new THREE.BoxGeometry(1, 1, 1);
 
@@ -33,7 +34,7 @@ export const SpaceshipEngines = memo(() => {
         } else {
             return {
                 uOpacity: 1.0,
-                uIntensity: 6.0,
+                uIntensity: 8.0,
             };
         }
     }, [ui_state]);
@@ -66,6 +67,7 @@ const SpaceshipEngine = ({
     position,
 }: EngineMaterialProps) => {
     const ref = useRef<THREE.ShaderMaterial>(null);
+    const enableLights = useGameSettings(s => s.enableLights);
 
     useEffect(() => {
         if (ref.current) {
@@ -82,6 +84,17 @@ const SpaceshipEngine = ({
                 geometry={geometry}>
                 <engineMaterial ref={ref} />
             </mesh>
+            {enableLights && (
+                <pointLight
+                    position={position}
+                    position-y={position[1] - 0.5}
+                    position-z={position[2] + 1}
+                    color={0xf59e0b}
+                    intensity={uIntensity}
+                    distance={Math.min(uIntensity * 0.5, 2.5)}
+                    decay={0}
+                />
+            )}
         </>
     );
 };
