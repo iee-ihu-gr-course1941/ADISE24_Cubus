@@ -12,8 +12,10 @@ import {useTimerStore} from '@/Store/timer';
 import {PlayerColor} from '@/types/game';
 import {GameSession} from '@/types/models/tables/Session';
 import {User} from '@/types/models/tables/User';
-import {PropsWithChildren, useEffect, useState} from 'react';
+import {PropsWithChildren, useEffect, useMemo, useState} from 'react';
 import {Loading} from './Loading';
+import {COLORS} from '@/Constants/colors';
+import {usePlayerRank} from '@/Hooks/usePlayerRank';
 
 export const Interface = () => {
     const ui_state = useBoardState(state => state.gameState.ui_state);
@@ -33,7 +35,7 @@ export const Interface = () => {
                 <ControlsHUD />
             </div>
             {gameHasFinished ? (
-                <GameEndScreen isWin={true} />
+                <GameEndScreen />
             ) : playerHasFinished() ? (
                 <GameFinishedMessage />
             ) : null}
@@ -239,10 +241,6 @@ function ControlsHUD() {
     );
 }
 
-type GameEndScreenProps = {
-    isWin: boolean;
-};
-
 function GameFinishedMessage() {
     const [showMessage, setShowMessage] = useState(true);
     const {currentSession} = useAppState();
@@ -297,7 +295,8 @@ function GameFinishedMessage() {
     }
 }
 
-function GameEndScreen({isWin}: GameEndScreenProps) {
+function GameEndScreen() {
+    const {rank, isWin} = usePlayerRank();
     return (
         <div className="fixed z-50 inset-0 left-1/2 top-1/2">
             <div
@@ -318,7 +317,20 @@ function GameEndScreen({isWin}: GameEndScreenProps) {
                 bg-light-default-bottom border-t-custom-gray-700 border-b-custom-gray-800
                 ">
                 <p className="text-bold text-pink-50 text-6xl">
-                    YOU {isWin ? 'WIN' : 'LOSE'}
+                    {isWin ? (
+                        <>
+                            YOU <span className="text-green-500">WIN</span>
+                        </>
+                    ) : (
+                        <>
+                            You placed{' '}
+                            <span
+                                className={`${rank === 2 ? 'text-[#C0C0C0]' : rank === 3 ? 'text-[#CD7F32]' : 'text-[#D3D3D3]'}`}>
+                                {rank +
+                                    `${rank === 2 ? 'nd' : rank === 3 ? 'rd' : 'th'}`}
+                            </span>
+                        </>
+                    )}
                 </p>
                 <Button
                     onClick={() => window.open(route('index'), '_self')}
