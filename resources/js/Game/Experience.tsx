@@ -73,7 +73,7 @@ export const Experience = memo(() => {
                 }}
                 camera={INITIAL_CAMERA_PROPS}>
                 <color attach={'background'} args={['#535353']} />
-                <Perf position="top-left" />
+                { /* <Perf position="top-left" /> */ }
                 <BoardControls />
                 <GameMap />
             </Canvas>

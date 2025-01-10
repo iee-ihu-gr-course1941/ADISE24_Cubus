@@ -7,11 +7,12 @@ type ButtonProps = {
     isLeft?: boolean;
 
     blocked?: boolean;
+    className?: string;
 
     onClick?: () => void;
 };
 
-export function Button({text = '', color = 'default', icon, isLeft = false, blocked = false, onClick}: ButtonProps) {
+export function Button({text = '', color = 'default', icon, isLeft = false, blocked = false, className, onClick}: ButtonProps) {
     let colors = `bg-light-default-bottom shadow-button-default
         ${blocked ? '' : 'hover:bg-bright-default-bottom hover:shadow-button-default-hover'}
         border-t-custom-gray-700 border-b-custom-purple-500
@@ -41,6 +42,7 @@ export function Button({text = '', color = 'default', icon, isLeft = false, bloc
                 ${blocked ? 'cursor-not-allowed' : 'cursor-pointer'}
 
                 ${colors}
+                ${className}
             `}
             onClick={onClick}>
             { isLeft && <Icon /> }

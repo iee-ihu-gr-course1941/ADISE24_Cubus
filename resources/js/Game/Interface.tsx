@@ -1,10 +1,16 @@
 import {useInterval} from '@/Hooks/useInterval';
-import {FlipIcon, RotateIcon} from '@/Icons/InterfaceIcons';
+import {FlipIcon } from '@/Icons/InterfaceIcons';
+import { Portrait } from '@/Icons/Portrait';
+import { Icon, SVG } from '@/Icons/SVG';
+import { Button } from '@/Inputs/Button';
+import { useAppState } from '@/Store/app_state';
 import {useBoardState} from '@/Store/board_state';
 import {useInterfaceState} from '@/Store/interface_state';
 import {useTimerStore} from '@/Store/timer';
 import {PlayerColor} from '@/types/game';
-import {useState} from 'react';
+import { GameSession } from '@/types/models/tables/Session';
+import { User } from '@/types/models/tables/User';
+import {PropsWithChildren, useState} from 'react';
 
 export const Interface = () => {
     const startGame = useBoardState(state => state.startGame);
@@ -32,6 +38,14 @@ export const Interface = () => {
             Math.round(((Date.now() - (startTime ?? 0)) / 1000) * 10) / 10,
         );
     }, 100);
+
+    return (
+        <div className="absolute inset-0 pointer-events-none flex flex-col">
+            <PlayersHUD />
+            <div className="grow flex items-end"><ControlsHUD /></div>
+            { gameHasFinished && <GameEndScreen isWin={true} /> }
+        </div>
+    );
 
     return (
         <div className="interface">
@@ -95,26 +109,149 @@ export const Interface = () => {
                         </div>
                     )}
                     {/* <button datatype={state === 'OpponentTurn' ? '' : 'blocked'} onClick={() => changeTurn('red')}>End Opponent Turn</button> */}
-                    {move && !hasFinished && (
-                        <div className="flex gap-x-2">
-                            <RotateIcon
-                                enabled={action === 'none'}
-                                onClick={() => setAction('rotate_neg')}
-                                color="#f87171"
-                            />
-                            <FlipIcon
-                                enabled={action === 'none'}
-                                onClick={() => setAction('flip')}
-                            />
-                            <RotateIcon
-                                enabled={action === 'none'}
-                                onClick={() => setAction('rotate_pos')}
-                                color="#22c55e"
-                            />
-                        </div>
-                    )}
+                    <div className="flex gap-x-2">
+                        <Button
+                            icon={Icon.rotateLeft}
+                            blocked={action !== 'none' || hasFinished}
+                            onClick={() => setAction('rotate_neg')}
+                        />
+
+                        <FlipIcon
+                            enabled={action === 'none'}
+                            onClick={() => setAction('flip')}
+                        />
+                        <Button
+                            icon={Icon.rotateRight}
+                            blocked={action !== 'none' || hasFinished}
+                            onClick={() => setAction('rotate_pos')}
+                        />
+                    </div>
                 </div>
             )}
         </div>
     );
 };
+
+function PlayersHUD() {
+    const { currentSession } = useAppState();
+
+    if(!currentSession) return;
+
+    return (
+        <div className="p-4 flex gap-4">
+            {
+                ['blue', 'red', 'green', 'yellow'].map(color => {
+                    const currentPlayer = currentSession['player_' + color as keyof GameSession] as User | null;
+                    if(currentPlayer == null) return;
+                    return <PlayerDetails user={currentPlayer} playerPoints={currentSession[`player_${color}_points` as keyof GameSession] as number} color={color} />
+                })
+            }
+        </div>
+    );
+}
+
+type PlayerDetails = {
+    user: User;
+    color: string;
+    playerPoints: number;
+}
+
+function PlayerDetails({ user, playerPoints, color }: PlayerDetails) {
+    if (user == null) return;
+
+    let textColor;
+    switch(color) {
+        case 'blue':
+            textColor = 'text-cyan-200';
+            break;
+        case 'red':
+            textColor = 'text-red-200';
+            break;
+        case 'green':
+            textColor = 'text-green-200';
+            break;
+        case 'yellow':
+            textColor = 'text-yellow-200';
+            break;
+    }
+
+    return (
+        <div className="flex gap-4 items-start">
+            <Portrait url={user.icon} isTiny={true} outlineColor={color as PlayerColor} />
+
+            <section className="flex flex-col gap-[9px] items-start">
+                <TextTile className={textColor}>{user.name}</TextTile>
+                <TextTile>{playerPoints} <SVG icon={Icon.points} fill="fill-custom-gray-400" /></TextTile>
+            </section>
+        </div>
+    );
+}
+
+function TextTile({className, children}: PropsWithChildren<{className?: string}>) {
+    return (
+        <div
+            className={`
+            py-2 px-6 text-gray-400 font-bold
+            flex gap-1 items-center w-fit
+            border-t border-b-2 rounded-[20px]
+            bg-light-default-bottom border-t-custom-gray-700 border-b-custom-gray-800
+
+            ${className}
+        `}>
+            {children}
+        </div>
+    );
+}
+
+function ControlsHUD() {
+    const {setAction, action} = useInterfaceState();
+
+    const areActionsBlocked = action !== 'none';
+
+    return (
+        <div className="grow flex align-center justify-between p-4">
+            <div>
+                <Button icon={Icon.cogs} className="pointer-events-auto" />
+            </div>
+
+            <div className="flex gap-4">
+                <Button icon={Icon.rotateLeft} className="pointer-events-auto" blocked={areActionsBlocked} onClick={() => setAction('rotate_neg')} />
+                <Button icon={Icon.mirror} className="pointer-events-auto" blocked={areActionsBlocked} onClick={() => setAction('flip')} />
+                <Button icon={Icon.rotateRight} className="pointer-events-auto" blocked={areActionsBlocked} onClick={() => setAction('rotate_pos')} />
+            </div>
+
+            <div>
+            </div>
+        </div>
+    );
+}
+
+type GameEndScreenProps = {
+    isWin: boolean;
+};
+
+function GameEndScreen({isWin}: GameEndScreenProps) {
+    return (
+        <div className="fixed z-50 inset-0 left-1/2 top-1/2">
+            <div className="
+                relative -translate-y-1/2 -translate-x-1/2
+                shadow-2xl shadow-black
+
+                flex flex-col gap-12 items-center
+
+                w-[600px]
+                rounded-[40px]
+                text-bold text-custom-gray-400
+
+                pt-16 pb-20 px-12
+
+                border-t
+                border-b-2
+                bg-light-default-bottom border-t-custom-gray-700 border-b-custom-gray-800
+                ">
+                <p className="text-bold text-pink-50 text-6xl">YOU { isWin ? 'WIN' : 'LOSE' }</p>
+                <Button text="Continue" icon={Icon.play} className="pointer-events-auto" />
+            </div>
+        </div>
+    );
+}

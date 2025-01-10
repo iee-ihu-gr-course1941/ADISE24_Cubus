@@ -7,5 +7,6 @@ export type User = {
     auth_identifier: string;
     name?: string;
     icon?: string;
+    points?: string;
 }
 
