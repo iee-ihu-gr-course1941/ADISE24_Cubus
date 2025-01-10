@@ -21,14 +21,8 @@ export const Interface = () => {
     const gameHasFinished = useBoardState(
         state => state.gameState.ui_state === 'Finished',
     );
-    // const [timer, setTimer] = useState(0);
+    const playerHasFinished = useBoardState(s => s.getHasFinished);
     const {time} = useTimerStore();
-
-    // useInterval(() => {
-    //     setTimer(
-    //         Math.round(((Date.now() - (startTime ?? 0)) / 1000) * 10) / 10,
-    //     );
-    // }, 100);
 
     return (
         <div className="absolute inset-0 pointer-events-none flex flex-col overflow-hidden">
@@ -37,94 +31,14 @@ export const Interface = () => {
             <div className="grow flex items-end">
                 <ControlsHUD />
             </div>
-            {gameHasFinished && <GameEndScreen isWin={true} />}
+            {gameHasFinished ? (
+                <GameEndScreen isWin={true} />
+            ) : playerHasFinished() ? (
+                <GameFinishedMessage />
+            ) : null}
             <StartingTimer />
         </div>
     );
-
-    // return (
-    //     <div className="interface">
-    //         <div className="game-state">
-    //             <p>Game State: {ui_state}</p>
-    //             <p>Board Pieces: {boardPieces.length}</p>
-    //             {ui_state !== 'Ready' && (
-    //                 <>
-    //                     <p>Round: {current_round}</p>
-    //                     <p>Points: {playerPoints()}</p>
-    //                     <p>Time: {timer}</p>
-    //                     <p>Playing: {current_playing}</p>
-    //                     <p className="playing">
-    //                         {ui_state === 'OwnTurnPlaying' ||
-    //                         ui_state === 'OwnTurnLocked'
-    //                             ? 'You are playing!'
-    //                             : 'Opponent is playing!'}
-    //                     </p>
-    //                 </>
-    //             )}
-    //         </div>
-    //         {ui_state === 'Starting' && (
-    //             <p className="starting-text">
-    //                 Starting in {Math.round(3 - time / 10)}...
-    //             </p>
-    //         )}
-    //         {ui_state !== 'Starting' && (
-    //             <div className="btn-group">
-    //                 {move && <div></div>}
-    //                 {ui_state === 'Ready' && (
-    //                     <>
-    //                         <div
-    //                             onClick={startGame}
-    //                             className="px-4 py-3 bg-sky-600 text-white rounded cursor-pointer pointer-events-auto">
-    //                             Start
-    //                         </div>
-    //                     </>
-    //                 )}
-    //                 {ui_state !== 'Ready' &&
-    //                     ui_state !== 'Finished' &&
-    //                     !hasFinished && (
-    //                         <button
-    //                             datatype={
-    //                                 ui_state === 'OwnTurnPlaying' && move
-    //                                     ? ''
-    //                                     : 'blocked'
-    //                             }
-    //                             onClick={
-    //                                 ui_state === 'OwnTurnPlaying' && move
-    //                                     ? lockTurn
-    //                                     : undefined
-    //                             }>
-    //                             Lock Turn
-    //                         </button>
-    //                     )}
-    //                 {hasFinished && (
-    //                     <div className="absolute bottom-20 left-0 w-full py-10 px-4 bg-gray-300 opacity-35 text-center">
-    //                         {gameHasFinished
-    //                             ? 'The game has Finished!'
-    //                             : 'Waiting for other players to finish'}
-    //                     </div>
-    //                 )}
-    //                 {/* <button datatype={state === 'OpponentTurn' ? '' : 'blocked'} onClick={() => changeTurn('red')}>End Opponent Turn</button> */}
-    //                 <div className="flex gap-x-2">
-    //                     <Button
-    //                         icon={Icon.rotateLeft}
-    //                         blocked={action !== 'none' || hasFinished}
-    //                         onClick={() => setAction('rotate_neg')}
-    //                     />
-
-    //                     <FlipIcon
-    //                         enabled={action === 'none'}
-    //                         onClick={() => setAction('flip')}
-    //                     />
-    //                     <Button
-    //                         icon={Icon.rotateRight}
-    //                         blocked={action !== 'none' || hasFinished}
-    //                         onClick={() => setAction('rotate_pos')}
-    //                     />
-    //                 </div>
-    //             </div>
-    //         )}
-    //     </div>
-    // );
 };
 
 const StartingTimer = () => {
@@ -211,7 +125,11 @@ function PlayerDetails({user, playerPoints, color}: PlayerDetails) {
                 <TextTile className={textColor}>{user.name}</TextTile>
                 <TextTile>
                     {playerPoints}{' '}
-                    <SVG icon={Icon.points} size={14} fill="fill-custom-gray-400" />
+                    <SVG
+                        icon={Icon.points}
+                        size={14}
+                        fill="fill-custom-gray-400"
+                    />
                 </TextTile>
             </section>
         </div>
@@ -239,10 +157,13 @@ function TextTile({
 
 function ControlsHUD() {
     const lockTurn = useBoardState(s => s.lockTurn);
+    const move = useBoardState(s => s.move);
+    const ui_state = useBoardState(s => s.gameState.ui_state);
     const {setAction, action} = useInterfaceState();
     const showPopup = usePopup(s => s.showPopup);
 
-    const areActionsBlocked = action !== 'none';
+    const areActionsBlocked =
+        action !== 'none' || ui_state !== 'OwnTurnPlaying' || !move;
 
     return (
         <div className="grow flex items-end justify-between p-4">
@@ -281,7 +202,12 @@ function ControlsHUD() {
                     />
                 </div>
 
-                <Button text="End Turn" className="w-full justify-center" onClick={() => lockTurn()} />
+                <Button
+                    text="End Turn"
+                    className="w-full justify-center"
+                    blocked={areActionsBlocked}
+                    onClick={() => lockTurn()}
+                />
             </div>
 
             <div></div>
@@ -292,6 +218,60 @@ function ControlsHUD() {
 type GameEndScreenProps = {
     isWin: boolean;
 };
+
+function GameFinishedMessage() {
+    const [showMessage, setShowMessage] = useState(true);
+    const {currentSession} = useAppState();
+    const points =
+        (currentSession?.[
+            `player_${currentSession.current_playing}_points` as keyof GameSession
+        ] as number) ?? 0;
+    if (showMessage) {
+        return (
+            <div className="fixed z-50 inset-0 left-1/2 top-1/2">
+                <div
+                    className="
+                        relative -translate-y-1/2 -translate-x-1/2
+                        shadow-2xl shadow-black
+
+                        flex flex-col gap-12 items-center
+
+                        w-[600px]
+                        rounded-[40px]
+                        text-bold text-custom-gray-400
+
+                        pt-16 pb-20 px-12
+
+                        border-t
+                        border-b-2
+                        bg-light-default-bottom border-t-custom-gray-700 border-b-custom-gray-800
+                        ">
+                    <p className="text-bold text-pink-50 text-3xl">
+                        You have scored{' '}
+                        <span className="text-custom-purple-400">{points}</span>{' '}
+                        points!
+                    </p>
+                    <div className="flex gap-x-4">
+                        <Button
+                            onClick={() => setShowMessage(false)}
+                            text="Spectate"
+                            icon={Icon.see}
+                            className="pointer-events-auto"
+                        />
+                        <Button
+                            text="Play Again"
+                            icon={Icon.play}
+                            className="pointer-events-auto"
+                            onClick={() => window.open(route('index'), '_self')}
+                        />
+                    </div>
+                </div>
+            </div>
+        );
+    } else {
+        return null;
+    }
+}
 
 function GameEndScreen({isWin}: GameEndScreenProps) {
     return (
@@ -317,6 +297,7 @@ function GameEndScreen({isWin}: GameEndScreenProps) {
                     YOU {isWin ? 'WIN' : 'LOSE'}
                 </p>
                 <Button
+                    onClick={() => window.open(route('index'), '_self')}
                     text="Continue"
                     icon={Icon.play}
                     className="pointer-events-auto"
