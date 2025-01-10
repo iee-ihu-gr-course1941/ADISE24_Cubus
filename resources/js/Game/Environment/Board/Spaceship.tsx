@@ -2,10 +2,10 @@ import {memo} from 'react';
 import {SpaceshipPlayerColors} from './SpaceshipPlayerColors';
 import {SpaceshipAirModules} from './SpaceshipAirModules';
 import {SpaceshipEngines} from './SpaceshipEngines';
-import {Float} from '@react-three/drei';
 import {useBoardState} from '@/Store/board_state';
 import {PlayerModels} from './PlayerModels';
 import {useLoadedModels} from '@/Store/models_state';
+import {SpaceshipModels} from './SpaceshipModels';
 
 export const Spaceship = memo(() => {
     const playerColor = useBoardState(s => s.playerState?.session_color);
@@ -17,6 +17,7 @@ export const Spaceship = memo(() => {
             <SpaceshipPlayerColors playerColor={playerColor} />
             <SpaceshipEngines />
             <PlayerModels />
+            <SpaceshipModels />
         </>
     );
 });
