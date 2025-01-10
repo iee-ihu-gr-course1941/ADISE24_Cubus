@@ -31,7 +31,7 @@ export const formatOpponentMoveOrigin = (
                 y: p.y - move.origin_y,
             })),
         ],
-        origin_x: move.origin_x / 2 - 3,
-        origin_y: move.origin_y / 2 - 3,
+        origin_x: move.origin_x / 2 - (playerCount === '2' ? 3 : 4.5),
+        origin_y: move.origin_y / 2 - (playerCount === '2' ? 3 : 4.5),
     };
 };
