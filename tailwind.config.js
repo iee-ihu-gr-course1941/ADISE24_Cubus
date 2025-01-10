@@ -77,11 +77,17 @@ export default {
                 'noise-alt': 'NoiseAlt 6s infinite',
                 'show': 'Show 3s ease 1s both',
 
-                'pulse-slow': 'pulse 6s cubic-bezier(0.4, 0, 0.6, 1) infinite',
-                'pulse-fast': 'pulse 1s cubic-bezier(0.4, 0, 0.6, 1) infinite',
-                'pulse-slower': 'pulse 8s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                'star': 'Star 6s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                'star-slow': 'Star 6s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                'star-fast': 'Star 1s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                'star-slower': 'Star 8s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+
             },
             keyframes: {
+                Star: {
+                    '0%, 100%': { opacity: '60%', boxShadow: '0 0 4px 2px white' },
+                    '50%': { opacity: '20%' },
+                },
                 Show: {
                     '0%': { opacity: '0%' },
                     '100%': { opacity: '100%' },

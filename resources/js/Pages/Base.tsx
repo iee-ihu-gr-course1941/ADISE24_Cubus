@@ -11,12 +11,12 @@ export default function Base({ className, children }: PropsWithChildren<{ classN
 
             <div className="fixed inset-0">
                 <div>
-                    <div className="absolute top-[10%] left-[20%] w-[2px] h-[2px] rounded-full bg-white animate-pulse-slow"></div>
-                    <div className="absolute top-[25%] left-[10%] w-[3px] h-[3px] rounded-full bg-white animate-pulse"></div>
-                    <div className="absolute top-[30%] left-[40%] w-[2px] h-[2px] rounded-full bg-white animate-pulse-fast"></div>
-                    <div className="absolute top-[32%] left-[41%] w-[2px] h-[2px] rounded-full bg-white animate-pulse-slow"></div>
-                    <div className="absolute top-[5%] right-[30%] w-[4px] h-[4px] rounded-full bg-white animate-pulse"></div>
-                    <div className="absolute top-[15%] right-[15%] w-[1px] h-[1px] rounded-full bg-white animate-pulse-slower"></div>
+                    <div className="absolute top-[10%] left-[20%] w-[2px] h-[2px] rounded-full bg-white animate-star-slow"></div>
+                    <div className="absolute top-[25%] left-[10%] w-[3px] h-[3px] rounded-full bg-white animate-star"></div>
+                    <div className="absolute top-[30%] left-[40%] w-[2px] h-[2px] rounded-full bg-white animate-star-fast"></div>
+                    <div className="absolute top-[32%] left-[41%] w-[2px] h-[2px] rounded-full bg-white animate-star-slow"></div>
+                    <div className="absolute top-[5%] right-[30%] w-[4px] h-[4px] rounded-full bg-white animate-star"></div>
+                    <div className="absolute top-[15%] right-[15%] w-[1px] h-[1px] rounded-full bg-white animate-star-slower"></div>
                 </div>
 
                 <img src="/ui-backdrop/nebula.svg" className="absolute w-[4000px] -bottom-[22%] -left-[10%]" />
