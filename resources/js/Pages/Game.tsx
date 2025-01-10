@@ -112,11 +112,16 @@ function Lobby({
     serverMessage,
 }: LobbyProps) {
     const {showPopup} = usePopup();
+    const {user: appStateUser} = useAppState();
+    const currentUser = appStateUser ?? user;
+
+
+    console.warn('[DATAAA] ServerMessage:', serverMessage);
 
     useEffect(() => {
         if (
             (serverMessage && serverMessage === 'user_new') ||
-            (user && (user.icon == null || user.icon.length === 0))
+            (currentUser && (currentUser.icon == null || currentUser.icon.length === 0))
         ) {
             showPopup('user-settings', {
                 title: 'Create Your Profile',
@@ -128,7 +133,7 @@ function Lobby({
     return (
         <Base
             className="flex flex-col"
-            initializeMusic={serverMessage !== 'user_new'}>
+            initializeMusic={true}>
             <PopupContainer />
             <section className="pt-8 px-8 flex gap-8 grow items-start">
                 <LobbiesControls games={availableSessions} />

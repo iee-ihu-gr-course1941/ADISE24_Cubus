@@ -12,6 +12,8 @@ export default function Base({ className, children, initializeMusic }: PropsWith
     const AudioInterface = AudioManager.getInstance();
     const { showPopup } = usePopup();
 
+    console.warn('Iniitalizing music necessary? ', {initializeMusic, hasInterracted});
+
     useEffect(() => {
         if(!initializeMusic) return;
         if(!hasInterracted) showPopup('prompt-audio', { title: 'Do you want audio?', showExit: false, denyExit: true }, () => { setHasInterracted(true) });
@@ -35,7 +37,7 @@ export default function Base({ className, children, initializeMusic }: PropsWith
             <div className="absolute z-50 w-screen h-screen pointer-events-none bg-[url('/ui-backdrop/noise.jpg')] opacity-[4%] scale-105 animate-noise"></div>
             <div className="absolute z-50 w-screen h-screen pointer-events-none bg-[url('/ui-backdrop/noise.jpg')] opacity-[5%] scale-105 animate-noise-alt"></div>
             <div className={`relative z-10 w-screen h-screen text-custom-gray-400 font-bold ${className}`}>
-                { hasInterracted || !initializeMusic ? children : '' }
+                { children }
             </div>
 
             <div className="fixed inset-0">
