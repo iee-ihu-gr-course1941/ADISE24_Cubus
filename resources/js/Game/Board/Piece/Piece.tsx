@@ -68,7 +68,6 @@ export const Piece = ({
     const {action, setAction} = useInterfaceState();
     const pieceAnimationState = useRef<AnimateState>(null);
     const [isHovering, setIsHovering] = useState(false);
-    const ui_state = useBoardState(s => s.gameState.ui_state);
 
     const canMovePiece = useMemo(() => {
         return (
@@ -81,7 +80,7 @@ export const Piece = ({
         boardState?.gameState,
         boardState?.boardPieces,
         ref.current,
-        ui_state,
+        boardState?.gameState.ui_state,
     ]);
 
     const {block_positions, center_offset, origin_center_distance} =

@@ -27,8 +27,12 @@ export default function Game(props: GameProps) {
     let {connectionState, latestMove} = useUserEvents();
 
     const setLatestMove = useUserEventsStore(s => s.setLatestMove);
+    const updateGameState = useBoardState(s => s.updateGameState);
 
     useEffect(() => {
+        if (latestMove) {
+            updateGameState(latestMove.session);
+        }
         setLatestMove(latestMove);
     }, [latestMove]);
 
